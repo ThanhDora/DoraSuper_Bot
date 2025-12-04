@@ -1,0 +1,12 @@
+{
+    "already_up": "Đã được cập nhật mới nhất!",
+    "up_and_rest": "<b>Tiến sĩ Tèo đang khởi động lại.</b>",
+    "cl_btn": "❌ Đóng",
+    "no_eval": "__Không có tin nhắn để đánh giá!__",
+    "privacy_policy": "<b>Chính Sách Bảo Mật cho {botname}</b>\n\n<b>Ngày Hiệu Lực:</b> 02 Tháng 8, 2024\n\nChính sách bảo mật này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn khi bạn tương tác với bot Telegram của chúng tôi được thiết kế để quản lý nhóm.\n\n<b>1. Thông Tin Chúng Tôi Thu Thập</b>\n\nKhi bạn sử dụng bot Telegram của chúng tôi, chúng tôi có thể thu thập các loại thông tin sau:\n- <b>Thông Tin Người Dùng</b>: Thông tin cơ bản như ID Telegram của bạn, tên người dùng, và bất kỳ dữ liệu nào khác mà bạn chọn cung cấp.\n- <b>Thông Tin Nhóm</b>: Dữ liệu liên quan đến các nhóm bạn quản lý, bao gồm ID nhóm, tên nhóm, và chi tiết thành viên.\n\n<b>2. Cách Chúng Tôi Sử Dụng Thông Tin Của Bạn</b>\n\nChúng tôi sử dụng thông tin thu thập được để:\n- Quản lý và duy trì các chức năng nhóm.\n- Cung cấp hỗ trợ và cải thiện dịch vụ của chúng tôi.\n- Gửi thông báo quan trọng hoặc thay đổi liên quan đến bot.\n\n<b>3. Cách Chúng Tôi Bảo Vệ Thông Tin Của Bạn</b>\n\nChúng tôi thực hiện các biện pháp bảo mật khác nhau để bảo vệ thông tin của bạn khỏi truy cập trái phép, thay đổi, tiết lộ hoặc phá hủy. Tuy nhiên, hãy lưu ý rằng không có phương pháp truyền tải qua internet hoặc lưu trữ điện tử nào là an toàn 100%.\n\n<b>4. Chia Sẻ Thông Tin Của Bạn</b>\n\nChúng tôi không chia sẻ thông tin của bạn với bên thứ ba, trừ khi được yêu cầu bởi luật pháp hoặc khi cần thiết để cung cấp các dịch vụ đã mô tả.\n\n<b>5. Quyền Của Bạn</b>\n\nBạn có quyền truy cập, sửa đổi hoặc xóa thông tin cá nhân của mình. Nếu bạn muốn thực hiện bất kỳ quyền nào trong số này, vui lòng liên hệ trực tiếp với chúng tôi qua bot.\n\n<b>6. Thay Đổi Chính Sách Bảo Mật Này</b>\n\nChúng tôi có thể cập nhật Chính Sách Bảo Mật này theo thời gian. Chúng tôi sẽ thông báo cho bạn về bất kỳ thay đổi quan trọng nào bằng cách cập nhật chính sách trong bot. Bạn có trách nhiệm xem xét chính sách này định kỳ.\n\n<b>7. Liên Hệ Với Chúng Tôi</b>\n\nNếu bạn có bất kỳ câu hỏi hoặc mối quan tâm nào về Chính Sách Bảo Mật này hoặc các thực hành của chúng tôi, vui lòng liên hệ với chủ sở hữu của tôi.",
+    "run_eval": "<i>Đang xử lý đánh giá pyrogram..</i>",
+    "run_exec": "<i>Đang xử lý thực thi pyrogram..</i>",
+    "no_cmd": "Không có lệnh nào được cung cấp để thực thi.",
+    "success": "Thành công",
+    "no_reply": "Không có phản hồi"
+}

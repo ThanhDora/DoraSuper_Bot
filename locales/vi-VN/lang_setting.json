@@ -1,0 +1,5 @@
+{
+    "language_changed_successfully": "Ngôn ngữ đã được thay đổi thành công.",
+    "language_changer_chat": "Tại đây bạn có thể thay đổi ngôn ngữ được sử dụng cho bot trong toàn bộ cuộc trò chuyện.",
+    "language_changer_private": "Tại đây bạn có thể thay đổi ngôn ngữ được sử dụng cho bot trong cuộc trò chuyện riêng này.\n\nNếu bạn muốn thay đổi ngôn ngữ của nhóm của mình, hãy chạy lệnh <code>/ngonngu</code> trên nhóm đó.."
+}

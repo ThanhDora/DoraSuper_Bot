@@ -1,0 +1,21 @@
+{
+    "no_anim_stick": "Sticker động không được hỗ trợ!",
+    "not_sticker": "Đây không phải là một sticker!",
+    "unkang_msg": "Đang cố gắng loại bỏ khỏi gói...",
+    "unkang_success": "Sticker đã được loại bỏ khỏi gói của bạn",
+    "unkang_error": "Không thể loại bỏ sticker khỏi gói của bạn.\n\nLỖI: {e}",
+    "unkang_help": "Vui lòng trả lời sticker được tạo bởi {c} để loại bỏ sticker khỏi gói của bạn.",
+    "unkang_anon": "Bạn đang ẩn danh, hãy nhắn tin riêng với tôi",
+    "unkang_no" : "Hình dán này không phải gói của bạn, đừng làm vậy..",
+    "anon_warn": "Bạn là quản trị viên ẩn danh, hãy lấy sticker trong tin nhắn riêng của tôi.",
+    "kang_msg": "Đang cố gắng lấy sticker của bạn...",
+    "stick_no_name": "Sticker không có tên.",
+    "kang_help": "Bạn muốn tôi tạo gói sticker không? Vui lòng trả lời một sticker.",
+    "exist_pack": "<code>Đang sử dụng gói sticker hiện có...</code>",
+    "new_packs": "<b>Đang tạo gói sticker mới...</b>",
+    "please_start_msg": "Có vẻ như bạn chưa tương tác với tôi trong trò chuyện riêng, bạn cần làm điều đó trước...",
+    "click_me": "Nhấp vào tôi",
+    "pack_full": "Gói Sticker của bạn đã đầy, nếu gói của bạn không phải là loại v1 hãy nhập /kang 1, nếu không phải là loại v2 hãy nhập /kang 2 và vân vân.",
+    "viewpack": "👀 Xem Gói Của Bạn",
+    "kang_success": "<b>Sticker đã được lấy thành công!</b>\n<b>Cảm xúc:</b> {emot}"
+}

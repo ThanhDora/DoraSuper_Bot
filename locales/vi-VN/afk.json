@@ -1,0 +1,13 @@
+{
+    "no_channel": "Tính năng này không được hỗ trợ cho kênh.",
+    "on_afk_msg_no_r": "**{usr}** [<code>{id}</code>] đã trực tuyến trở lại và đã vắng mặt trong {tm}\n\n",
+    "on_afk_msg_with_r": "**{usr}** [<code>{id}</code>] đã trực tuyến trở lại và đã vắng mặt trong {tm}\n\n**Lý do:** `{reas}`\n\n",
+    "is_afk_msg_no_r": "**{usr}** [<code>{id}</code>] đã vắng mặt từ {tm} trước.\n\n",
+    "is_afk_msg_with_r": "**{usr}** [<code>{id}</code>] đã vắng mặt từ {tm} trước.\n\n**Lý do:** {reas}\n\n",
+    "is_online": "**{usr}** [<code>{id}</code>] đã trực tuyến trở lại",
+    "now_afk": "{usr} [<code>{id}</code>] hiện đang vắng mặt (AFK)!.",
+    "afkdel_help": "**Cách sử dụng:**\n/{cmd} [ENABLE|DISABLE] để bật hoặc tắt tự động xóa tin nhắn AFK.",
+    "afkdel_disable": "Đã tắt tự động xóa tin nhắn AFK.",
+    "afkdel_enable": "Đã bật tự động xóa tin nhắn AFK trong cuộc trò chuyện này.",
+    "is_afk": "{usr} [<code>{id}</code>] đang vắng mặt (AFK)!"
+}

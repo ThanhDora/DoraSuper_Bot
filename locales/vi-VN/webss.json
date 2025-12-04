@@ -1,0 +1,6 @@
+{
+    "no_url": "Vui lòng cung cấp một URL để chụp ảnh màn hình.",
+    "wait_str": "Đang chụp ảnh màn hình...",
+    "str_credit": "🌞 Ảnh màn hình được tạo bằng Puppeteer",
+    "ss_failed_str": "Không thể chụp ảnh màn hình. {err}"
+}

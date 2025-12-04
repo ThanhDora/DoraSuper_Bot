@@ -1,0 +1,6 @@
+{
+    "no_photo": "Trả lời ảnh với lệnh /{cmd} để quét văn bản từ ảnh.",
+    "read_ocr": "Đang quét ảnh của bạn..",
+    "result_ocr": "Kết quả OCR:\n<code>{result}</code>",
+    "ocr_helper": "/ocr [trả lời ảnh] - Đọc văn bản từ ảnh"
+}

@@ -1,0 +1,12 @@
+{
+    "sudo_join_msg": "Wow anh em ơi, đại ca của tôi - @dabeecao tiên sinh vừa tham gia nhóm này!",
+    "log_bot_added": "#Nhóm Mới\nNhóm = {ttl}(<code>{cid}</code>)\nSố Thành Viên = <code>{tot}</code>\nThêm bởi - {r_j}",
+    "support_btn": "Hỗ Trợ",
+    "help_btn": "ℹ️ Trợ Giúp",
+    "update_btn": "📢 Cập Nhật",
+    "chat_not_allowed": "<b>CHAT KHÔNG ĐƯỢC PHÉP 🐞\n\nChủ của tôi đã cấm tôi làm việc ở đây! Bạn có thể liên hệ với chủ của bot này..</b>",
+    "welcome_thanks": "<b>Cảm ơn bạn đã thêm tôi vào {ttl} ❣️\n\nNếu bạn có bất kỳ vấn đề hoặc gợi ý nào, bạn có thể liên hệ với tôi.</b>",
+    "combot_msg": "<b>#CAS Federation Ban</b>\nNgười dùng {umention} [<code>{uid}</code>] đã được phát hiện là một spambot và đã bị cấm. Được hỗ trợ bởi <a href='https://api.cas.chat/check?user_id={u.id}'>Combot AntiSpam.</a>",
+    "spamwatch_msg": "<b>#SpamWatch Federation Ban</b>\nNgười dùng {umention} [<code>{uid}</code>] đã bị cấm vì <code>{reas}</code>.\n",
+    "welcpic_msg": "Chào mừng {userr}"
+}

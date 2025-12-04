@@ -1,0 +1,11 @@
+{
+    "newgroup_log": "#Nhóm Mới\nNhóm = {jdl}(<code>{id}</code>)\nSố Thành Viên = <code>{c}</code>",
+    "newuser_log": "#Người Dùng Mới\nID - <code>{id}</code>\nTên - {nm}",
+    "help_name": "Dưới đây là hướng dẫn cho **{mod}**:\n",
+    "help_txt": "<b>Chào {kamuh}, Tôi là {bot}.\n\nTôi là một bot với một số tính năng hữu ích.\nBạn có thể xem bằng cách nhấp vào nút dưới đây.</b>\n\nCác lệnh chung là:\n - /start: Bắt đầu bot\n - /help: Cung cấp hướng dẫn sử dụng này\n\nNếu bạn muốn tặng cà phê cho chủ sở hữu của tôi, bạn có thể gửi lệnh /donate để biết thêm thông tin.\n\n<b>Tôi chỉ hỗ trợ Tiếng Việt 🇻🇳</b>",
+    "click_me": "Nhấp vào tôi",
+    "back_btn": "Quay lại",
+    "click_btn": "Nhấp vào nút dưới đây để nhận hướng dẫn về {nm}",
+    "pm_detail": "Nhắn tin cho tôi để biết thêm chi tiết.",
+    "start_msg": "Chào {kamuh}, nhắn tin cho tôi để biết tất cả các tính năng của tôi."
+}

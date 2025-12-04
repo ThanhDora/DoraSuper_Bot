@@ -1,0 +1,13 @@
+{
+    "no_uname": "<code>Không có tên người dùng</code>",
+    "no_last_name": "<code>Không có họ</code>",
+    "uname_change_msg": "✨ Đã thay đổi tên người dùng từ {bef} ➡️ {aft}.\n",
+    "lastname_change_msg": "✨ Đã thay đổi họ từ {bef} ➡️ {aft}.\n",
+    "firstname_change_msg": "✨ Đã thay đổi tên từ {bef} ➡️ {aft}.\n",
+    "set_sangmata_help": "Sử dụng <code>/{cmd} on</code> để bật sangmata. Nếu bạn muốn tắt, bạn có thể sử dụng tham số off.",
+    "sangmata_already_on": "SangMata đã được bật trong các nhóm của bạn.",
+    "sangmata_enabled": "Sangmata đã được bật trong các nhóm của bạn.",
+    "sangmata_already_off": "SangMata đã được tắt trong các nhóm của bạn.",
+    "sangmata_disabled": "Sangmata đã được tắt trong các nhóm của bạn.",
+    "wrong_param": "Tham số không hợp lệ, chỉ sử dụng tham số on/off."
+}

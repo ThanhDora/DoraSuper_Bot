@@ -1,0 +1,7 @@
+{
+    "extr_help": "Vui lòng sử dụng lệnh /{cmd} [link/trả lời video] để trích xuất âm thanh trong tệp video.",
+    "progress_str": "⏳ Đang xử lý yêu cầu của bạn..",
+    "up_str": "Đang tải lên các tệp..",
+    "fail_extr_media": "Không thể trích xuất phương tiện, hãy đảm bảo liên kết của bạn không bị bảo vệ bởi WAF hoặc có thể không truy cập được đối với bot.",
+    "capt_extr": "Đây là âm thanh từ video của bạn."
+}

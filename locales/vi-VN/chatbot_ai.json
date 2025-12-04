@@ -1,0 +1,6 @@
+{
+    "no_question": "Vui lòng sử dụng lệnh <code>/{cmd} [câu hỏi]</code> để hỏi câu hỏi của bạn với AI.",
+    "find_answers_str": "Tiến sĩ đang gõ câu trả lời chờ tí...",
+    "dont_spam": "Đừng spam, vui lòng chờ {tm} giây hoặc tôi sẽ cấm bạn sử dụng bot này.",
+    "answers_too_long": "Câu trả lời của bạn đã vượt quá giới hạn văn bản của TG, kiểm tra liên kết này để xem.\n\n{answerlink}"
+}

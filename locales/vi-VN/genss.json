@@ -1,0 +1,13 @@
+{
+    "wait_msg": "Hãy cho tôi một chút thời gian để xử lý yêu cầu của bạn!! 😴",
+    "wait_dl": "<code>Đang xử lý, vui lòng chờ..</code>",
+    "dl_progress": "Đang cố gắng tải xuống, vui lòng chờ..",
+    "up_progress": "Đang cố gắng tải lên...",
+    "success_dl_msg": "Tệp đã được tải xuống tại <code>{path}</code>.",
+    "fail_open": "😟 Xin lỗi! Tôi không thể mở tệp.",
+    "limit_dl": "Xin lỗi, giới hạn tải xuống là 2GB để giảm tải. Bạn có thể chuyển đổi tệp của mình thành liên kết.",
+    "err_ssgen": "Tạo ảnh chụp màn hình thất bại.\n\n{exc}",
+    "up_msg": "☑️ Tạo ảnh chụp màn hình thành công.\n\n{namma} (<code>{id}</code>)\n#️⃣ #ssgen #id{id}\n\nẢnh chụp màn hình được tạo bởi @{bot_uname}",
+    "no_reply": "Trả lời video hoặc tài liệu trên Telegram hoặc sử dụng liên kết trực tiếp sau lệnh để tạo ảnh chụp màn hình từ phương tiện!",
+    "choose_no_ss": "Bây giờ chọn số lượng kết quả cho ảnh chụp màn hình? 🥳.\n\nTổng thời lượng: `{td}` (`{dur} giây`)"
+}
