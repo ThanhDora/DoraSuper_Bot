@@ -1,10 +1,15 @@
 import os
 import time
-from asyncio import get_event_loop
+import asyncio
+import uvloop
+
+uvloop.install()
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
 from faulthandler import enable as faulthandler_enable
 from logging import ERROR, INFO, StreamHandler, basicConfig, getLogger, handlers
 
-import uvloop
 from apscheduler.jobstores.mongodb import MongoDBJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from async_pymongo import AsyncClient
@@ -42,7 +47,6 @@ cleanmode = {}
 botStartTime = time.time()
 tiensiteo_version = "v3.0"
 
-uvloop.install()
 faulthandler_enable()
 from tiensiteo.core import tiensiteo_patch
 

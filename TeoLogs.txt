@@ -1,0 +1,38 @@
+[ERROR] - [27-Feb-26 01:45:13 - TienSiTeo - Lỗi khi phân tích: ] -> [audio_check:247]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/librosa/core/audio.py", line 176, in load
+    y, sr_native = __soundfile_load(path, offset, duration, dtype)
+                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/librosa/core/audio.py", line 209, in __soundfile_load
+    context = sf.SoundFile(path)
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/soundfile.py", line 690, in __init__
+    self._file = self._open(file, mode_int, closefd)
+                 ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/soundfile.py", line 1265, in _open
+    raise LibsndfileError(err, prefix="Error opening {0!r}: ".format(self.name))
+soundfile.LibsndfileError: Error opening 'downloads/AgADjSAAAibjAAFV.mp3': File does not exist or is not a regular file (possibly a pipe?).
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/tiensiteo/plugins/audio_check.py", line 135, in analyze_audio_features
+    y, sr = librosa.load(audio_path, sr=TARGET_SR, duration=load_duration, mono=False)
+            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/librosa/core/audio.py", line 184, in load
+    y, sr_native = __audioread_load(path, offset, duration, dtype)
+                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/decorator.py", line 235, in fun
+    return caller(func, *(extras + args), **kw)
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/librosa/util/decorators.py", line 63, in __wrapper
+    return func(*args, **kwargs)
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/librosa/core/audio.py", line 240, in __audioread_load
+    reader = audioread.audio_open(path)
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/venv/lib/python3.14/site-packages/audioread/__init__.py", line 131, in audio_open
+    raise NoBackendError()
+audioread.exceptions.NoBackendError
+[ERROR] - [27-Feb-26 01:49:29 - TienSiTeo - Lỗi khi phân tích: only 0-dimensional arrays can be converted to Python scalars] -> [audio_check:247]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/tiensiteo-bot/tiensiteo/plugins/audio_check.py", line 193, in analyze_audio_features
+    tempo = round(float(tempo), 2)
+                  ~~~~~^^^^^^^
+TypeError: only 0-dimensional arrays can be converted to Python scalars

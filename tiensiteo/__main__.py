@@ -16,7 +16,6 @@ from tiensiteo import (
     HELPABLE,
     UBOT_NAME,
     app,
-    get_event_loop,
     scheduler,
 )
 from tiensiteo.plugins import ALL_MODULES
@@ -99,7 +98,12 @@ async def start_bot():
 
 if __name__ == "__main__":
     try:
-        get_event_loop().run_until_complete(start_bot())
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        loop.run_until_complete(start_bot())
     except KeyboardInterrupt:
         LOGGER.info("Bot stopped by user")
     except Exception:
