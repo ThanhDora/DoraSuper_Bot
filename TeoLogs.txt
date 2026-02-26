@@ -36,3 +36,178 @@ Traceback (most recent call last):
     tempo = round(float(tempo), 2)
                   ~~~~~^^^^^^^
 TypeError: only 0-dimensional arrays can be converted to Python scalars
+[INFO] - [27-Feb-26 02:09:37 - TienSiTeo - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [27-Feb-26 02:09:40 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - +===============================================================+] -> [__main__:48]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - |                        TienSiTeo                           |] -> [__main__:49]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:50]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - |admin          |afk            |ai             |audio_check    |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |check_ip       |checkin        |code_tester    |
+|copy_forward   |currency       |daoly          |dev            |
+|download_upload|fake_human     |filters        |fun            |
+|fungame        |funny_rate     |genss          |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |media_extractor|mediainfo      |misc_tools     |
+|movie_view     |nightmodev2    |notes          |nulis          |
+|ocr            |paste          |phone_check    |ping           |
+|quotly         |sangmata       |sed            |session_generator|
+|start_help     |stickers       |waifus         |wallpapers     |
+|weather        |webss          ] -> [__main__:51]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:52]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - [INFO]: BOT STARTED AS @DoraTeam_iBot!] -> [__main__:53]
+[INFO] - [27-Feb-26 02:09:40 - TienSiTeo - [INFO]: SENDING ONLINE STATUS] -> [__main__:55]
+[INFO] - [27-Feb-26 02:09:41 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[ERROR] - [27-Feb-26 02:09:51 - TienSiTeo - Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 8.329342423s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 8
+}
+]] -> [ai:57]
+[INFO] - [27-Feb-26 02:11:25 - TienSiTeo - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [27-Feb-26 02:11:28 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - +===============================================================+] -> [__main__:48]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - |                        TienSiTeo                           |] -> [__main__:49]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:50]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - |admin          |afk            |ai             |audio_check    |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |check_ip       |checkin        |code_tester    |
+|copy_forward   |currency       |daoly          |dev            |
+|download_upload|fake_human     |filters        |fun            |
+|fungame        |funny_rate     |genss          |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |media_extractor|mediainfo      |misc_tools     |
+|movie_view     |nightmodev2    |notes          |nulis          |
+|ocr            |paste          |phone_check    |ping           |
+|quotly         |sangmata       |sed            |session_generator|
+|start_help     |stickers       |waifus         |wallpapers     |
+|weather        |webss          ] -> [__main__:51]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:52]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - [INFO]: BOT STARTED AS @DoraTeam_iBot!] -> [__main__:53]
+[INFO] - [27-Feb-26 02:11:28 - TienSiTeo - [INFO]: SENDING ONLINE STATUS] -> [__main__:55]
+[INFO] - [27-Feb-26 02:11:28 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[WARNING] - [27-Feb-26 02:12:03 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 1/2)] -> [ai:68]
+[WARNING] - [27-Feb-26 02:12:13 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 2/2)] -> [ai:68]
+[WARNING] - [27-Feb-26 02:12:54 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 1/2)] -> [ai:68]
+[WARNING] - [27-Feb-26 02:13:04 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 2/2)] -> [ai:68]
+[WARNING] - [27-Feb-26 02:13:15 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 1/2)] -> [ai:68]
+[WARNING] - [27-Feb-26 02:13:25 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 2/2)] -> [ai:68]
+[ERROR] - [27-Feb-26 02:14:31 - TienSiTeo - Media conversion error: [Errno 2] No such file or directory] -> [quotly:83]
+[ERROR] - [27-Feb-26 02:14:31 - TienSiTeo - Media conversion skipped: Media conversion failed: [Errno 2] No such file or directory] -> [quotly:193]
+[INFO] - [27-Feb-26 02:16:33 - TienSiTeo - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [27-Feb-26 02:16:35 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - +===============================================================+] -> [__main__:48]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - |                        TienSiTeo                           |] -> [__main__:49]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:50]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - |admin          |afk            |ai             |audio_check    |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |check_ip       |checkin        |code_tester    |
+|copy_forward   |currency       |daoly          |dev            |
+|download_upload|fake_human     |filters        |fun            |
+|fungame        |funny_rate     |genss          |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |media_extractor|mediainfo      |misc_tools     |
+|movie_view     |nightmodev2    |notes          |nulis          |
+|ocr            |paste          |phone_check    |ping           |
+|quotly         |sangmata       |sed            |session_generator|
+|start_help     |stickers       |waifus         |wallpapers     |
+|weather        |webss          ] -> [__main__:51]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:52]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - [INFO]: BOT STARTED AS @DoraTeam_iBot!] -> [__main__:53]
+[INFO] - [27-Feb-26 02:16:35 - TienSiTeo - [INFO]: SENDING ONLINE STATUS] -> [__main__:55]
+[INFO] - [27-Feb-26 02:16:36 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[WARNING] - [27-Feb-26 02:16:54 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 1/2)] -> [ai:68]
+[WARNING] - [27-Feb-26 02:17:04 - TienSiTeo - Gemini rate limit hit, retrying in 10s (attempt 2/2)] -> [ai:68]
+[INFO] - [27-Feb-26 02:19:29 - TienSiTeo - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [27-Feb-26 02:19:31 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - +===============================================================+] -> [__main__:48]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - |                        TienSiTeo                           |] -> [__main__:49]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:50]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - |admin          |afk            |ai             |audio_check    |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |check_ip       |checkin        |code_tester    |
+|copy_forward   |currency       |daoly          |dev            |
+|download_upload|fake_human     |filters        |fun            |
+|fungame        |funny_rate     |genss          |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |media_extractor|mediainfo      |misc_tools     |
+|movie_view     |nightmodev2    |notes          |nulis          |
+|ocr            |paste          |phone_check    |ping           |
+|quotly         |sangmata       |sed            |session_generator|
+|start_help     |stickers       |waifus         |wallpapers     |
+|weather        |webss          ] -> [__main__:51]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:52]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - [INFO]: BOT STARTED AS @DoraTeam_iBot!] -> [__main__:53]
+[INFO] - [27-Feb-26 02:19:32 - TienSiTeo - [INFO]: SENDING ONLINE STATUS] -> [__main__:55]
+[INFO] - [27-Feb-26 02:19:32 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [27-Feb-26 02:39:36 - root - Stop signal received (SIGINT). Exiting...] -> [idle:76]
+[INFO] - [27-Feb-26 02:39:36 - TienSiTeo - ------------------------ Stopped Services ------------------------] -> [__main__:113]
+[INFO] - [27-Feb-26 02:40:25 - TienSiTeo - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [27-Feb-26 02:40:27 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - +===============================================================+] -> [__main__:48]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - |                        TienSiTeo                           |] -> [__main__:49]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:50]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - |admin          |afk            |ai             |audio_check    |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |check_ip       |checkin        |code_tester    |
+|copy_forward   |currency       |daoly          |dev            |
+|download_upload|fake_human     |filters        |fun            |
+|fungame        |funny_rate     |genss          |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |media_extractor|mediainfo      |misc_tools     |
+|movie_view     |nightmodev2    |notes          |nulis          |
+|ocr            |paste          |phone_check    |ping           |
+|quotly         |sangmata       |sed            |session_generator|
+|start_help     |stickers       |waifus         |wallpapers     |
+|weather        |webss          ] -> [__main__:51]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - +===============+===============+===============+===============+] -> [__main__:52]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - [INFO]: BOT STARTED AS @DoraTeam_iBot!] -> [__main__:53]
+[INFO] - [27-Feb-26 02:40:27 - TienSiTeo - [INFO]: SENDING ONLINE STATUS] -> [__main__:55]
+[INFO] - [27-Feb-26 02:40:28 - apscheduler.scheduler - Scheduler started] -> [base:181]

@@ -79,3 +79,4 @@ BLOCKED_EXTENSIONS = list(
 )
 MINIMUM_FILE_SIZE = environ.get("MINIMUM_FILE_SIZE")
 CURRENCY_API = environ.get("CURRENCY_API")
+AI_API_KEY = environ.get("AI_API_KEY", "")

@@ -137,7 +137,7 @@ async def coin_flip_callback(client, callback_query: CallbackQuery):
     await callback_query.edit_message_text(f"💥 Kết quả sau khi tung đồng xu: {result}", reply_markup=None)
 
     
-# Danh sách các câu trả lời ngẫu nhiên
+# Danh sách các câu trả lời ngẫu nhiên (dùng khi chỉ nhắc "Tèo" mà không hỏi gì)
 responses = [
     "Ai gọi Tiến sĩ Tèo đấy? 🧐",
     "Nhắc đến Tiến sĩ làm gì thế? 😎",
@@ -174,8 +174,38 @@ responses = [
 
 
 # Hàm xử lý khi phát hiện từ 'Tèo' trong tin nhắn
-@app.on_message(filters.text & filters.regex(r".*Tèo.*"))
+@app.on_message(filters.text & filters.regex(r"(?i).*T[eèẻẽếéẹ]o.*"))
 @use_chat_lang()
 async def reply_to_teo(c, m, strings):
-    response = random.choice(responses)  # Chọn câu trả lời ngẫu nhiên
-    await c.send_message(m.chat.id, response, reply_to_message_id=m.id)
+    import re
+    # Loại bỏ "Tèo", "tèo", "Teo" và các từ gọi như "ơi", "à", "ê" để lấy phần câu hỏi
+    question = re.sub(r"(?i)t[eèẻẽếéẹ]o[\s,]*(?:ơi|à|ê|nè)?[\s,]*", "", m.text).strip()
+
+    # Nếu có câu hỏi thực sự (>3 ký tự) → gọi AI
+    if len(question) > 3:
+        from tiensiteo.plugins.ai import ask_gemini
+        from pyrogram.errors import MessageTooLong
+
+        wait_msg = await m.reply("🧠 Đang suy nghĩ...", quote=True)
+        user_name = m.from_user.first_name if m.from_user else "Người dùng"
+        prompt = f"[{user_name}]: {question}"
+        answer = await ask_gemini(prompt)
+        result = f"🤖 <b>Tiến sĩ Tèo</b>\n\n{answer}"
+        try:
+            await wait_msg.edit(result)
+        except MessageTooLong:
+            from tiensiteo.helper.tools import rentry
+            url = await rentry(answer)
+            await wait_msg.edit(f"🤖 <b>Câu trả lời quá dài:</b>\n{url}")
+        except Exception:
+            from pyrogram.enums import ParseMode
+            try:
+                await wait_msg.edit(result, parse_mode=ParseMode.DISABLED)
+            except MessageTooLong:
+                from tiensiteo.helper.tools import rentry
+                url = await rentry(answer)
+                await wait_msg.edit(f"🤖 Câu trả lời quá dài:\n{url}", parse_mode=ParseMode.DISABLED)
+    else:
+        # Chỉ nhắc "Tèo" mà không hỏi gì → trả lời random vui
+        response = random.choice(responses)
+        await c.send_message(m.chat.id, response, reply_to_message_id=m.id)

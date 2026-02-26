@@ -42,3 +42,4 @@ lxml_html_clean
 python-multipart
 standard-imghdr
 audioop-lts
+google-generativeai
