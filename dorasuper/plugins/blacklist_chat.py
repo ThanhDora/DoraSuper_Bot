@@ -98,6 +98,6 @@ async def blacklist_filters_re(self, message):
                 return
             await app.send_message(
                 chat_id,
-                f"Đã tắt tiếng {user.mention} [`{user.id}`] trong 1 giờ "
+                f"Đã tắt tiếng {user.mention} trong 1 giờ "
                 + f"do vi phạm danh sách đen với {word}.",
             )

@@ -75,9 +75,9 @@ async def telegraph_paste(_, message):
 
     if message.from_user:
         if message.from_user.username:
-            uname = f"@{message.from_user.username} [{message.from_user.id}]"
+            uname = f"@{message.from_user.username}"
         else:
-            uname = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id}) [{message.from_user.id}]"
+            uname = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     else:
         uname = message.sender_chat.title
     
@@ -157,9 +157,9 @@ async def wastepaste(_, message):
 
     if message.from_user:
         if message.from_user.username:
-            uname = f"@{message.from_user.username} [{message.from_user.id}]"
+            uname = f"@{message.from_user.username}"
         else:
-            uname = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id}) [{message.from_user.id}]"
+            uname = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     else:
         uname = message.sender_chat.title
 

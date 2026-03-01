@@ -1,7 +1,4 @@
-import os
 import re
-import logging
-from logging import getLogger
 
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
@@ -17,9 +14,13 @@ from dorasuper import BOT_NAME, BOT_USERNAME, HELPABLE, app
 from dorasuper.helper import bot_sys_stats, paginate_modules
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.localization import use_chat_lang
-from dorasuper.emoji import E_BACK, E_BOT, E_COFFEE, E_DART, E_LIST, E_MEGAPHONE, E_MSG, E_PARTY, E_USER, E_VIP, E_VN
-from dorasuper.vars import COMMAND_HANDLER
-LOGGER = getLogger("DoraSuper")
+from dorasuper.emoji import E_BOT, E_COFFEE, E_DART, E_LIST, E_MEGAPHONE, E_MSG, E_PARTY, E_USER, E_VIP, E_VN
+from dorasuper.vars import COMMAND_HANDLER, THUMB_PATH
+
+
+def _helpable_keys_sorted():
+    return sorted(HELPABLE.keys(), key=lambda k: (getattr(HELPABLE[k], "__MODULE__", None) or ""))
+
 
 home_keyboard_pm = InlineKeyboardMarkup(
     [
@@ -59,30 +60,34 @@ async def start(self, ctx: Message, strings):
         nama = ctx.from_user.mention if ctx.from_user else ctx.sender_chat.title
         try:
             return await ctx.reply_photo(
-                photo="assets/thumb.jpg",
+                photo=THUMB_PATH,
                 caption=strings("start_msg").format(kamuh=nama, **EMOJI_FMT),
                 reply_markup=keyboard,
             )
         except (ChatSendPhotosForbidden, ChatWriteForbidden):
             return await ctx.chat.leave()
-    if len(ctx.text.split()) > 1:
-        name = (ctx.text.split(None, 1)[1]).lower()
+    text_raw = (ctx.text or "").strip()
+    if len(text_raw.split(None, 1)) > 1:
+        name = text_raw.split(None, 1)[1].lower().strip()
         if "_" in name:
-            module = name.split("_", 1)[1]
+            module = name.split("_", 1)[1].strip()
+            ordered = _helpable_keys_sorted()
+            if module.isdigit() and 0 <= int(module) < len(ordered):
+                module = ordered[int(module)]
+            if module not in HELPABLE:
+                await ctx.reply_msg(strings("pm_detail").format(**EMOJI_FMT), reply_markup=keyboard)
+                return
+            mod = HELPABLE[module]
             text = (
-                strings("help_name").format(mod=HELPABLE[module].__MODULE__, **EMOJI_FMT)
-                + HELPABLE[module].__HELP__
+                strings("help_name").format(mod=mod.__MODULE__, **EMOJI_FMT)
+                + (getattr(mod, "__HELP__", "") or "")
+            )
+            reply_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton(strings("back_btn"), callback_data="help_back")]]
             )
             await ctx.reply_msg(
                 text,
-                disable_web_page_preview=True,
-                message_effect_id=5104841245755180586,
-            )
-            await ctx.reply(
-                text,
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(strings("back_btn"), callback_data="help_back")]]
-                ),
+                reply_markup=reply_markup,
                 disable_web_page_preview=True,
                 message_effect_id=5104841245755180586,
             )
@@ -94,10 +99,19 @@ async def start(self, ctx: Message, strings):
                 parse_mode=ParseMode.HTML,
                 message_effect_id=5104841245755180586,
             )
+        else:
+            await self.send_photo(
+                ctx.chat.id,
+                photo=THUMB_PATH,
+                caption=home_text_pm,
+                reply_markup=home_keyboard_pm,
+                reply_to_message_id=ctx.id,
+                message_effect_id=5104841245755180586,
+            )
     else:
         await self.send_photo(
             ctx.chat.id,
-            photo="assets/thumb.jpg",
+            photo=THUMB_PATH,
             caption=home_text_pm,
             reply_markup=home_keyboard_pm,
             reply_to_message_id=ctx.id,
@@ -107,7 +121,7 @@ async def start(self, ctx: Message, strings):
 
 @app.on_callback_query(filters.regex("bot_commands"))
 async def commands_callbacc(_, cb: CallbackQuery):
-    text, keyb = await help_parser(cb.from_user.mention)
+    text, keyb = await help_parser(cb.from_user.first_name)
     await app.send_message(
         cb.message.chat.id,
         text=text,
@@ -129,7 +143,7 @@ async def stats_callbacc(_, cb: CallbackQuery):
 async def help_command(_, ctx: Message, strings):
     if ctx.chat.type.value != "private":
         if len(ctx.command) >= 2:
-            name = (ctx.text.split(None, 1)[1]).replace(" ", "_").lower()
+            name = ((ctx.text or "").split(None, 1)[1] or "").replace(" ", "_").lower()
             if str(name) in HELPABLE:
                 key = InlineKeyboardMarkup(
                     [
@@ -150,7 +164,7 @@ async def help_command(_, ctx: Message, strings):
         else:
             await ctx.reply_msg(strings("pm_detail").format(**EMOJI_FMT), reply_markup=keyboard)
     elif len(ctx.command) >= 2:
-        name = (ctx.text.split(None, 1)[1]).replace(" ", "_").lower()
+        name = ((ctx.text or "").split(None, 1)[1] or "").replace(" ", "_").lower()
         if str(name) in HELPABLE:
             text = (
                 strings("help_name").format(mod=HELPABLE[name].__MODULE__, **EMOJI_FMT)
@@ -217,18 +231,32 @@ async def help_button(self: Client, query: CallbackQuery, strings):
         kamuh=query.from_user.first_name, bot=self.me.first_name, **EMOJI_FMT
     )
     if mod_match:
-        module = mod_match[1].replace(" ", "_")
-        text = (
-            strings("help_name").format(mod=HELPABLE[module].__MODULE__, **EMOJI_FMT)
-            + HELPABLE[module].__HELP__
-        )
-        await query.message.edit_msg(
-            text=text,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(strings("back_btn"), callback_data="help_back")]]
-            ),
-            disable_web_page_preview=True,
-        )
+        raw = (mod_match[1] or "").strip()
+        try:
+            idx = int(raw.split(",")[-1].strip()) if "," in raw else int(raw)
+        except (ValueError, IndexError):
+            idx = 0
+        ordered = _helpable_keys_sorted()
+        if 0 <= idx < len(ordered):
+            module_key = ordered[idx]
+            mod = HELPABLE[module_key]
+            text = (
+                strings("help_name").format(mod=mod.__MODULE__, **EMOJI_FMT)
+                + (getattr(mod, "__HELP__", "") or "")
+            )
+            await query.message.edit_msg(
+                text=text,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(strings("back_btn"), callback_data="help_back")]]
+                ),
+                disable_web_page_preview=True,
+            )
+        else:
+            await query.message.edit_msg(
+                text=top_text,
+                reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help")),
+                disable_web_page_preview=True,
+            )
     elif home_match:
         await app.send_msg(
             query.from_user.id,
@@ -274,5 +302,5 @@ async def help_button(self: Client, query: CallbackQuery, strings):
 
     try:
         await self.answer_callback_query(query.id)
-    except:
+    except Exception:
         pass

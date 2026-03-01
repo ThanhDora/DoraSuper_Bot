@@ -205,7 +205,7 @@ async def command_karma(_, message):
             user = await app.get_users(user_id)
             user_mention = user.mention
         except PeerIdInvalid:
-            user_mention = f"ID: {user_id}"
+            user_mention = "Thành viên"
 
         karma_text += f"👉 Top {index} là {user_mention} với tổng số điểm là {karma_count} điểm\n\n"
 

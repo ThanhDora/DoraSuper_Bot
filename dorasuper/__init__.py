@@ -32,7 +32,7 @@ basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
     handlers=[
         handlers.RotatingFileHandler(
-            "DoraLogs.txt", mode="w+", maxBytes=5242880, backupCount=1
+            "DoraLogs.txt", mode="a", encoding="utf-8", maxBytes=5242880, backupCount=1
         ),
         StreamHandler(),
     ],

@@ -136,7 +136,7 @@ async def rm_delacc(_, message):
     user = await app.get_chat_member(message.chat.id, message.from_user.id)
     if user.status.value in ("administrator", "owner"):
         sent_message = await message.reply_text(
-            "🚮**Hiện đang dọn dẹp người dùng, có thể mất một lúc...**"
+            f"{E_LOADING} **Hiện đang dọn dẹp người dùng, có thể mất một lúc...**"
         )
         count = 0
         async for member in app.get_chat_members(message.chat.id):
@@ -160,9 +160,9 @@ async def rm_delacc(_, message):
                     await message.chat.unban_member(member.user.id)
         if count == 0:
             return await sent_message.edit_msg(
-                f"{E_ERROR} Không có tài khoản nào bị xóa trong cuộc trò chuyện này."
+                f"{E_ERROR} **Không có tài khoản nào bị xóa trong cuộc trò chuyện này.**"
             )
-        await sent_message.edit_msg(f"✔️ **Đã loại bỏ thành công {count} người dùng dựa trên các đối số.**")
+        await sent_message.edit_msg(f"{E_SUCCESS} **Đã loại bỏ thành công {count} người dùng dựa trên các đối số.**")
     else:
         sent_message = await message.reply_text(
             f"{E_ERROR} **Bạn phải là quản trị viên hoặc chủ sở hữu nhóm để thực hiện hành động này.**"
@@ -178,7 +178,7 @@ async def instatus(client, message):
     bstat = await app.get_chat_member(message.chat.id, client.me.id)
     if bstat.status.value != "administrator":
         return await message.reply_msg(
-            f"{E_ERROR} Vui lòng cấp cho tôi tất cả quyền quản trị viên cơ bản để chạy lệnh này."
+            f"{E_ERROR} **Vui lòng cấp cho tôi tất cả quyền quản trị viên cơ bản để chạy lệnh này.**"
         )
     start_time = time.perf_counter()
     user = await app.get_chat_member(message.chat.id, message.from_user.id)

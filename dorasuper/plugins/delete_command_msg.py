@@ -10,12 +10,22 @@ from dorasuper import app
 from dorasuper.vars import COMMAND_HANDLER
 
 # Regex khớp mọi tin nhắn bắt đầu bằng prefix (/, !, ...) + tên lệnh
-_prefix_re = "|".join(re.escape(p) for p in (COMMAND_HANDLER or ["/"]))
-COMMAND_ANY_RE = re.compile(r"^(" + _prefix_re + r")\s*\S+", re.IGNORECASE)
+_prefixes = [p for p in (COMMAND_HANDLER or ["/"]) if p]
+_prefix_re = "|".join(re.escape(p) for p in _prefixes) if _prefixes else re.escape("/")
+COMMAND_ANY_RE = re.compile(r"^(" + _prefix_re + r")\s*(\S+)", re.IGNORECASE)
+
+# Lệnh không tự động xóa tin nhắn (downloadsVideo: giữ link để user tham chiếu)
+NO_DELETE_COMMANDS = {"autodl", "dl", "tt", "tiktok"}
 
 
 async def _is_command_msg(_, __, msg: Message):
-    return bool(msg and COMMAND_ANY_RE.search((msg.text or msg.caption or "").strip()))
+    if not msg:
+        return False
+    m = COMMAND_ANY_RE.match((msg.text or msg.caption or "").strip())
+    if not m:
+        return False
+    cmd = (m.group(2) or "").lower().split("@")[0]
+    return cmd not in NO_DELETE_COMMANDS
 
 
 is_command = filters.create(_is_command_msg)

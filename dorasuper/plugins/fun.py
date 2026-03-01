@@ -15,7 +15,7 @@ from dorasuper.emoji import E_NOTE, E_SEARCH, E_WARN
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.localization import use_chat_lang
-from dorasuper.vars import COMMAND_HANDLER, SUDO
+from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR, SUDO
 
 
         
@@ -77,8 +77,8 @@ async def givereact(c, m):
 async def reaction_update(self, ctx):
     self.log.info(ctx)
 
-# Đường dẫn tới file GIF
-GIF_PATH = "/www/wwwroot/tiensi-teo-bot/assets/tungxu.gif"
+# Đường dẫn tới file GIF (tương đối thư mục dự án)
+GIF_PATH = str(ROOT_DIR / "assets" / "tungxu.gif")
 
 # Hàm xử lý khi người dùng gõ lệnh /coin
 @app.on_message(filters.command("tungxu"))
@@ -121,19 +121,23 @@ async def coin_flip_callback(client, callback_query: CallbackQuery):
     # Cập nhật tin nhắn gốc để hiển thị trạng thái "Đang tung xu"
     await callback_query.edit_message_text("🎲 Đang tung đồng xu cho bạn...", reply_markup=None)
 
-    # Gửi GIF "tung xu" và reply vào tin nhắn gốc (tin nhắn có nút bấm)
-    gif_message = await callback_query.message.reply_animation(
-        animation=GIF_PATH
-    )
-    
+    # Gửi GIF "tung xu" nếu file tồn tại, nếu không thì chỉ chờ
+    gif_message = None
+    if os.path.exists(GIF_PATH):
+        try:
+            gif_message = await callback_query.message.reply_animation(animation=GIF_PATH)
+        except (ValueError, OSError):
+            pass
+
     # Hiệu ứng chờ trong 3 giây
     await asyncio.sleep(3)
 
     # Tung đồng xu (sấp hoặc ngửa)
     result = random.choice(["🪙 Sấp", "🪙 Ngửa"])
 
-    # Xóa GIF sau khi đã chờ xong
-    await gif_message.delete()
+    # Xóa GIF sau khi đã chờ xong (nếu đã gửi)
+    if gif_message:
+        await gif_message.delete()
 
     # Chỉnh sửa tin nhắn gốc (tin nhắn chứa nút bấm) để hiển thị kết quả
     await callback_query.edit_message_text(f"💥 Kết quả sau khi tung đồng xu: {result}", reply_markup=None)

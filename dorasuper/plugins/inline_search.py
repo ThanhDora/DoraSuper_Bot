@@ -98,7 +98,7 @@ async def inline_menu(self, inline_query: InlineQuery):
         namanya = (
             f"{diaa.first_name} {diaa.last_name}" if diaa.last_name else diaa.first_name
         )
-        msg = f"<b>🏷 Tên:</b> {namanya}\n<b>🆔 ID:</b> <code>{diaa.id}</code>\n"
+        msg = f"<b>🏷 Tên:</b> {namanya}\n"
         if diaa.username:
             msg += f"<b>🌐 Tên người dùng:</b> <code>@{diaa.username}</code>\n"
         if diaa.status:
@@ -175,7 +175,7 @@ async def inline_menu(self, inline_query: InlineQuery):
             else f"<a href='tg://user?id={penerima.id}'>{penerima.first_name}</a>"
         )
         msg_c = (
-            f"🔒 Đã gửi <b>Tin nhắn bảo mật</b> tới {mention} [<code>{penerima.id}</code>], "
+            f"🔒 Đã gửi <b>Tin nhắn bảo mật</b> tới {mention}, "
         )
         msg_c += "Chỉ người đó mới có thể xem tin nhắn này."
         results = [

@@ -87,3 +87,9 @@ BLOCKED_EXTENSIONS = list(
 MINIMUM_FILE_SIZE = environ.get("MINIMUM_FILE_SIZE")
 CURRENCY_API = environ.get("CURRENCY_API")
 AI_API_KEY = environ.get("AI_API_KEY", "")
+# Google Drive upload (getdirect): true = upload lên GDrive, false = dùng tmpfiles
+USE_GDRIVE = environ.get("USE_GDRIVE", "").strip().lower() in ("1", "true", "yes")
+GDRIVE_CREDENTIALS_PATH = environ.get("GDRIVE_CREDENTIALS_PATH", "")  # Đường dẫn file JSON service account
+GDRIVE_FOLDER_ID = environ.get("GDRIVE_FOLDER_ID", "")  # ID thư mục Drive (để trống = upload vào My Drive gốc)
+# Tmpfiles: tên field form (upload hoặc file). Đổi nếu server báo "No file uploaded"
+TMPFILES_UPLOAD_FIELD = environ.get("TMPFILES_UPLOAD_FIELD", "file").strip() or "file"

@@ -375,10 +375,9 @@ async def ban_globally(self: Client, ctx: Message):
     await m.edit(f"Đã cấm {user_mention} toàn cầu!")
     ban_text = f"""
 __**New Global Ban**__
-**Origin:** {ctx.chat.title} [`{ctx.chat.id}`]
+**Origin:** {ctx.chat.title}
 **Admin:** {from_user.mention}
 **Banned User:** {user_mention}
-**Banned User ID:** `{user_id}`
 **Reason:** __{reason}__
 **Chats:** `{number_of_chats}`"""
     try:
@@ -660,7 +659,7 @@ async def updtebot(client, update, users, _):
             await db.delete_user(niuser.id)
         await client.send_msg(
             LOG_CHANNEL,
-            f"<a href='tg://user?id={niuser.id}'>{niuser.first_name}</a> (<code>{niuser.id}</code>) "
+            f"<a href='tg://user?id={niuser.id}'>{niuser.first_name}</a> "
             f"{'BLOCKED' if update.stopped else 'UNBLOCKED'} the bot at "
             f"{datetime.fromtimestamp(update.date)}",
         )

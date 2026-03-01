@@ -1,1 +1,16 @@
-{"wait_msg":"{E_WAIT} Hãy cho tôi một chút thời gian để xử lý yêu cầu của bạn!!","wait_dl":"<code>{E_LOADING} Đang xử lý, vui lòng chờ..</code>","dl_progress":"{E_DOWNLOAD} Đang cố gắng tải xuống, vui lòng chờ..","up_progress":"{E_UPLOAD} Đang cố gắng tải lên...","success_dl_msg":"{E_SUCCESS} Tệp đã được tải xuống tại <code>{path}</code>.","fail_open":"{E_ERROR} Xin lỗi! Tôi không thể mở tệp.","limit_dl":"{E_WARN} Xin lỗi, giới hạn tải xuống là 2GB để giảm tải. Bạn có thể chuyển đổi tệp của mình thành liên kết.","err_ssgen":"{E_ERROR} Tạo ảnh chụp màn hình thất bại.\n\n{exc}","up_msg":"{E_SUCCESS} Tạo ảnh chụp màn hình thành công.\n\n{namma} (<code>{id}</code>)\n#️⃣ #ssgen #id{id}\n\nẢnh chụp màn hình được tạo bởi @{bot_uname}","no_reply":"{E_TIP} Trả lời video hoặc tài liệu trên Telegram hoặc sử dụng liên kết trực tiếp sau lệnh để tạo ảnh chụp màn hình từ phương tiện!","choose_no_ss":"{E_PARTY} Bây giờ chọn số lượng kết quả cho ảnh chụp màn hình?\n\nTổng thời lượng: `{td}` (`{dur} giây`)"}
+{
+  "wait_msg": "{E_WAIT} Hãy cho tôi một chút thời gian để xử lý yêu cầu của bạn!!",
+  "wait_dl": "{E_LOADING} Đang xử lý, vui lòng chờ...",
+  "dl_progress": "{E_DOWNLOAD} Đang tải xuống, vui lòng chờ...",
+  "dl_trying": "{E_DOWNLOAD} Đang tải xuống...",
+  "downloaded_ok": "{E_SUCCESS} Đã tải xuống tới <code>{path}</code> trong {ms} giây.",
+  "err_file_not_found": "{E_ERROR} Lỗi: Không tìm thấy tệp.",
+  "up_progress": "{E_UPLOAD} Đang tải lên...",
+  "success_dl_msg": "{E_SUCCESS} Tệp đã được tải xuống tại <code>{path}</code>.",
+  "fail_open": "{E_ERROR} Xin lỗi! Tôi không thể mở tệp.",
+  "limit_dl": "{E_WARN} Giới hạn tải xuống là 2GB. Bạn có thể chuyển tệp thành liên kết.",
+  "err_ssgen": "{E_ERROR} Tạo ảnh chụp màn hình thất bại.\n\n{exc}",
+  "up_msg": "{E_SUCCESS} Tạo ảnh chụp màn hình thành công.\n\n{namma}\n#️⃣ #ssgen\n\nẢnh chụp màn hình được tạo bởi @{bot_uname}",
+  "no_reply": "{E_TIP} Trả lời video/tài liệu hoặc gửi link sau lệnh để tạo ảnh chụp màn hình!",
+  "choose_no_ss": "{E_PARTY} Chọn số lượng ảnh chụp màn hình?\n\nTổng thời lượng: `{td}` (`{dur} giây`)"
+}

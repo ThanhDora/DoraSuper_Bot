@@ -1,4 +1,5 @@
 import asyncio
+import html
 import os
 import re
 import logging
@@ -16,6 +17,7 @@ from pyrogram.errors import (
 from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
 from pyrogram.types import ChatMember, ChatPermissions, ChatPrivileges, Message
 
+from database.chat_ban_db import add_chat_ban, remove_chat_ban
 from database.warn_db import add_warn, get_warn, remove_warns
 from dorasuper import app, user
 from dorasuper.core.decorator.errors import capture_err
@@ -33,9 +35,21 @@ from dorasuper.helper.functions import (
 )
 from dorasuper.helper.emoji_fmt import EMOJI_FMT, EMOJI_FMT_BTN
 from dorasuper.helper.localization import use_chat_lang
-from dorasuper.emoji import E_WAIT, E_WARN, E_GEAR, E_CLOCK, E_FIRE, E_ERROR, E_NOTE, E_SUCCESS, E_GROUP, E_LOCK, E_KEY, E_STAR, E_HEART, E_BELL, E_MEGAPHONE, E_MSG, E_WRENCH, E_IMAGE, E_CAMERA, E_SEARCH, E_LINK, E_GIFT, E_ROCKET, E_HOME, E_BACK, E_NEXT, E_COFFEE, E_PARTY, E_MOVIE, E_MUSIC, E_UPLOAD, E_DOWNLOAD, E_CHECK, E_SOS, E_ADMIN, E_VIP, E_VIP1, E_ICON
-from dorasuper.vars import COMMAND_HANDLER, SUDO
+from dorasuper.emoji import E_WAIT, E_WARN, E_GEAR, E_CLOCK, E_FIRE, E_ERROR, E_NOTE, E_SUCCESS, E_GROUP, E_LOCK, E_KEY, E_STAR, E_HEART, E_BELL, E_MEGAPHONE, E_MSG, E_WRENCH, E_IMAGE, E_CAMERA, E_SEARCH, E_LINK, E_GIFT, E_ROCKET, E_HOME, E_BACK, E_NEXT, E_COFFEE, E_PARTY, E_MOVIE, E_MUSIC, E_UPLOAD, E_DOWNLOAD, E_CHECK, E_SOS, E_ADMIN, E_VIP, E_VIP1, E_ICON, E_TIP
+from dorasuper.vars import COMMAND_HANDLER, SUDO, USER_SESSION
 LOGGER = getLogger("DoraSuper")
+
+
+async def _try_add_user_back(chat_id: int, user_id: int) -> str:
+    """Sau khi unban, thử mời user vào lại bằng userbot (nếu có USER_SESSION)."""
+    add_members = getattr(user, "add_chat_members", None) if USER_SESSION else None
+    if add_members and callable(add_members):
+        try:
+            await add_members(chat_id, user_id)
+            return f"\n{E_SUCCESS} Đã mời lại vào nhóm."
+        except Exception:
+            pass
+    return ""
 
 __MODULE__ = "AdminNhóm"
 __HELP__ = """
@@ -173,7 +187,6 @@ async def kickFunc(client: Client, ctx: Message, strings) -> "Message":
         return await ctx.reply_msg(strings("user_not_found").format(**EMOJI_FMT))
     msg = strings("kick_msg").format(
         mention=user.mention,
-        id=user.id,
         kicker=ctx.from_user.mention if ctx.from_user else "Anon Admin",
         reasonmsg=reason or "-",
         **EMOJI_FMT,
@@ -227,7 +240,6 @@ async def banFunc(client, message, strings):
 
     msg = strings("ban_msg").format(
         mention=mention,
-        id=user_id,
         banner=message.from_user.mention if message.from_user else "Anon",
         **EMOJI_FMT,
     ) + f" {E_ICON}"
@@ -243,6 +255,7 @@ async def banFunc(client, message, strings):
             msg += strings("banned_reason").format(reas=reason, **EMOJI_FMT)
         try:
             await message.chat.ban_member(user_id)
+            await add_chat_ban(message.chat.id, user_id)
             await message.reply_msg(msg, reply_markup=ikb({"Bỏ Cấm": f"bocam_{user_id}"}))
         except ChatAdminRequired:
             await message.reply(f"{E_GEAR} Xin hãy cho tôi quyền cấm thành viên..!!!")
@@ -264,6 +277,7 @@ async def banFunc(client, message, strings):
         try:
             if len(time_value[:-1]) < 3:
                 await message.chat.ban_member(user_id, until_date=temp_ban)
+                # Không thêm vào chat_ban vì cấm có thời hạn - khi hết hạn user có thể vào lại
                 await message.reply_text(msg)
             else:
                 await message.reply_text(strings("no_more_99").format(**EMOJI_FMT))
@@ -277,6 +291,7 @@ async def banFunc(client, message, strings):
     keyboard = ikb({"Bỏ Cấm": f"bocam_{user_id}"})
     try:
         await message.chat.ban_member(user_id)
+        await add_chat_ban(message.chat.id, user_id)
         await message.reply_msg(msg, reply_markup=keyboard)
     except ChatAdminRequired:
         await message.reply(f"{E_GEAR} Xin hãy cho tôi quyền cấm thành viên..!!!")
@@ -290,23 +305,29 @@ async def banFunc(client, message, strings):
 async def unban_func(_, message, strings):
     reply = message.reply_to_message
 
-    if reply and reply.sender_chat and reply.sender_chat != message.chat.id:
+    if reply and reply.sender_chat and getattr(reply.sender_chat, "id", None) != message.chat.id:
         return await message.reply_text(strings("unban_channel_err").format(**EMOJI_FMT))
 
-    if len(message.command) == 2:
-        user = message.text.split(None, 1)[1]
-    elif len(message.command) == 1 and reply:
-        user = message.reply_to_message.from_user.id
-    else:
+    try:
+        user_id = await extract_user(message)
+    except (PeerIdInvalid, UsernameNotOccupied):
+        return await message.reply_msg(f"{E_WARN} ID sai hoặc người dùng không tồn tại.")
+
+    if not user_id:
         return await message.reply_msg(strings("give_unban_user").format(**EMOJI_FMT))
 
     try:
-        user_id = int(user) if user.isdigit() else user
+        user_id = int(user_id)
         if not await is_valid_user(app, user_id):
             return await message.reply_msg(f"{E_WARN} ID sai hoặc người dùng không tồn tại.")
         await message.chat.unban_member(user_id)
+        await remove_chat_ban(message.chat.id, user_id)
+        extra = await _try_add_user_back(message.chat.id, user_id)
         umention = (await app.get_users(user_id)).mention
-        await message.reply_msg(strings("unban_success").format(umention=umention, **EMOJI_FMT))
+        await message.reply_msg(
+            strings("unban_success").format(umention=umention, **EMOJI_FMT) + extra,
+            parse_mode=enums.ParseMode.HTML,
+        )
     except (PeerIdInvalid, UsernameNotOccupied):
         await message.reply_msg(f"{E_WARN} ID sai hoặc người dùng không tồn tại.")
     except ChatAdminRequired:
@@ -703,17 +724,23 @@ async def remove_warning(_, cq, strings):
     if warns:
         warns = warns["warns"]
     if not warns or warns == 0:
+        reply_msg = cq.message.reply_to_message
+        mention = (
+            reply_msg.from_user.mention
+            if reply_msg and reply_msg.from_user
+            else "User"
+        )
         return await cq.answer(
-            strings("user_no_warn").format(
-                mention=cq.message.reply_to_message.from_user.mention, **EMOJI_FMT
-            )
+            strings("user_no_warn").format(mention=mention, **EMOJI_FMT)
         )
     warn = {"warns": warns - 1}
     await add_warn(chat_id, await int_to_alpha(user_id), warn)
-    text = cq.message.text.markdown
-    text = f"~~{text}~~\n\n"
+    orig = cq.message.text
+    orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
+    text = f"<s>{orig_html}</s>\n\n"
     text += strings("unwarn_msg").format(mention=from_user.mention, **EMOJI_FMT)
-    await cq.message.edit(text)
+    text = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", text)
+    await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_callback_query(filters.regex("boimmom_"))
@@ -729,12 +756,14 @@ async def unmute_user(_, cq, strings):
             show_alert=True,
         )
     user_id = int(cq.data.split("_")[1])
-    text = cq.message.text.markdown
-    text = f"~~{text}~~\n\n"
+    orig = cq.message.text
+    orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
+    text = f"<s>{orig_html}</s>\n\n"
     text += strings("rmmute_msg").format(mention=from_user.mention, **EMOJI_FMT)
+    text = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", text)
     try:
         await cq.message.chat.unban_member(user_id)
-        await cq.message.edit(text)
+        await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await cq.answer(str(e))
 
@@ -752,12 +781,17 @@ async def unban_user(_, cq, strings):
             show_alert=True,
         )
     user_id = int(cq.data.split("_")[1])
-    text = cq.message.text.markdown
-    text = f"~~{text}~~\n\n"
+    orig = cq.message.text
+    orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
+    text = f"<s>{orig_html}</s>\n\n"
     text += strings("unban_msg").format(mention=from_user.mention, **EMOJI_FMT)
+    text = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", text)
     try:
         await cq.message.chat.unban_member(user_id)
-        await cq.message.edit(text)
+        await remove_chat_ban(cq.message.chat.id, user_id)
+        extra = await _try_add_user_back(cq.message.chat.id, user_id)
+        extra = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", extra)
+        await cq.message.edit_text(text + extra, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await cq.answer(str(e))
 

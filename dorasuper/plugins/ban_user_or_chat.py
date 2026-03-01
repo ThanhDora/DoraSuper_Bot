@@ -83,15 +83,15 @@ async def grp_bd(self: Client, ctx: Message, strings):
             LOGGER.warning("Không gửi được tin lên LOG: %s", e)
         return
     chck = await db.get_chat(ctx.chat.id)
-    if chck["is_disabled"]:
+    if chck and chck.get("is_disabled"):
         buttons = [
             [InlineKeyboardButton("Liên hệ hỗ trợ", url=f"https://t.me/{SUPPORT_CHAT}")]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        vazha = await db.get_chat(ctx.chat.id)
+        reason = (chck or {}).get("reason") or "Không nêu"
         try:
             k = await ctx.reply_msg(
-                f"{E_LIMIT} <b>KHÔNG ĐƯỢC PHÉP TRÒ CHUYỆN</b>\n\nChủ sở hữu của tôi đã hạn chế tôi làm việc ở đây!\n<b>Lý do:</b> <code>{vazha['reason']}</code>.",
+                f"{E_LIMIT} <b>KHÔNG ĐƯỢC PHÉP TRÒ CHUYỆN</b>\n\nChủ sở hữu của tôi đã hạn chế tôi làm việc ở đây!\n<b>Lý do:</b> <code>{reason}</code>.",
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
             )
@@ -135,8 +135,9 @@ async def ban_a_user(bot, message):
     else:
         isban, alesan = await db.get_ban_status(k.id)
         if isban:
+            reason_show = (alesan or {}).get("reason", "Không nêu") if alesan else "Không nêu"
             return await message.reply(
-                f"{E_LIMIT} {k.mention} đã bị cấm rồi \n<b>Lý do:</b> {alesan['reason']}",
+                f"{E_LIMIT} {k.mention} đã bị cấm rồi\n<b>Lý do:</b> {reason_show}",
                 parse_mode=enums.ParseMode.HTML,
             )
         await db.ban_user(k.id, reason)
@@ -170,9 +171,9 @@ async def unban_a_user(bot, message):
         return await message.reply(f"{E_ERROR} Lỗi - {e}", parse_mode=enums.ParseMode.HTML)
     
     is_banned, user_data = await db.get_ban_status(k.id)
-    if not is_banned:
+    if not is_banned or not user_data:
         return await message.reply(f"{E_INFO} {k.mention} chưa bị cấm.", parse_mode=enums.ParseMode.HTML)
-    
+
     await db.remove_ban(user_data["_id"])
     await message.reply(f"{E_SUCCESS} Người dùng đã bỏ cấm thành công {k.mention}!!!", parse_mode=enums.ParseMode.HTML)
 

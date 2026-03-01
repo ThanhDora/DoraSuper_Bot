@@ -12,7 +12,7 @@ async def task(msg, warn=False, sec=None):
     if warn:
         user = msg.from_user or msg.sender_chat
         ids = await msg.reply_msg(
-            f"Sorry {user.mention if msg.from_user else msg.sender_chat.title} [<code>{user.id}</code>], you must wait for {sec}s before using this feature again.."
+            f"Sorry {user.mention if msg.from_user else msg.sender_chat.title}, you must wait for {sec}s before using this feature again.."
         )
         try:
             await msg.delete_msg()
@@ -20,7 +20,7 @@ async def task(msg, warn=False, sec=None):
             pass
         await asyncio.sleep(sec)
         await ids.edit_msg(
-            f"Alright {user.mention if msg.from_user else msg.sender_chat.title} [<code>{user.id}</code>], your cooldown is over you can command again.",
+            f"Alright {user.mention if msg.from_user else msg.sender_chat.title}, your cooldown is over you can command again.",
             del_in=3,
         )
 

@@ -107,3 +107,26 @@ E_ICON = (
     '<emoji id="5379811382826905462">🎉</emoji>'
     '<emoji id="5379732518637417441">🎉</emoji>'
 )
+
+
+# Emoji Love
+E_ICE = '<emoji id="5265032152822588326">🥶</emoji>'
+E_GRASS = '<emoji id="5292196476645032073">🌱</emoji>'
+E_SPARKLE = '<emoji id="5363992034728229166">✨</emoji>'
+E_FLOWER = '<emoji id="5881985285562043957">🌸</emoji>'
+E_SWEET = '<emoji id="5330125947016335549">🍬</emoji>'
+E_HEART3 = '<emoji id="5276239041052828276">🎭</emoji>'
+E_HEART4 = '<emoji id="5253463362058070742">💕</emoji>'
+E_DIAMON = '<emoji id="5427168083074628963">💎</emoji>'
+E_GLARE = '<emoji id="6222245733056120693">😒</emoji>'
+E_UNCOMFORTABLE = '<emoji id="6219542815647467589">😣</emoji>'
+E_EYE_ROLL = '<emoji id="6327735399770752519">�</emoji>'
+E_SHOUT = '<emoji id="6325618998801074473">😤</emoji>'
+
+# Thời tiết
+E_SUNNY = '<emoji id="5402477260982731644">☀️</emoji>'
+E_RAINBOW = '<emoji id="5206587423269593472">🌈</emoji>'
+E_THUNDER = '<emoji id="5307493878843059915">⚡️</emoji>'
+E_MAYCUTE = '<emoji id="5006123161918374529">☁</emoji>'
+E_RAIN = '<emoji id="5399913388845322366">🌧</emoji>'
+E_SNOW = '<emoji id="5449449325434266744">❄️</emoji>'

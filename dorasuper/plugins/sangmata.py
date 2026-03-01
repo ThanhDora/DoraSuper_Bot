@@ -53,7 +53,7 @@ async def cek_mataa(_, ctx: Message, strings):
     lname_cur = (ctx.from_user.last_name or "").strip()
     msg = ""
     if uname_b != uname_cur or fname_b != fname_cur or lname_b != lname_cur:
-        msg += f"{E_SEARCH} <b>DoraSuper Check</b>\n\n{E_USER} Người dùng: {ctx.from_user.mention} [<code>{ctx.from_user.id}</code>]\n"
+        msg += f"{E_SEARCH} <b>DoraSuper Check</b>\n\n{E_USER} Người dùng: {ctx.from_user.mention}\n"
     if uname_b != uname_cur:
         usernamebefore = f"@{usernamebefore}" if usernamebefore else strings("no_uname").format(**EMOJI_FMT)
         usernameafter = (

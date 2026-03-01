@@ -1,3 +1,4 @@
+import io
 import zipfile
 import shutil
 import tempfile
@@ -11,7 +12,6 @@ import pytz
 import subprocess
 import random
 import string
-import logging
 from logging import getLogger
 from datetime import datetime, timedelta
 from urllib.parse import unquote
@@ -29,41 +29,83 @@ from dorasuper.core.decorator import capture_err, new_task
 from dorasuper.emoji import E_DOWNLOAD, E_LINK, E_LOADING, E_ERROR, E_SUCCESS
 from dorasuper.helper.http import fetch
 from dorasuper.helper.pyro_progress import humanbytes, progress_for_pyrogram
-from dorasuper.vars import COMMAND_HANDLER, SUDO
+from dorasuper.vars import (
+    COMMAND_HANDLER,
+    SUDO,
+    USE_GDRIVE,
+    GDRIVE_CREDENTIALS_PATH,
+    GDRIVE_FOLDER_ID,
+    TMPFILES_UPLOAD_FIELD,
+)
 
 LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "TảiVề"
 __HELP__ = """
-<blockquote>/getfiles [url/trả lời tệp]- Tải xuống tệp từ URL hoặc Telegram (Chỉ dành cho chủ bot) 
-/getdirect [trả lời tệp] - Tải tệp lên tmpfiles để lấy link tải xuống (direct link)
-/getinstall [trả lời tệp]</blockquote> - Tạo link cài ipa qua trollstore hay link cài OTA trực tiếp từ file trên Telegram
+<blockquote><u>Tải tệp:</u>
+/getfile [url/trả lời tệp] - Tải xuống tệp (chủ bot)
+/getdirect [trả lời tệp] - Tải tệp lên tmpfiles hoặc Google Drive để lấy link
+
+<u>Tải Video TikTok:</u>
+/dl [link] - Tải video/ảnh từ TikTok
+/tt [link] - Viết tắt của /dl
+/autodl - Bật/tắt tự động nhận link trong nhóm (admin)
+Gửi link TikTok → bot tự tải (trong nhóm cần bật /autodl trước)</blockquote>
 """
 async def auto_delete_message(message, delay=1800):
     await asyncio.sleep(delay)
     await message.delete()
 
-API_UPLOAD_URL = "https://tmpfiles.dabeecao.org/upload"
-TIMEOUT_MINUTES = 60  # Thời gian hết hạn là 60 phút
+# tmpfiles.org chính thức: https://tmpfiles.org/api (file tự xóa sau 60 phút, tối đa 100 MB)
+API_UPLOAD_URL = "https://tmpfiles.org/api/v1/upload"
+TIMEOUT_MINUTES = 60
+
+
+def _upload_to_gdrive_sync(file_path: str, filename: str) -> str:
+    """Upload file lên Google Drive. Bắt buộc dùng thư mục trong Shared Drive (Service Account không có quota)."""
+    from google.oauth2.service_account import Credentials
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaFileUpload
+
+    if not GDRIVE_FOLDER_ID:
+        raise ValueError(
+            "GDRIVE_FOLDER_ID chưa cấu hình. Tạo Shared Drive (Drive → New → Shared drive), "
+            "thêm email Service Account (trong file JSON) vào Shared Drive với quyền Content manager, "
+            "mở Shared Drive → copy ID từ URL (dạng .../folders/XXXX) vào GDRIVE_FOLDER_ID."
+        )
+    creds = Credentials.from_service_account_file(
+        GDRIVE_CREDENTIALS_PATH,
+        scopes=["https://www.googleapis.com/auth/drive"],
+    )
+    drive = build("drive", "v3", credentials=creds)
+    media = MediaFileUpload(file_path, resumable=True)
+    meta = {"name": filename, "parents": [GDRIVE_FOLDER_ID]}
+    file = drive.files().create(
+        body=meta,
+        media_body=media,
+        fields="id",
+        supportsAllDrives=True,
+    ).execute()
+    file_id = file.get("id")
+    drive.permissions().create(
+        fileId=file_id,
+        body={"type": "anyone", "role": "reader"},
+        supportsAllDrives=True,
+    ).execute()
+    return f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
 
 @app.on_message(filters.command(["getdirect"], COMMAND_HANDLER))
-async def upload(bot, message):
+async def getdirect_handler(bot, message):
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
     
     if not message.reply_to_message:
         return await message.reply(f"{E_ERROR} Vui lòng trả lời tập tin phương tiện.")
     
-    media = next(
-        (media for media in [
-            message.reply_to_message.video,
-            message.reply_to_message.document,
-            message.reply_to_message.audio,
-            message.reply_to_message.photo
-        ] if media is not None),
-        None
-    )
-    
+    reply = message.reply_to_message
+    media = reply.document or reply.video or reply.audio
+    if not media and reply.photo:
+        media = reply.photo[-1]  # largest photo size
     if not media:
         return await message.reply(f"{E_ERROR} Loại phương tiện không được hỗ trợ.")
     
@@ -76,53 +118,70 @@ async def upload(bot, message):
     )
     
     try:
-        # Tạo đối tượng FormData để gửi file
-        form = aiohttp.FormData()
-        form.add_field('file', open(fileku, 'rb'))
-        
-        await m.edit(f"{E_LOADING} Đang tải lên tmpfiles, xin chờ..")
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.post(API_UPLOAD_URL, data=form) as response:
-                response_json = await response.json()
-        
-        if 'url' in response_json:
-            file_url = response_json['url']
-            
-            # Tính thời gian hết hạn với múi giờ Asia/Ho_Chi_Minh (UTC+7)
-            tz = pytz.timezone('Asia/Ho_Chi_Minh')
-            expiration_time = datetime.now(tz) + timedelta(minutes=TIMEOUT_MINUTES)
-            expiration_str = expiration_time.strftime("%H:%M:%S %d/%m/%Y")
-            
+        filename = os.path.basename(fileku) or "file"
+
+        if USE_GDRIVE and GDRIVE_CREDENTIALS_PATH and os.path.exists(GDRIVE_CREDENTIALS_PATH):
+            await m.edit(f"{E_LOADING} Đang tải lên Google Drive, xin chờ..")
+            file_url = await asyncio.to_thread(_upload_to_gdrive_sync, fileku, filename)
             output = (
-                f'{E_SUCCESS} Tệp đã tải lên tmpfiles. Liên kết có hiệu lực trong {TIMEOUT_MINUTES} phút và sẽ hết hạn vào lúc {expiration_str}.\n\n'
-                f'{E_DOWNLOAD} Link tải xuống: <code>{file_url}</code>'
+                f"{E_SUCCESS} Đã tải lên Google Drive.\n\n"
+                f"{E_DOWNLOAD} Link: <code>{file_url}</code>"
             )
-            
             btn = InlineKeyboardMarkup(
                 [
-                    [
-                        InlineKeyboardButton(
-                            f"{E_LINK} Chia sẻ liên kết", url=f"https://t.me/share/url?url={file_url}"
-                        )
-                    ]
+                    [InlineKeyboardButton(f"{E_LINK} Mở / Chia sẻ", url=file_url)],
+                    [InlineKeyboardButton("Chia sẻ", url=f"https://t.me/share/url?url={file_url}")],
                 ]
             )
             await m.edit(output, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
-            
         else:
-            await m.edit(f"{E_ERROR} Đã xảy ra lỗi khi tải lên file.")
+            await m.edit(f"{E_LOADING} Đang tải lên tmpfiles, xin chờ..")
+            with open(fileku, "rb") as f:
+                file_content = f.read()
+            form = aiohttp.FormData()
+            # Gửi dạng file-like (BytesIO) + filename để server nhận đúng phần file
+            form.add_field(
+                TMPFILES_UPLOAD_FIELD,
+                io.BytesIO(file_content),
+                filename=filename,
+                content_type="application/octet-stream",
+            )
+            async with aiohttp.ClientSession() as session:
+                async with session.post(API_UPLOAD_URL, data=form) as response:
+                    try:
+                        response_json = await response.json()
+                    except Exception:
+                        text = await response.text()
+                        raise ValueError(f"API trả về không phải JSON: {text[:200]}")
+            
+            file_url = response_json.get("url") or (response_json.get("data") or {}).get("url")
+            if file_url:
+                tz = pytz.timezone("Asia/Ho_Chi_Minh")
+                expiration_time = datetime.now(tz) + timedelta(minutes=TIMEOUT_MINUTES)
+                expiration_str = expiration_time.strftime("%H:%M:%S %d/%m/%Y")
+                output = (
+                    f"{E_SUCCESS} Tệp đã tải lên tmpfiles. Liên kết có hiệu lực trong {TIMEOUT_MINUTES} phút (hết hạn {expiration_str}).\n\n"
+                    f"{E_DOWNLOAD} Link: <code>{file_url}</code>"
+                )
+                btn = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(f"Chia sẻ liên kết", url=f"https://t.me/share/url?url={file_url}")]]
+                )
+                await m.edit(output, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
+            else:
+                err_msg = response_json.get("message") or response_json.get("error") or str(response_json)
+                await m.edit(f"{E_ERROR} Đã xảy ra lỗi khi tải lên: {err_msg}")
         
     except Exception as e:
-        await bot.send_message(message.chat.id, text=f"{E_ERROR} Đã xảy ra lỗi!\n\n{e}")
+        LOGGER.exception("getdirect: %s", e)
+        await m.edit(f"{E_ERROR} Đã xảy ra lỗi!\n\n{type(e).__name__}: {e}")
         
     finally:
-        # Xóa tệp ngay sau khi xử lý
-        if os.path.exists(fileku):
-            os.remove(fileku)
-            
-    # Xóa tin nhắn sau 60 phút
-    await auto_delete_message(m, TIMEOUT_MINUTES * 60)  # 60 phút
+        if fileku and os.path.exists(fileku):
+            try:
+                os.remove(fileku)
+            except OSError:
+                pass
+    await auto_delete_message(m, TIMEOUT_MINUTES * 60)
     
 API_URL = "https://litterbox.catbox.moe/resources/internals/api.php"
 UPLOAD_TIME = "1h"
@@ -285,7 +344,7 @@ async def upload(bot, message):
             os.remove(output_file_path)
             
 @app.on_message(filters.command(["cloneapp"], COMMAND_HANDLER))
-async def upload(bot, message):
+async def cloneapp_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type != enums.ChatType.GROUP and message.chat.type != enums.ChatType.SUPERGROUP:
         return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @DoraTeamMods để sử dụng.")
@@ -379,7 +438,7 @@ async def upload(bot, message):
             os.remove(output_file_path)
             
 @app.on_message(filters.command(["inject_iap"], COMMAND_HANDLER))
-async def upload(bot, message):
+async def inject_iap_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
@@ -475,7 +534,7 @@ async def upload(bot, message):
                 os.remove(path)
         
 @app.on_message(filters.command(["inject_fix"], COMMAND_HANDLER))
-async def upload(bot, message):
+async def inject_fix_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
@@ -573,7 +632,7 @@ async def upload(bot, message):
                 
 
 @app.on_message(filters.command(["inject_ext"], COMMAND_HANDLER))
-async def upload(bot, message):
+async def inject_ext_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
@@ -667,22 +726,20 @@ async def download(client, message):
         # Trường hợp trả lời vào một tệp
         start_t = datetime.now()
         c_time = time.time()
-        vid = [
-            message.reply_to_message.video,
-            message.reply_to_message.document,
-            message.reply_to_message.audio,
-            message.reply_to_message.photo,
-        ]
-        media = next((v for v in vid if v is not None), None)
+        reply = message.reply_to_message
+        media = reply.document or reply.video or reply.audio
+        if not media and reply.photo:
+            media = reply.photo[-1]
         if not media:
             return await pesan.edit(f"{E_ERROR} Loại phương tiện không được hỗ trợ.")
         dc_id = FileId.decode(media.file_id).dc_id
 
-        # Tạo chuỗi ngẫu nhiên để thêm vào tên tệp
         random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-
-        # Đặt đường dẫn lưu file với tên tệp ngẫu nhiên
-        download_path = '/opt/storage/Private/Downloads/' + os.path.splitext(media.file_name)[0] + "_" + random_suffix + os.path.splitext(media.file_name)[1]
+        base_name = getattr(media, "file_name", None) or f"file_{random_suffix}"
+        name, ext = os.path.splitext(base_name)
+        if not ext and reply.photo:
+            ext = ".jpg"
+        download_path = f'/opt/storage/Private/Downloads/{name}_{random_suffix}{ext}'
 
         the_real_download_location = await client.download_media(
             message=message.reply_to_message,
@@ -692,12 +749,11 @@ async def download(client, message):
         )
         end_t = datetime.now()
         ms = (end_t - start_t).seconds
-
-        # Lấy kích thước tệp tính bằng bytes
         file_size = os.path.getsize(the_real_download_location)
-
+        file_name = getattr(media, "file_name", None) or os.path.basename(the_real_download_location) or "file"
         await pesan.edit(
-            f"{E_SUCCESS} Đã tải tệp tin đến máy chủ lưu trữ.\nTên tệp tin: <code>{media.file_name}</code>\nKích thước <code>{file_size}</code> bytes\nĐã tải trong <u>{ms}</u> giây."
+            f"{E_SUCCESS} Đã tải tệp tin đến máy chủ lưu trữ.\nTên tệp tin: <code>{file_name}</code>\nKích thước <code>{file_size}</code> bytes\nĐã tải trong <u>{ms}</u> giây.",
+            parse_mode=enums.ParseMode.HTML,
         )
     elif len(message.command) > 1:
         # Trường hợp tải file từ URL
@@ -748,7 +804,9 @@ async def download(client, message):
                 )
                 if round(diff % 10.00) == 0 and current_message != display_message:
                     await pesan.edit(
-                        disable_web_page_preview=True, text=current_message
+                        text=current_message,
+                        disable_web_page_preview=True,
+                        parse_mode=enums.ParseMode.HTML,
                     )
                     display_message = current_message
                     await asyncio.sleep(10)
@@ -770,11 +828,13 @@ async def download(client, message):
             ms = (end_t - start_t).seconds
 
             await pesan.edit(
-                f"{E_SUCCESS} Đã tải xuống và tải lên Telegram <code>{download_file_path}</code> có kích thước {file_size} bytes trong {ms} giây"
+                f"{E_SUCCESS} Đã tải xuống và tải lên Telegram <code>{download_file_path}</code> có kích thước {file_size} bytes trong {ms} giây",
+                parse_mode=enums.ParseMode.HTML,
             )
     else:
         await pesan.edit(
-            f"{E_ERROR} Trả lời Telegram Media để tải nó xuống máy chủ cục bộ của tôi."
+            f"{E_ERROR} Trả lời Telegram Media hoặc gửi kèm URL để tải.",
+            parse_mode=enums.ParseMode.HTML,
         )
 
 

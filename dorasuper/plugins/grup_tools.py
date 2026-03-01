@@ -21,6 +21,7 @@ from pyrogram.errors import (
 )
 from pyrogram.types import ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
+from database.chat_ban_db import is_chat_banned
 from database.greetings_db import (
     is_welcome, toggle_welcome, set_custom_welcome, get_custom_welcome,
     is_goodbye, toggle_goodbye, set_custom_goodbye, get_custom_goodbye,
@@ -44,7 +45,7 @@ from dorasuper.helper import fetch, use_chat_lang
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.vars import COMMAND_HANDLER, SUDO, SUPPORT_CHAT
 from utils import temp
-from dorasuper.emoji import E_VIP, E_SUCCESS, E_ERROR, E_LOADING, E_WELCOME, E_WELCOME1, E_WELCOME2, E_HEART, E_OTO, E_BACK
+from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_OTO, E_SUCCESS, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
 from dorasuper.vars import COMMAND_HANDLER, SUDO
 
 
@@ -157,16 +158,34 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
                     await c.ban_chat_member(member.chat.id, user_left.id)
                     await c.send_message(
                         member.chat.id,
-                        f"Người dùng <a href='tg://user?id={user_left.id}'>{user_left.first_name}</a> (ID: <code>{user_left.id}</code>) đã bị cấm vì tự ý rời nhóm.",
-                        parse_mode=enums.ParseMode.HTML
+                        f"{E_CROSS} Người dùng <a href='tg://user?id={user_left.id}'>{user_left.first_name}</a> đã bị cấm vì tự ý rời nhóm.",
+                        parse_mode=enums.ParseMode.HTML,
                     )
                 except Exception as e:
                     LOGGER.info(f"Không thể cấm người dùng {user_left.id}: {e}")
         return
 
-    # Xử lý khi người dùng tham gia nhóm (chào mừng)
+    # Xử lý khi người dùng tham gia nhóm
+    user = member.new_chat_member.user
+    new_status = member.new_chat_member.status
+    # Chỉ xử lý khi user thực sự tham gia (MEMBER), tránh trùng khi Telegram gửi update cấm
+    if new_status != CMS.MEMBER:
+        return
+    # Tự động cấm lại nếu user đã bị cấm trước đó (tránh mời lại vào được)
+    if await is_chat_banned(member.chat.id, user.id):
+        try:
+            await c.ban_chat_member(member.chat.id, user.id)
+            await c.send_message(
+                member.chat.id,
+                f"{E_CROSS} Người dùng <a href='tg://user?id={user.id}'>{user.first_name}</a> đã bị cấm trước đó, không thể tham gia lại.",
+                parse_mode=enums.ParseMode.HTML,
+            )
+        except Exception as e:
+            LOGGER.info("Không thể cấm lại user %s: %s", user.id, e)
+        return
+
+    # Chào mừng
     if await is_welcome(member.chat.id):
-        user = member.new_chat_member.user
         if user.id in SUDO:
             await c.send_message(member.chat.id, strings("sudo_join_msg").format(**EMOJI_FMT))
             return
@@ -217,14 +236,10 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
             if join_count == 1:
                 caption = (f"{welcome_text}\n\n"
                           f"<b>Tên thành viên:</b> <code>{first_name}</code>\n"
-                          f"<b>ID tài khoản:</b> <code>{id}</code>\n"
-                        #   f"<b>ID TT Dữ liệu:</b> <code>{dc}</code>\n"
                           f"<b>Tham gia vào lúc:</b> <code>{joined_date}</code>")
             else:
                 caption = (f"{welcome_text}\n\n"
                           f"<b>Tên thành viên:</b> <code>{first_name}</code>\n"
-                          f"<b>ID tài khoản:</b> <code>{id}</code>\n"
-                        #   f"<b>ID TT Dữ liệu:</b> <code>{dc}</code>\n"
                           f"<b>Tham gia lần đầu:</b> <code>{first_joined_str}</code>\n"
                           f"<b>Lần rời gần nhất:</b> <code>{last_left_str}</code>\n"
                           f"<b>Tham gia lại vào:</b> <code>{joined_date}</code>")

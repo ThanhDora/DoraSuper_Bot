@@ -18,42 +18,23 @@ class EqInlineKeyboardButton(InlineKeyboardButton):
 
 
 def paginate_modules(page_n, module_dict, prefix, chat=None):
-    modules = (
-        sorted(
-            [
-                EqInlineKeyboardButton(
-                    x.__MODULE__,
-                    callback_data=f"{prefix}_module({chat},{x.__MODULE__.lower()})",
-                )
-                for x in module_dict.values()
-            ]
+    # Dùng index thay vì tên module để callback_data luôn < 64 byte (giới hạn Telegram)
+    ordered_keys = sorted(module_dict.keys(), key=lambda k: (module_dict[k].__MODULE__ or ""))
+    modules = [
+        EqInlineKeyboardButton(
+            module_dict[k].__MODULE__,
+            callback_data=f"{prefix}_module({chat},{i})" if chat is not None else f"{prefix}_module({i})",
         )
-        if chat
-        else sorted(
-            [
-                EqInlineKeyboardButton(
-                    x.__MODULE__,
-                    callback_data=f"{prefix}_module({x.__MODULE__.lower()})",
-                )
-                for x in module_dict.values()
-            ]
-        )
-    )
+        for i, k in enumerate(ordered_keys)
+    ]
+    modules = sorted(modules)
 
     pairs = list(zip(modules[::3], modules[1::3], modules[2::3]))
-    i = 0
-    for m in pairs:
-        for _ in m:
-            i += 1
-    if len(modules) - i == 1:
+    remainder = len(modules) % 3
+    if remainder == 1:
         pairs.append((modules[-1],))
-    elif len(modules) - i == 2:
-        pairs.append(
-            (
-                modules[-2],
-                modules[-1],
-            )
-        )
+    elif remainder == 2:
+        pairs.append((modules[-2], modules[-1]))
 
     COLUMN_SIZE = 4
 

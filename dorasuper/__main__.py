@@ -31,11 +31,11 @@ async def start_bot():
             try:
                 imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
                 if hasattr(imported_module, "__MODULE__") and imported_module.__MODULE__:
-                    imported_module.__MODULE__ = imported_module.__MODULE__
                     if hasattr(imported_module, "__HELP__") and imported_module.__HELP__:
                         HELPABLE[imported_module.__MODULE__.lower()] = imported_module
             except Exception as e:
-                LOGGER.error(f"Failed to load module {module}: {str(e)}")
+                LOGGER.error("Failed to load module %s: %s", module, e, exc_info=True)
+        LOGGER.info("HELPABLE modules (%d): %s", len(HELPABLE), sorted(HELPABLE.keys()))
 
         bot_modules = ""
         j = 1

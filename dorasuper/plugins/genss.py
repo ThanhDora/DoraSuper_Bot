@@ -1,7 +1,6 @@
 import math
 import os
 import time
-import logging
 from logging import getLogger
 
 from asyncio import gather, sleep
@@ -17,6 +16,7 @@ from pySmartDL import SmartDL
 from dorasuper import app
 from dorasuper.core.decorator import new_task
 from dorasuper.helper import is_url, progress_for_pyrogram, take_ss
+from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.localization import use_chat_lang
 from dorasuper.helper.pyro_progress import humanbytes
 
@@ -35,7 +35,11 @@ __HELP__ = """
 async def genss(self: Client, ctx: Message, strings):
     replied = ctx.reply_to_message
     if len(ctx.command) == 2 and is_url(ctx.command[1]):
-        pesan = await ctx.reply_msg(strings("wait_dl"), quote=True)
+        pesan = await ctx.reply_msg(
+            strings("wait_dl").format(**EMOJI_FMT),
+            quote=True,
+            parse_mode=enums.ParseMode.HTML,
+        )
         start_t = datetime.now()
         the_url_parts = " ".join(ctx.command[1:])
         url = the_url_parts.strip()
@@ -65,7 +69,7 @@ async def genss(self: Client, ctx: Message, strings):
 
             estimated_total_time = downloader.get_eta(human=True)
             try:
-                current_message = "Trying to download...\n"
+                current_message = strings("dl_trying").format(**EMOJI_FMT) + "\n"
                 current_message += f"URL: <code>{url}</code>\n"
                 current_message += f"File Name: <code>{unquote(file_name)}</code>\n"
                 current_message += f"Speed: {speed}\n"
@@ -74,7 +78,9 @@ async def genss(self: Client, ctx: Message, strings):
                 current_message += f"ETA: {estimated_total_time}"
                 if round(diff % 10.00) == 0 and current_message != display_message:
                     await pesan.edit(
-                        disable_web_page_preview=True, text=current_message
+                        text=current_message,
+                        disable_web_page_preview=True,
+                        parse_mode=enums.ParseMode.HTML,
                     )
                     display_message = current_message
                     await sleep(10)
@@ -84,11 +90,18 @@ async def genss(self: Client, ctx: Message, strings):
             end_t = datetime.now()
             ms = (end_t - start_t).seconds
             await pesan.edit(
-                f"Downloaded to <code>{download_file_path}</code> in {ms} seconds"
+                strings("downloaded_ok").format(
+                    path=download_file_path, ms=ms, **EMOJI_FMT
+                ),
+                parse_mode=enums.ParseMode.HTML,
             )
+            images = None
             try:
                 images = await take_ss(download_file_path)
-                await pesan.edit_msg(strings("up_progress"))
+                await pesan.edit_msg(
+                    strings("up_progress").format(**EMOJI_FMT),
+                    parse_mode=enums.ParseMode.HTML,
+                )
                 await self.send_chat_action(
                     chat_id=ctx.chat.id, action=enums.ChatAction.UPLOAD_PHOTO
                 )
@@ -112,51 +125,83 @@ async def genss(self: Client, ctx: Message, strings):
                         namma=ctx.from_user.mention
                         if ctx.from_user
                         else ctx.sender_chat.title,
-                        id=ctx.from_user.id if ctx.from_user else ctx.sender_chat.title,
                         bot_uname=self.me.username,
+                        **EMOJI_FMT,
                     ),
                     reply_to_message_id=ctx.id,
+                    parse_mode=enums.ParseMode.HTML,
                 )
                 await pesan.delete()
-                try:
-                    os.remove(images)
-                    os.remove(download_file_path)
-                except:
-                    pass
+                for f in (images, download_file_path):
+                    if f and os.path.exists(f):
+                        try:
+                            os.remove(f)
+                        except OSError:
+                            pass
             except Exception as exc:
-                await ctx.reply_msg(strings("err_ssgen").format(exc=exc))
-                try:
-                    os.remove(images)
-                    os.remove(download_file_path)
-                except:
-                    pass
+                await ctx.reply_msg(
+                    strings("err_ssgen").format(exc=exc, **EMOJI_FMT),
+                    parse_mode=enums.ParseMode.HTML,
+                )
+                for f in (images, download_file_path):
+                    if f and os.path.exists(f):
+                        try:
+                            os.remove(f)
+                        except OSError:
+                            pass
     elif replied and replied.media:
         vid = [replied.video, replied.document]
         media = next((v for v in vid if v is not None), None)
         if media is None:
-            return await ctx.reply_msg(strings("no_reply"), quote=True)
-        process = await ctx.reply_msg(strings("wait_dl"), quote=True)
+            return await ctx.reply_msg(
+                strings("no_reply").format(**EMOJI_FMT),
+                quote=True,
+                parse_mode=enums.ParseMode.HTML,
+            )
+        process = await ctx.reply_msg(
+            strings("wait_dl").format(**EMOJI_FMT),
+            quote=True,
+            parse_mode=enums.ParseMode.HTML,
+        )
         if media.file_size > 2097152000:
-            return await process.edit_msg(strings("limit_dl"))
+            return await process.edit_msg(
+                strings("limit_dl").format(**EMOJI_FMT),
+                parse_mode=enums.ParseMode.HTML,
+            )
         c_time = time.time()
         dc_id = FileId.decode(media.file_id).dc_id
         try:
             dl = await replied.download(
                 file_name="downloads/",
                 progress=progress_for_pyrogram,
-                progress_args=(strings("dl_progress"), process, c_time, dc_id),
+                progress_args=(
+                    strings("dl_progress").format(**EMOJI_FMT),
+                    process,
+                    c_time,
+                    dc_id,
+                ),
             )
         except FileNotFoundError:
-            return await process.edit_msg("ERROR: FileNotFound.")
+            return await process.edit_msg(
+                strings("err_file_not_found").format(**EMOJI_FMT),
+                parse_mode=enums.ParseMode.HTML,
+            )
         the_real_download_location = os.path.join("downloads/", os.path.basename(dl))
         if the_real_download_location is not None:
+            images = None
             try:
                 await process.edit_msg(
-                    strings("success_dl_msg").format(path=the_real_download_location)
+                    strings("success_dl_msg").format(
+                        path=the_real_download_location, **EMOJI_FMT
+                    ),
+                    parse_mode=enums.ParseMode.HTML,
                 )
                 await sleep(2)
                 images = await take_ss(the_real_download_location)
-                await process.edit_msg(strings("up_progress"))
+                await process.edit_msg(
+                    strings("up_progress").format(**EMOJI_FMT),
+                    parse_mode=enums.ParseMode.HTML,
+                )
                 await self.send_chat_action(
                     chat_id=ctx.chat.id, action=enums.ChatAction.UPLOAD_PHOTO
                 )
@@ -181,23 +226,33 @@ async def genss(self: Client, ctx: Message, strings):
                         namma=ctx.from_user.mention
                         if ctx.from_user
                         else ctx.sender_chat.title,
-                        id=ctx.from_user.id if ctx.from_user else ctx.sender_chat.id,
                         bot_uname=self.me.username,
+                        **EMOJI_FMT,
                     ),
                     reply_to_message_id=ctx.id,
+                    parse_mode=enums.ParseMode.HTML,
                 )
                 await process.delete()
-                try:
-                    os.remove(images)
-                    os.remove(the_real_download_location)
-                except:
-                    pass
+                for f in (images, the_real_download_location):
+                    if f and os.path.exists(f):
+                        try:
+                            os.remove(f)
+                        except OSError:
+                            pass
             except Exception as exc:
-                await ctx.reply_msg(strings("err_ssgen").format(exc=exc))
-                try:
-                    os.remove(images)
-                    os.remove(the_real_download_location)
-                except:
-                    pass
+                await ctx.reply_msg(
+                    strings("err_ssgen").format(exc=exc, **EMOJI_FMT),
+                    parse_mode=enums.ParseMode.HTML,
+                )
+                for f in (images, the_real_download_location):
+                    if f and os.path.exists(f):
+                        try:
+                            os.remove(f)
+                        except OSError:
+                            pass
     else:
-        await ctx.reply_msg(strings("no_reply"), del_in=6)
+        await ctx.reply_msg(
+            strings("no_reply").format(**EMOJI_FMT),
+            del_in=6,
+            parse_mode=enums.ParseMode.HTML,
+        )

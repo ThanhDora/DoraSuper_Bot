@@ -601,7 +601,7 @@ async def kang_sticker(self: Client, ctx: Message, strings):
                     mime_type=self.guess_mime_type(filename),
                     attributes=[DocumentAttributeFilename(file_name=filename)],
                 ),
-                message=f"#Sticker kang bởi UserID -> {ctx.from_user.id}",
+                message="#Sticker kang",
                 random_id=self.rnd_id(),
             ),
         )
