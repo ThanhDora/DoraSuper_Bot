@@ -1,0 +1,3 @@
+# Google Cloud / service account credentials (never commit)
+gen-lang-client-*.json
+*-credentials*.json
