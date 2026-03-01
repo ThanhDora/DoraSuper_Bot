@@ -1,9 +1,12 @@
 import os
 import time
 import asyncio
-import uvloop
 
-uvloop.install()
+try:
+    import uvloop
+    uvloop.install()
+except ImportError:
+    pass
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 

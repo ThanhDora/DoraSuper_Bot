@@ -83,8 +83,8 @@ async def extract_userid(message, text: str):
 
 
 async def extract_user_and_reason(message, sender_chat=False):
-    args = message.text.strip().split()
-    text = message.text
+    text = (message.text or message.caption or "").strip()
+    args = text.split()
     user = None
     reason = None
     if message.reply_to_message:
@@ -93,7 +93,7 @@ async def extract_user_and_reason(message, sender_chat=False):
         if reply.from_user:
             id_ = reply.from_user.id
 
-        elif reply.sender_chat and reply.sender_chat != message.chat.id and sender_chat:
+        elif reply.sender_chat and sender_chat and reply.sender_chat.id != message.chat.id:
             id_ = reply.sender_chat.id
         else:
             return None, None
