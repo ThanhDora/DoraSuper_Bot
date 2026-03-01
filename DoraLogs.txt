@@ -48,3 +48,128 @@
 [INFO] - [02-Mar-26 00:17:36 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
 [INFO] - [02-Mar-26 00:17:36 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
 [INFO] - [02-Mar-26 00:17:36 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [02-Mar-26 00:22:08 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [02-Mar-26 00:22:16 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - HELPABLE modules (37): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'trợlýai', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - |admin          |afk            |ai             |auto_forwarder |
+|autoapprove    |ban_user_or_chat|blacklist_chat |broadcast      |
+|check_ip       |checkin        |code_tester    |copy_forward   |
+|currency       |daoly          |delete_command_msg|dev            |
+|download_upload|downloadsVideo |fake_human     |filters        |
+|fun            |fungame        |funny_rate     |genss          |
+|getid_emoji    |goldprice      |grup_tools     |imdb_search    |
+|inkick_user    |inline_search  |json           |karma          |
+|lang_setting   |locks          |love           |mediainfo      |
+|misc_tools     |movie_view     |nightmodev2    |notes          |
+|nulis          |ocr            |paste          |phone_check    |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [02-Mar-26 00:22:16 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [02-Mar-26 00:22:17 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [02-Mar-26 00:25:03 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [02-Mar-26 00:25:10 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - HELPABLE modules (37): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'trợlýai', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - |admin          |afk            |ai             |auto_forwarder |
+|autoapprove    |ban_user_or_chat|blacklist_chat |broadcast      |
+|check_ip       |checkin        |code_tester    |copy_forward   |
+|currency       |daoly          |delete_command_msg|dev            |
+|download_upload|downloadsVideo |fake_human     |filters        |
+|fun            |fungame        |funny_rate     |genss          |
+|getid_emoji    |goldprice      |grup_tools     |imdb_search    |
+|inkick_user    |inline_search  |json           |karma          |
+|lang_setting   |locks          |love           |mediainfo      |
+|misc_tools     |movie_view     |nightmodev2    |notes          |
+|nulis          |ocr            |paste          |phone_check    |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [02-Mar-26 00:25:11 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [02-Mar-26 00:25:11 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [02-Mar-26 00:28:08 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [02-Mar-26 00:28:15 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - HELPABLE modules (37): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'trợlýai', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - |admin          |afk            |ai             |auto_forwarder |
+|autoapprove    |ban_user_or_chat|blacklist_chat |broadcast      |
+|check_ip       |checkin        |code_tester    |copy_forward   |
+|currency       |daoly          |delete_command_msg|dev            |
+|download_upload|downloadsVideo |fake_human     |filters        |
+|fun            |fungame        |funny_rate     |genss          |
+|getid_emoji    |goldprice      |grup_tools     |imdb_search    |
+|inkick_user    |inline_search  |json           |karma          |
+|lang_setting   |locks          |love           |mediainfo      |
+|misc_tools     |movie_view     |nightmodev2    |notes          |
+|nulis          |ocr            |paste          |phone_check    |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [02-Mar-26 00:28:16 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [02-Mar-26 00:28:17 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [02-Mar-26 00:32:03 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [02-Mar-26 00:32:10 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - HELPABLE modules (37): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'trợlýai', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - |admin          |afk            |ai             |auto_forwarder |
+|autoapprove    |ban_user_or_chat|blacklist_chat |broadcast      |
+|check_ip       |checkin        |code_tester    |copy_forward   |
+|currency       |daoly          |delete_command_msg|dev            |
+|download_upload|downloadsVideo |fake_human     |filters        |
+|fun            |fungame        |funny_rate     |genss          |
+|getid_emoji    |goldprice      |grup_tools     |imdb_search    |
+|inkick_user    |inline_search  |json           |karma          |
+|lang_setting   |locks          |love           |mediainfo      |
+|misc_tools     |movie_view     |nightmodev2    |notes          |
+|nulis          |ocr            |paste          |phone_check    |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [02-Mar-26 00:32:11 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [02-Mar-26 00:32:12 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [02-Mar-26 00:33:32 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [02-Mar-26 00:33:38 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - HELPABLE modules (37): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'trợlýai', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - |admin          |afk            |ai             |auto_forwarder |
+|autoapprove    |ban_user_or_chat|blacklist_chat |broadcast      |
+|check_ip       |checkin        |code_tester    |copy_forward   |
+|currency       |daoly          |delete_command_msg|dev            |
+|download_upload|downloadsVideo |fake_human     |filters        |
+|fun            |fungame        |funny_rate     |genss          |
+|getid_emoji    |goldprice      |grup_tools     |imdb_search    |
+|inkick_user    |inline_search  |json           |karma          |
+|lang_setting   |locks          |love           |mediainfo      |
+|misc_tools     |movie_view     |nightmodev2    |notes          |
+|nulis          |ocr            |paste          |phone_check    |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [02-Mar-26 00:33:39 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [02-Mar-26 00:33:40 - apscheduler.scheduler - Scheduler started] -> [base:181]

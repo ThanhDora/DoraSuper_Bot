@@ -534,7 +534,7 @@ async def demote(client, message, strings):
         try:
             await message.reply_text(txt, parse_mode=enums.ParseMode.HTML)
         except DocumentInvalid:
-            await message.reply_text(re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', txt), parse_mode=enums.ParseMode.HTML)
+            await message.reply_text(re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), txt), parse_mode=enums.ParseMode.HTML)
     except ChatAdminRequired:
         await message.reply_text(f"{E_GEAR} Xin hãy cho phép hạ cấp thành viên..")
     except Exception as e:
@@ -739,7 +739,7 @@ async def remove_warning(_, cq, strings):
     orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
     text = f"<s>{orig_html}</s>\n\n"
     text += strings("unwarn_msg").format(mention=from_user.mention, **EMOJI_FMT)
-    text = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", text)
+    text = re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), text)
     await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)
 
 
@@ -760,7 +760,7 @@ async def unmute_user(_, cq, strings):
     orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
     text = f"<s>{orig_html}</s>\n\n"
     text += strings("rmmute_msg").format(mention=from_user.mention, **EMOJI_FMT)
-    text = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", text)
+    text = re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), text)
     try:
         await cq.message.chat.unban_member(user_id)
         await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)
@@ -783,14 +783,13 @@ async def unban_user(_, cq, strings):
     user_id = int(cq.data.split("_")[1])
     orig = cq.message.text
     orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
-    text = f"<s>{orig_html}</s>\n\n"
-    text += strings("unban_msg").format(mention=from_user.mention, **EMOJI_FMT)
-    text = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", text)
+    # Giữ nguyên chữ + emoji động (không strip thẻ <emoji> để hiển thị custom emoji)
+    unban_part = strings("unban_msg").format(mention=from_user.mention, **EMOJI_FMT)
+    text = orig_html + "\n\n" + unban_part
     try:
         await cq.message.chat.unban_member(user_id)
         await remove_chat_ban(cq.message.chat.id, user_id)
         extra = await _try_add_user_back(cq.message.chat.id, user_id)
-        extra = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r"\1", extra)
         await cq.message.edit_text(text + extra, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await cq.answer(str(e))
