@@ -1,6 +1,6 @@
 from datetime import datetime
 from async_pymongo import AsyncClient
-from tiensiteo.vars import DATABASE_NAME, DATABASE_URI
+from dorasuper.vars import DATABASE_NAME, DATABASE_URI
 
 class UsersData:
     def __init__(self, uri, database_name):
@@ -8,6 +8,7 @@ class UsersData:
         self.db = self._client[database_name]
         self.col = self.db["userlist"]
         self.grp = self.db["groups"]
+        self.welcomed_grp = self.db["welcomed_groups"]  # Chat đã gửi tin chào mừng (chỉ chào 1 lần)
         self.member_history = self.db["member_history"]  # Collection để lưu lịch sử tham gia
 
     @staticmethod
@@ -77,6 +78,22 @@ class UsersData:
     async def add_chat(self, chat, title):
         chat = self.new_group(chat, title)
         await self.grp.insert_one(chat)
+
+    async def is_welcomed(self, chat_id):
+        """Nhóm này đã từng được gửi tin chào mừng (bot được thêm lần đầu) chưa."""
+        return bool(await self.welcomed_grp.find_one({"chat_id": int(chat_id)}))
+
+    async def set_welcomed(self, chat_id):
+        """Đánh dấu đã gửi tin chào mừng cho nhóm (chỉ chào 1 lần dù mời lại)."""
+        await self.welcomed_grp.update_one(
+            {"chat_id": int(chat_id)}, {"$set": {"chat_id": int(chat_id)}}, upsert=True
+        )
+
+    async def delete_chat(self, chat_id):
+        """Xóa hết dữ liệu nhóm khi bot rời nhóm (mời lại sẽ coi là nhóm mới)."""
+        cid = int(chat_id)
+        await self.grp.delete_many({"id": cid})
+        await self.welcomed_grp.delete_many({"chat_id": cid})
 
     async def re_enable_chat(self, id):
         chat_status = dict(

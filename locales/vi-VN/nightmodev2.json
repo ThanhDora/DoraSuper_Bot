@@ -1,17 +1,1 @@
-{
-    "nmd_disabled": "Chế độ ban đêm đã được tắt.",
-    "nmd_not_enabled": "Chế độ ban đêm chưa được bật trong cuộc trò chuyện này.",
-    "invalid_time_format": "Định dạng thời gian không hợp lệ. Sử dụng định dạng HH:MM.",
-    "invalid_lockdur": "Thời gian khóa không hợp lệ. Sử dụng định dạng chính xác.\nVí dụ: 6h (cho 6 giờ), 10m cho 10 phút.",
-    "schedule_already_on": "Đã có một lịch trình đang chạy trong cuộc trò chuyện này. Tắt nó bằng cách sử dụng cờ `-d`.",
-    "nmd_enable_success": "Đã bật chế độ ban đêm thành công trong cuộc trò chuyện này.\nNhóm sẽ bị khóa vào {st} và sẽ được mở sau {lockdur} mỗi ngày.",
-    "nmd_cb": "🔖 Chào, Tôi là {bname}",
-    "nmd_off_not_admin": "#NIGHTMODE_FAIL\nKhông thể tắt chế độ ban đêm tại `{chat_id}`, vì {bname} không phải là quản trị viên trong trò chuyện `{chat_id}`",
-    "nmd_off_not_present": "#NIGHTMODE_FAIL\nKhông thể tắt chế độ ban đêm tại `{chat_id}`, vì {bname} không có mặt trong trò chuyện `{chat_id}`. Đã xóa nhóm khỏi danh sách.",
-    "nmd_off_err": "#NIGHTMODE_FAIL\nKhông thể tắt chế độ ban đêm tại `{chat_id}`\nLỖI: `{e}`",
-    "nmd_off_success": "#NIGHTMODE_HANDLER\n📆 {dt}\n\n☀️ Nhóm đang mở.\nSẽ bị đóng lại vào {close_at}",
-    "nmd_on_not_admin": "#NIGHTMODE_FAIL\nKhông thể bật chế độ ban đêm tại `{chat_id}`, vì {bname} không phải là quản trị viên trong trò chuyện `{chat_id}`",
-    "nmd_on_not_present": "#NIGHTMODE_FAIL\nKhông thể bật chế độ ban đêm tại `{chat_id}`, vì {bname} không có mặt trong trò chuyện `{chat_id}`. Đã xóa nhóm khỏi danh sách.",
-    "nmd_on_err": "#NIGHTMODE_FAIL\nKhông thể bật chế độ ban đêm tại `{chat_id}`\nLỖI: `{e}`",
-    "nmd_on_success": "#NIGHTMODE_HANDLER\n📆 {dt}\n\n🌗 Nhóm đang đóng.\nSẽ được mở vào {open_at}"
-}
+{"nmd_disabled":"{E_SUCCESS} Chế độ ban đêm đã được tắt.","nmd_not_enabled":"{E_INFO} Chế độ ban đêm chưa được bật trong cuộc trò chuyện này.","invalid_time_format":"{E_WARN} Định dạng thời gian không hợp lệ. Sử dụng định dạng HH:MM.","invalid_lockdur":"{E_WARN} Thời gian khóa không hợp lệ. Sử dụng định dạng chính xác.\nVí dụ: 6h (cho 6 giờ), 10m cho 10 phút.","schedule_already_on":"{E_WARN} Đã có một lịch trình đang chạy trong cuộc trò chuyện này. Tắt nó bằng cách sử dụng cờ `-d`.","nmd_enable_success":"{E_SUCCESS} Đã bật chế độ ban đêm thành công trong cuộc trò chuyện này.\nNhóm sẽ bị khóa vào {st} và sẽ được mở sau {lockdur} mỗi ngày.","nmd_cb":"{E_GIFT} Chào, Tôi là {bname}","nmd_off_not_admin":"#NIGHTMODE_FAIL\n{E_ERROR} Không thể tắt chế độ ban đêm tại `{chat_id}`, vì {bname} không phải là quản trị viên trong trò chuyện `{chat_id}`","nmd_off_not_present":"#NIGHTMODE_FAIL\n{E_ERROR} Không thể tắt chế độ ban đêm tại `{chat_id}`, vì {bname} không có mặt trong trò chuyện `{chat_id}`. Đã xóa nhóm khỏi danh sách.","nmd_off_err":"#NIGHTMODE_FAIL\n{E_ERROR} Không thể tắt chế độ ban đêm tại `{chat_id}`\nLỖI: `{e}`","nmd_off_success":"#NIGHTMODE_HANDLER\n{E_CALENDAR} {dt}\n\n{E_SUCCESS} Nhóm đang mở.\nSẽ bị đóng lại vào {close_at}","nmd_on_not_admin":"#NIGHTMODE_FAIL\n{E_ERROR} Không thể bật chế độ ban đêm tại `{chat_id}`, vì {bname} không phải là quản trị viên trong trò chuyện `{chat_id}`","nmd_on_not_present":"#NIGHTMODE_FAIL\n{E_ERROR} Không thể bật chế độ ban đêm tại `{chat_id}`, vì {bname} không có mặt trong trò chuyện `{chat_id}`. Đã xóa nhóm khỏi danh sách.","nmd_on_err":"#NIGHTMODE_FAIL\n{E_ERROR} Không thể bật chế độ ban đêm tại `{chat_id}`\nLỖI: `{e}`","nmd_on_success":"#NIGHTMODE_HANDLER\n{E_CALENDAR} {dt}\n\n{E_LOCK} Nhóm đang đóng.\nSẽ được mở vào {open_at}"}

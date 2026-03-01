@@ -16,9 +16,9 @@ from pyrogram.types import Message
 
 from database.afk_db import is_cleanmode_on
 from database.users_chats_db import db
-from tiensiteo import app, cleanmode
+from dorasuper import app, cleanmode
 
-LOGGER = getLogger("TienSiTeo")
+LOGGER = getLogger("DoraSuper")
 BANNED = {}
 
 loop = asyncio.get_event_loop()

@@ -1,0 +1,30 @@
+# Plugin: xóa tin nhắn lệnh của user ngay sau khi bot đã reply.
+# Chạy ở group=99 (sau mọi handler lệnh). Bot cần quyền xóa tin nhắn trong nhóm.
+
+import asyncio
+import re
+from pyrogram import filters
+from pyrogram.types import Message
+
+from dorasuper import app
+from dorasuper.vars import COMMAND_HANDLER
+
+# Regex khớp mọi tin nhắn bắt đầu bằng prefix (/, !, ...) + tên lệnh
+_prefix_re = "|".join(re.escape(p) for p in (COMMAND_HANDLER or ["/"]))
+COMMAND_ANY_RE = re.compile(r"^(" + _prefix_re + r")\s*\S+", re.IGNORECASE)
+
+
+async def _is_command_msg(_, __, msg: Message):
+    return bool(msg and COMMAND_ANY_RE.search((msg.text or msg.caption or "").strip()))
+
+
+is_command = filters.create(_is_command_msg)
+
+
+@app.on_message(is_command, group=99)
+async def delete_user_command_after_reply(_, msg: Message):
+    try:
+        await asyncio.sleep(0.15)  # Đợi bot reply gửi xong rồi mới xóa tin lệnh
+        await msg.delete()
+    except Exception:
+        pass

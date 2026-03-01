@@ -1,7 +1,7 @@
 from typing import Dict, Union
 
 from database import dbname
-from tiensiteo.helper.functions import int_to_alpha
+from dorasuper.helper.functions import int_to_alpha
 
 karmadb = dbname["karma"]
 

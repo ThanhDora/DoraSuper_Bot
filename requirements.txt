@@ -1,3 +1,5 @@
+# Giữ setuptools < 70 (tùy chọn, tránh lỗi build một số package cũ)
+setuptools>=58,<70
 emoji
 git+https://github.com/yasirarism/pyrofork
 tgcrypto
@@ -33,7 +35,6 @@ aiofiles
 uvloop>=0.21.0
 lxml_html_clean
 bing_image_downloader
-librosa
 numpy
 mutagen
 matplotlib
@@ -41,5 +42,8 @@ uvicorn
 lxml_html_clean
 python-multipart
 standard-imghdr
-audioop-lts
+# audioop bị gỡ từ stdlib từ Python 3.13; 3.12 không cần audioop-lts
+audioop-lts; python_version >= "3.13"
 google-generativeai
+# librosa bỏ tạm — kéo theo numba/llvmlite, build llvmlite lỗi (spawn/dry_run) trên nhiều môi trường
+# Nếu cần xử lý audio nâng cao, cài thủ công: pip install librosa

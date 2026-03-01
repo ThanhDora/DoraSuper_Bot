@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================
-#  TienSiTeo Bot - Setup & Run Script
+#  DoraSuper Bot - Setup & Run Script
 # ============================================
 
 set -e
@@ -22,7 +22,7 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}"
 echo "╔═══════════════════════════════════════╗"
-echo "║         TienSiTeo Bot Setup           ║"
+echo "║         DoraSuper Bot Setup           ║"
 echo "╚═══════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -62,8 +62,8 @@ echo "  ✅ config.env OK"
 
 # Chạy bot
 echo ""
-echo -e "${GREEN}🚀 Đang khởi động TienSiTeo Bot...${NC}"
+echo -e "${GREEN}🚀 Đang khởi động DoraSuper Bot...${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-$PYTHON_VENV -m tiensiteo
+$PYTHON_VENV -m dorasuper

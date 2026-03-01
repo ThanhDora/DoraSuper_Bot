@@ -1,11 +1,1 @@
-{
-    "processing_text": "`Đang xử lý, thời gian tổng là dựa trên kích thước của các tệp của bạn...`",
-    "wait_msg": "`Vui lòng chờ một chút...`",
-    "err_link": "Có vẻ như liên kết bạn gửi không hợp lệ, hãy đảm bảo đó là liên kết trực tiếp và có thể tải xuống.",
-    "media_invalid": "Vui lòng trả lời phương tiện hợp lệ.",
-    "dl_limit_exceeded": "Xin lỗi, tải xuống bị giới hạn ở 2GB để giảm tải. Bạn có thể chuyển đổi các tệp của mình thành liên kết.",
-    "dl_args_text": "Đang cố gắng tải xuống..",
-    "mediainfo_help": "Sử dụng lệnh /{cmd} [link], hoặc trả lời phương tiện telegram với /{cmd}.",
-    "capt_media": "ℹ️ Kết quả mediainfo của bạn..\n\n**Yêu cầu bởi:** {ment}",
-    "viweb": "💬 Mở trên Web"
-}
+{"processing_text":"`{E_LOADING} Đang xử lý, thời gian tổng là dựa trên kích thước của các tệp của bạn...`","wait_msg":"`{E_WAIT} Vui lòng chờ một chút...`","err_link":"{E_ERROR} Có vẻ như liên kết bạn gửi không hợp lệ, hãy đảm bảo đó là liên kết trực tiếp và có thể tải xuống.","media_invalid":"{E_WARN} Vui lòng trả lời phương tiện hợp lệ.","dl_limit_exceeded":"{E_WARN} Xin lỗi, tải xuống bị giới hạn ở 2GB để giảm tải. Bạn có thể chuyển đổi các tệp của mình thành liên kết.","dl_args_text":"{E_LOADING} Đang cố gắng tải xuống..","mediainfo_help":"{E_TIP} Sử dụng lệnh /{cmd} [link], hoặc trả lời phương tiện telegram với /{cmd}.","capt_media":"{E_INFO} Kết quả mediainfo của bạn..\n\n**Yêu cầu bởi:** {ment}","viweb":"{E_MSG} Mở trên Web"}

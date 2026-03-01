@@ -1,6 +1,1 @@
-{
-    "no_url": "Vui lòng cung cấp một URL để chụp ảnh màn hình.",
-    "wait_str": "Đang chụp ảnh màn hình...",
-    "str_credit": "🌞 Ảnh màn hình được tạo bằng Puppeteer",
-    "ss_failed_str": "Không thể chụp ảnh màn hình. {err}"
-}
+{"no_url":"{E_TIP} Vui lòng cung cấp một URL để chụp ảnh màn hình.","wait_str":"{E_LOADING} Đang chụp ảnh màn hình...","str_credit":"{E_IMAGE} Ảnh màn hình được tạo bằng Puppeteer","ss_failed_str":"{E_ERROR} Không thể chụp ảnh màn hình. {err}"}

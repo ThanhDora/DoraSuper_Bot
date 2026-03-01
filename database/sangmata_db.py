@@ -9,9 +9,16 @@ async def cek_userdata(user_id: int) -> bool:
     return bool(user)
 
 
-async def get_userdata(user_id: int) -> bool:
+async def get_userdata(user_id: int):
+    """Trả về (username, first_name, last_name); thiếu key thì None."""
     user = await matadb.find_one({"user_id": user_id})
-    return user["username"], user["first_name"], user["last_name"]
+    if not user:
+        return None, None, None
+    return (
+        user.get("username"),
+        user.get("first_name"),
+        user.get("last_name"),
+    )
 
 
 async def add_userdata(user_id: int, username, first_name, last_name):

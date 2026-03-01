@@ -1,6 +1,1 @@
-{
-    "back_btn": "« Quay lại",
-    "no_results": "Không có kết quả.",
-    "unknown_id": "Xin lỗi, tôi không nhận ra người dùng này. Có lẽ tôi chưa từng gặp anh ấy.",
-    "exp_task": "😶‍🌫️ Hết thời gian. Nhiệm vụ đã bị hủy!"
-}
+{"back_btn":"Quay lại","no_results":"{E_INFO} Không có kết quả.","unknown_id":"{E_WARN} Xin lỗi, tôi không nhận ra người dùng này. Có lẽ tôi chưa từng gặp anh ấy.","exp_task":"{E_CLOCK} Hết thời gian. Nhiệm vụ đã bị hủy!"}
