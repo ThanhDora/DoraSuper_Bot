@@ -17,7 +17,7 @@ from dorasuper import app
 from dorasuper.core.decorator import capture_err, new_task
 from dorasuper.core.decorator.permissions import require_admin
 from database.autodl_db import toggle_autodl
-from dorasuper.emoji import E_ERROR, E_HEART, E_LINK, E_LOADING, E_MUSIC, E_SUCCESS, E_TIP, E_USER
+from dorasuper.emoji import E_ERROR, E_HEART, E_LINK, E_VIEW, E_LOADING, E_MUSIC, E_SUCCESS, E_TIP, E_USER
 from dorasuper.helper.pyro_progress import humanbytes
 from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR
 
@@ -146,20 +146,26 @@ def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: 
         # Số view
         views = info.get("view_count") or info.get("play_count")
         if views is not None:
-            lines.append(f"<b>Số view:</b> {_fmt_count(views)}")
-    # Link TikTok
+            lines.append(f"<b>Số view:</b> {E_VIEW} {_fmt_count(views)}")
+    # Link TikTok — chỉ hiển thị đến @user (bỏ /video/...)
     link = (info or {}).get("webpage_url") or (info or {}).get("url", "")
     if link:
-        lines.append(f'<b>Link:</b> <a href="{html.escape(link)}">{html.escape(link)}</a>')
+        at_pos = link.find("@")
+        if at_pos != -1:
+            slash_after = link.find("/", at_pos)
+            link_display = link[:slash_after] if slash_after != -1 else link
+        else:
+            link_display = link
+        lines.append(f'<b>Link:</b> <a href="{html.escape(link)}">{html.escape(link_display)}</a>')
     if shared_by:
-        lines.append(f"{E_USER} Chia sẻ bởi: {shared_by}")
+        lines.append(f"{E_USER} <b>Chia sẻ bởi:</b> {shared_by}")
     content = "\n".join(l for l in lines if l)
     return f"<blockquote>{content}</blockquote>" if content else ""
 
 
 async def _process_download(ctx: Message, url: str, platform: str):
     """Xử lý tải và gửi media."""
-    m = await ctx.reply_msg(f"{E_LOADING} Đang tải từ {platform}...", quote=True)
+    m = await ctx.reply_msg(f"Đang tải từ {platform}{E_LOADING}", quote=True)
     dl_root = ROOT_DIR / "downloads"
     dl_root.mkdir(parents=True, exist_ok=True)
     out_dir = tempfile.mkdtemp(prefix=f"{platform}_", dir=str(dl_root))
@@ -185,7 +191,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
         is_image = ext in (".jpg", ".jpeg", ".png", ".webp", ".gif")
         is_video = ext in (".mp4", ".webm", ".mkv", ".mov")
 
-        await m.edit_msg(f"{E_LOADING} Đang gửi...")
+        await m.edit_msg(f"Đang gửi{E_LOADING}")
 
         shared_by = ""
         if ctx.from_user:

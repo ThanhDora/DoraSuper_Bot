@@ -3,6 +3,7 @@ import logging
 from logging import getLogger
 
 from pyrogram import filters
+from pyrogram.enums import ParseMode
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from database.filters_db import (
@@ -18,8 +19,18 @@ from dorasuper.core.decorator.permissions import adminsOnly, member_permissions
 from dorasuper.core.keyboard import ikb
 from dorasuper.helper.functions import extract_text_and_keyb, extract_urls
 from dorasuper.vars import COMMAND_HANDLER
+from dorasuper.emoji import E_NOTE, E_LIST, E_SUCCESS, E_CROSS, E_WARN, E_GROUP, E_TIP
 
 LOGGER = getLogger("DoraSuper")
+
+
+async def _reply_filter(message, text: str, **kwargs):
+    """Gửi phản hồi (có emoji → dùng HTML)."""
+    kwargs.setdefault("parse_mode", ParseMode.HTML)
+    try:
+        return await message.reply_msg(text, **kwargs)
+    except (AttributeError, TypeError):
+        return await message.reply_text(text, **kwargs)
 
 __MODULE__ = "BộLọc"
 __HELP__ = """
@@ -31,8 +42,15 @@ Các loại bộ lọc được hỗ trợ là Văn bản, Hoạt hình, Ảnh, 
 Để sử dụng nhiều từ trong một bộ lọc, hãy sử dụng
 /boloc Hey_there hoặc /themboloc Hey_there để lọc "Hey there".
 /xboloc [TÊN_BỘ_LỌC] hoặc /xoaboloc [TÊN_BỘ_LỌC] - Dừng một bộ lọc.
-/xhboloc> - Xóa tất cả các bộ lọc trong một cuộc trò chuyện (vĩnh viễn).</blockquote>
+/xhboloc - Xóa tất cả các bộ lọc trong một cuộc trò chuyện (vĩnh viễn).</blockquote>
 """
+
+
+@app.on_message(
+    filters.command(["themboloc", "boloc", "xemboloc", "xboloc", "xoaboloc", "xhboloc"], COMMAND_HANDLER) & filters.private
+)
+async def filters_private(_, message):
+    await _reply_filter(message, f"{E_GROUP} <b>Bộ lọc chỉ dùng trong nhóm.</b>\nThêm bot vào nhóm rồi dùng lệnh ở đó.")
 
 
 @app.on_message(
@@ -42,13 +60,13 @@ Các loại bộ lọc được hỗ trợ là Văn bản, Hoạt hình, Ảnh, 
 async def save_filters(_, message):
     try:
         if len(message.command) < 2 or not message.reply_to_message:
-            return await message.reply_text(
-                "**Sử dụng:**\nTrả lời tin nhắn bằng /boloc [Tên bộ lọc] để thiết lập một bộ lọc mới."
+            return await _reply_filter(
+                message,
+                f"{E_TIP} <b>Sử dụng:</b>\nTrả lời tin nhắn bằng <code>/boloc [Tên bộ lọc]</code> để thiết lập bộ lọc mới.",
             )
-        text = message.text.markdown
-        name = text.split(None, 1)[1].strip()
+        name = (message.text or "").split(None, 1)[1].strip()
         if not name:
-            return await message.reply_text("**Sử dụng:**\n__/boloc [FILTER_NAME]__")
+            return await _reply_filter(message, f"{E_WARN} <b>Sử dụng:</b> <code>/boloc [TÊN_BỘ_LỌC]</code>")
         chat_id = message.chat.id
         replied_message = message.reply_to_message
         text = name.split(" ", 1)
@@ -62,11 +80,8 @@ async def save_filters(_, message):
         elif not replied_message.text and not replied_message.caption:
             data = None
         else:
-            data = (
-                replied_message.text.markdown
-                if replied_message.text
-                else replied_message.caption.markdown
-            )
+            raw = replied_message.text or replied_message.caption or ""
+            data = getattr(raw, "markdown", raw) if raw else None
         _type = "text"
         file_id = None
         if replied_message.sticker:
@@ -106,11 +121,15 @@ async def save_filters(_, message):
             "file_id": file_id,
         }
         await save_filter(chat_id, name, _filter)
-        return await message.reply_text(f"__**Đã lưu bộ lọc {name}.**__")
+        return await _reply_filter(message, f"{E_SUCCESS} <b>Đã lưu bộ lọc</b> <code>{name}</code>.", del_in=5)
     except UnboundLocalError:
-        return await message.reply_text(
-            "**Tin nhắn đã trả lời không thể truy cập được.\n`Chuyển tiếp tin nhắn và thử lại`**"
+        return await _reply_filter(
+            message,
+            f"{E_WARN} Tin nhắn đã trả lời không thể truy cập. Chuyển tiếp tin nhắn và thử lại.",
         )
+    except Exception as e:
+        LOGGER.exception("save_filters: %s", e)
+        return await _reply_filter(message, f"{E_CROSS} Có lỗi khi lưu bộ lọc. Thử reply đúng tin nhắn.")
 
 
 @app.on_message(filters.command("xemboloc", COMMAND_HANDLER) & ~filters.private)
@@ -118,12 +137,12 @@ async def save_filters(_, message):
 async def get_filterss(_, m):
     _filters = await get_filters_names(m.chat.id)
     if not _filters:
-        return await m.reply_msg("**Không có bộ lọc nào trong cuộc trò chuyện này.**")
+        return await _reply_filter(m, f"{E_NOTE} Không có bộ lọc nào trong cuộc trò chuyện này.")
     _filters.sort()
-    msg = f"Danh sách các bộ lọc trong {m.chat.title} {m.chat.id}\n"
-    for _filter in _filters:
-        msg += f"**-** `{_filter}`\n"
-    await m.reply_msg(msg)
+    msg = f"{E_LIST} <b>Danh sách bộ lọc</b> – {m.chat.title} (<code>{m.chat.id}</code>)\n\n"
+    for fname in _filters:
+        msg += f"• <code>{fname}</code>\n"
+    await _reply_filter(m, msg)
 
 
 @app.on_message(
@@ -132,16 +151,15 @@ async def get_filterss(_, m):
 @adminsOnly("can_change_info")
 async def del_filter(_, m):
     if len(m.command) < 2:
-        return await m.reply_msg("**Sử dụng:**\n__/xoaboloc [FILTER_NAME]__", del_in=6)
-    name = m.text.split(None, 1)[1].strip()
+        return await _reply_filter(m, f"{E_TIP} <b>Sử dụng:</b> <code>/xoaboloc [TÊN_BỘ_LỌC]</code>")
+    name = (m.text or "").split(None, 1)[1].strip()
     if not name:
-        return await m.reply_msg("**Sử dụng:**\n__/xoaboloc [FILTER_NAME]__", del_in=6)
+        return await _reply_filter(m, f"{E_TIP} <b>Sử dụng:</b> <code>/xoaboloc [TÊN_BỘ_LỌC]</code>")
     chat_id = m.chat.id
     deleted = await delete_filter(chat_id, name)
     if deleted:
-        return await m.reply_msg(f"**Đã xoá bộ lọc {name}.**")
-    else:
-        return await m.reply_msg("**Không có bộ lọc.**")
+        return await _reply_filter(m, f"{E_SUCCESS} Đã xoá bộ lọc <code>{name}</code>.", del_in=5)
+    return await _reply_filter(m, f"{E_CROSS} Không tìm thấy bộ lọc này.", del_in=5)
 
 
 @app.on_message(
@@ -194,57 +212,56 @@ async def filters_re(_, message):
 
             if data_type == "text":
                 await message.reply_text(
-                    text=data,
+                    text=(data or ""),
                     reply_markup=keyb,
                     disable_web_page_preview=True,
                 )
-            else:
-                if not file_id:
-                    continue
-            if data_type == "sticker":
-                await message.reply_sticker(
-                    sticker=file_id,
-                )
-            if data_type == "animation":
-                await message.reply_animation(
-                    animation=file_id,
-                    caption=data,
-                    reply_markup=keyb,
-                )
-            if data_type == "photo":
-                await message.reply_photo(
-                    photo=file_id,
-                    caption=data,
-                    reply_markup=keyb,
-                )
-            if data_type == "document":
-                await message.reply_document(
-                    document=file_id,
-                    caption=data,
-                    reply_markup=keyb,
-                )
-            if data_type == "video":
-                await message.reply_video(
-                    video=file_id,
-                    caption=data,
-                    reply_markup=keyb,
-                )
-            if data_type == "video_note":
-                await message.reply_video_note(
-                    video_note=file_id,
-                )
-            if data_type == "audio":
-                await message.reply_audio(
-                    audio=file_id,
-                    caption=data,
-                    reply_markup=keyb,
-                )
-            if data_type == "voice":
-                await message.reply_voice(
-                    voice=file_id,
-                    caption=data,
-                    reply_markup=keyb,
-                )
+                return
+            if not file_id:
+                continue
+            try:
+                if data_type == "sticker":
+                    await message.reply_sticker(sticker=file_id)
+                elif data_type == "animation":
+                    await message.reply_animation(
+                        animation=file_id,
+                        caption=data,
+                        reply_markup=keyb,
+                    )
+                elif data_type == "photo":
+                    await message.reply_photo(
+                        photo=file_id,
+                        caption=data,
+                        reply_markup=keyb,
+                    )
+                elif data_type == "document":
+                    await message.reply_document(
+                        document=file_id,
+                        caption=data,
+                        reply_markup=keyb,
+                    )
+                elif data_type == "video":
+                    await message.reply_video(
+                        video=file_id,
+                        caption=data,
+                        reply_markup=keyb,
+                    )
+                elif data_type == "video_note":
+                    await message.reply_video_note(video_note=file_id)
+                elif data_type == "audio":
+                    await message.reply_audio(
+                        audio=file_id,
+                        caption=data,
+                        reply_markup=keyb,
+                    )
+                elif data_type == "voice":
+                    await message.reply_voice(
+                        voice=file_id,
+                        caption=data,
+                        reply_markup=keyb,
+                    )
+            except Exception as e:
+                LOGGER.warning("filters_re send failed: %s", e)
             return
 
 
@@ -253,20 +270,20 @@ async def filters_re(_, message):
 async def stop_all(_, message):
     _filters = await get_filters_names(message.chat.id)
     if not _filters:
-        await message.reply_text("**Không có bộ lọc trong cuộc trò chuyện này.**")
-    else:
-        keyboard = InlineKeyboardMarkup(
+        return await _reply_filter(message, f"{E_NOTE} Không có bộ lọc trong cuộc trò chuyện này.")
+    keyboard = InlineKeyboardMarkup(
+        [
             [
-                [
-                    InlineKeyboardButton("OK, LÀM ĐI", callback_data="xboloc_yes"),
-                    InlineKeyboardButton("Huỷ", callback_data="xboloc_no"),
-                ]
+                InlineKeyboardButton("✅ OK, LÀM ĐI", callback_data="xboloc_yes"),
+                InlineKeyboardButton("❌ Huỷ", callback_data="xboloc_no"),
             ]
-        )
-        await message.reply_text(
-            "**Bạn có chắc chắn muốn xóa tất cả các bộ lọc trong cuộc trò chuyện này mãi mãi không ?.**",
-            reply_markup=keyboard,
-        )
+        ]
+    )
+    await _reply_filter(
+        message,
+        f"{E_WARN} <b>Xóa tất cả bộ lọc?</b>\nHành động này không thể hoàn tác.",
+        reply_markup=keyboard,
+    )
 
 
 @app.on_callback_query(filters.regex("xboloc_(.*)"))
@@ -286,10 +303,14 @@ async def stop_all_cb(_, cb):
         result = await deleteall_filters(chat_id)
         if result and result.deleted_count:
             await cb.message.edit(
-                "**Đã xóa thành công tất cả các bộ lọc trên cuộc trò chuyện này.**"
+                f"{E_SUCCESS} Đã xóa thành công tất cả bộ lọc trong cuộc trò chuyện này.",
+                parse_mode=ParseMode.HTML,
             )
         else:
-            await cb.message.edit("**Không có bộ lọc nào để xóa.**")
+            await cb.message.edit(
+                f"{E_NOTE} Không có bộ lọc nào để xóa.",
+                parse_mode=ParseMode.HTML,
+            )
     elif inp == "no":
         if cb.message.reply_to_message:
             await cb.message.reply_to_message.delete()

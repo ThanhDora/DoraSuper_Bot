@@ -1,1 +1,0 @@
-[INFO] - [02-Mar-26 13:31:13 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835] -> [fun:444]

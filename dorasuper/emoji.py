@@ -137,3 +137,6 @@ E_TYMMY = '<emoji id="6188184400425918123">🤷</emoji>'
 E_SIDEWAYS = '<emoji id="6327735399770752519">😒</emoji>'
 E_WINK = '<emoji id="6073232409657088703">🥺</emoji>'
 E_BITE_YOUR_LIPS = '<emoji id="6073604955120344984">😇</emoji>'
+
+
+E_VIEW = '<emoji id="6190717121165531888">🙋</emoji>'
