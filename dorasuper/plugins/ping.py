@@ -11,7 +11,7 @@ from pyrogram import enums, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from dorasuper import app, botStartTime, dorasuper_version
-from dorasuper.emoji import E_CHECK, E_CROSS
+from dorasuper.emoji import E_CHECK, E_CLOCK, E_CROSS, E_MSG, E_ROCKET
 from dorasuper.helper.human_read import get_readable_time
 from dorasuper.vars import COMMAND_HANDLER
 
@@ -30,7 +30,7 @@ async def ping(_, ctx: Message):
     )
     
     rm = await ctx.reply_msg(
-        "🐱 Pong!!...",
+        f"{E_ROCKET} Pong!!...",
         reply_markup=contact_button
     )
         
@@ -39,10 +39,10 @@ async def ping(_, ctx: Message):
     
     # Update message with ping results
     await rm.edit_msg(
-        f"<b>DoraSuper {dorasuper_version} bởi @dabeecao dựa trên Pyrogram {pyrover}.</b>\n\n"
-        f"<b>Thời gian phản hồi:</b> <code>{time_taken_s} ms</code>\n"
-        f"<b>Thời gian Uptime:</b> <code>{currentTime}</code>\n"
-        f"<b>Mọi thắc mắc và hợp tác vui lòng liên hệ tác giả. Nếu muốn ủng hộ bạn có thể xem cách ủng hộ bằng lệnh /donate</b>",
+        f"{E_ROCKET} <b>DoraSuper {dorasuper_version}</b> bởi @dabeecao dựa trên Pyrogram {pyrover}.\n\n"
+        f"{E_CLOCK} <b>Thời gian phản hồi:</b> <code>{time_taken_s} ms</code>\n"
+        f"{E_CLOCK} <b>Uptime:</b> <code>{currentTime}</code>\n\n"
+        f"{E_MSG} Mọi thắc mắc và hợp tác vui lòng liên hệ tác giả. Ủng hộ: /donate",
         reply_markup=contact_button
     )
 
@@ -54,7 +54,7 @@ async def ping_handler(_, ctx: Message):
     )
     
     m = await ctx.reply_msg(
-        "Pinging datacenters...",
+        f"{E_CLOCK} Pinging datacenters...",
         reply_markup=contact_button
     )
         

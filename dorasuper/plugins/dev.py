@@ -234,18 +234,19 @@ async def delete_logs(_, ctx: Message, strings):
         asyncio.create_task(_auto_del_msg(msg, 8))
 
 
-DONATE_MOMO_URL = "https://me.momo.vn/lDIjiWsjuDtos8TNi3IJ"
-DONATE_PAYPAL_URL = "https://paypal.me/dabeecao"
+DONATE_MOMO_URL = "https://me.momo.vn/ThanhDora"
+DONATE_PAYPAL_URL = "https://paypal.me/thanhdora"
 
 
 @app.on_message(filters.command(["donate"], COMMAND_HANDLER))
 async def donate(self: Client, ctx: Message):
+    return  # Tính năng tắt
     try:
         caption = (
             f"{E_HEART} Xin chào! Nếu bạn thấy bot này hữu ích, hãy ủng hộ để bot chạy ổn định.\n\n"
             f"{E_GIFT} <b>Phương thức ủng hộ:</b>\n"
-            "• <b>Momo</b> (Cao Duy Anh) – bấm nút bên dưới\n"
-            "• <b>Ngân hàng</b> Vietinbank, MBBank, OCB: <code>0869261804</code> (Cao Duy Anh)\n"
+            "• <b>Momo</b> (LE VAN THANH DAT) – bấm nút bên dưới\n"
+            "• <b>Ngân hàng</b> Vietcombank: <code>ThanhDora</code> (LE VAN THANH DAT)\n"
             "• <b>PayPal</b> – bấm nút bên dưới"
         )
         reply_markup = InlineKeyboardMarkup(

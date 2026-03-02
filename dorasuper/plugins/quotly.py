@@ -14,7 +14,7 @@ from pyrogram import filters, enums
 from pyrogram.types import Message
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
-from dorasuper.emoji import E_LOADING, E_ERROR
+from dorasuper.emoji import E_ERROR, E_GROUP, E_LOADING
 from dorasuper.vars import COMMAND_HANDLER
 
 LOGGER = getLogger("DoraSuper")
@@ -320,7 +320,7 @@ async def msg_quotly_cmd(client: app, message: Message):
     """Handle /q and /r commands to generate quote stickers."""
     reply_id = message.id
     if not message.chat or message.chat.type not in (enums.ChatType.GROUP, enums.ChatType.SUPERGROUP):
-        await message.reply_msg("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ như @thuthuatjb_sp để sử dụng.", reply_to_message_id=reply_id)
+        await message.reply_msg(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ @thuthuatjb_sp để sử dụng.", reply_to_message_id=reply_id)
         try:
             await client.delete_messages(message.chat.id, message.id)
         except Exception:

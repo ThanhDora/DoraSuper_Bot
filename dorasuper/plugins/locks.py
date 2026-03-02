@@ -8,6 +8,7 @@ from pyrogram.types import ChatPermissions
 
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
+from dorasuper.emoji import E_LOCK, E_SUCCESS, E_WARN
 from dorasuper.core.decorator.permissions import adminsOnly, list_admins
 from dorasuper.helper.functions import get_urls_from_text
 from dorasuper.vars import COMMAND_HANDLER, SUDO
@@ -105,10 +106,10 @@ async def current_chat_permissions(chat_id):
 async def tg_lock(message, permissions: list, perm: str, lock: bool):
     if lock:
         if perm not in permissions:
-            return await message.reply_text("Already locked.")
+            return await message.reply_text(f"{E_LOCK} Đã khóa rồi.")
         permissions.remove(perm)
     elif perm in permissions:
-        return await message.reply_text("Already Unlocked.")
+        return await message.reply_text(f"{E_SUCCESS} Đã mở khóa rồi.")
     else:
         permissions.append(perm)
 
@@ -121,7 +122,7 @@ async def tg_lock(message, permissions: list, perm: str, lock: bool):
             "To unlock this, you have to unlock 'messages' first."
         )
 
-    await message.reply_text(("Locked." if lock else "Unlocked."))
+    await message.reply_text(f"{E_LOCK} Đã khóa." if lock else f"{E_SUCCESS} Đã mở khóa.")
 
 
 @app.on_message(filters.command(["lock", "unlock"], COMMAND_HANDLER) & ~filters.private)
@@ -144,7 +145,7 @@ async def locks_func(_, message):
     elif parameter == "all" and state == "lock":
         try:
             await app.set_chat_permissions(chat_id, ChatPermissions(all_perms=False))
-            await message.reply_text(f"Locked Everything in {message.chat.title}")
+            await message.reply_text(f"{E_LOCK} Đã khóa tất cả trong {message.chat.title}")
         except ChatAdminRequired:
             await message.reply_msg(
                 "Give me proper admin permission to use this command."
@@ -158,7 +159,7 @@ async def locks_func(_, message):
                     all_perms=True,
                 ),
             )
-            await message.reply(f"Unlocked Everything in {message.chat.title}")
+            await message.reply(f"{E_SUCCESS} Đã mở khóa tất cả trong {message.chat.title}")
         except ChatAdminRequired:
             await message.reply_msg(
                 "Give me full admin permission to use this command."
@@ -171,7 +172,7 @@ async def locktypes(_, message):
     permissions = await current_chat_permissions(message.chat.id)
 
     if not permissions:
-        return await message.reply_text("No Permissions.")
+        return await message.reply_text(f"{E_WARN} Không đủ quyền.")
 
     perms = "".join(f"__**{i}**__\n" for i in permissions)
     await message.reply_text(perms)

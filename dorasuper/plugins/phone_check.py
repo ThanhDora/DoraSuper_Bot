@@ -6,7 +6,7 @@ import logging
 from logging import getLogger
 from pyrogram import enums, filters
 from dorasuper import app
-from dorasuper.emoji import E_CHECK, E_CROSS
+from dorasuper.emoji import E_CHECK, E_CROSS, E_LOADING
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.vars import COMMAND_HANDLER
 
@@ -18,7 +18,7 @@ __HELP__ = "<blockquote>/ktsdt [số điện thoại] - Kiểm tra thông tin s�
 @app.on_message(filters.command(["ktsdt"], COMMAND_HANDLER))
 @capture_err
 async def check_phone(_, ctx):
-    msg = await ctx.reply_msg("Đang kiểm tra số điện thoại, vui lòng đợi...", quote=True)
+    msg = await ctx.reply_msg(f"{E_LOADING} Đang kiểm tra số điện thoại, vui lòng đợi...", quote=True)
     try:
         args = ctx.text.split(None, 1)
         if len(args) < 2:

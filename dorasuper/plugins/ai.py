@@ -100,7 +100,7 @@ __HELP__ = """
 
 # Cấu hình Grok (xAI) – chỉ dùng khi AI_PROVIDER=grok
 XAI_BASE_URL = "https://api.x.ai/v1"
-GROK_MODEL = "grok-4-1-fast-reasoning"
+GROK_MODEL = "grok-4-1-fast-non-reasoning"
 grok_client = AsyncOpenAI(api_key=AI_API_KEY, base_url=XAI_BASE_URL) if (AI_API_KEY and AI_PROVIDER == "grok") else None
 
 # Placeholder cho AI: [TÊN] → emoji từ dorasuper/emoji.py (tất cả E_* dạng chuỗi)
@@ -113,6 +113,35 @@ for _name, _val in vars(_emoji_mod).items():
 
 # Các thẻ nội bộ (suy luận, v.v.) → xóa hẳn, không hiện trong tin nhắn
 _STRIP_BRACKET_TAGS = frozenset({"THOUGHT", "REASONING", "REASON", "NOTE_INTERNAL", "CITATION"})
+
+# Hành động AI hay dùng — thay cố định bằng emoji (kể cả khi thiếu * hoặc dính chữ)
+_ACTION_PHRASES = [
+    ("mỉm cười  ", E_SIDEWAYS),  # trước (prompt có 2 space)
+    ("mỉm cười", E_SIDEWAYS),
+    ("nháy mắt", E_WINK),
+    ("cắn môi", E_BITE_YOUR_LIPS),
+]
+
+
+def _normalize_ai_answer(text: str) -> str:
+    """Sửa lỗi format AI: thay cố định các cụm hành động bằng emoji (kể cả khi thiếu * hoặc dính chữ)."""
+    if not text:
+        return text
+    for phrase, emoji in _ACTION_PHRASES:
+        # Các pattern lỗi: ?phrase*, !phrase*, *phrase (thiếu * cuối), phrase* (thiếu * đầu)
+        text = re.sub(r"\?" + re.escape(phrase) + r"\*?", "? " + emoji + " ", text)
+        text = re.sub(r"!" + re.escape(phrase) + r"\*?", "! " + emoji + " ", text)
+        text = re.sub(r"\*" + re.escape(phrase) + r"\*?", emoji + " ", text)
+        text = re.sub(r"(?<!\*)" + re.escape(phrase) + r"\*", " " + emoji + " ", text)
+        # Thay cố định mọi chỗ còn lại (kể cả dính chữ: nháy mắtAnh → emoji Anh)
+        text = text.replace(phrase, emoji + " ")
+    # Gộp khoảng trắng thừa, bỏ dấu * còn sót (vd: "* emoji" sau khi thay)
+    text = re.sub(r" +", " ", text)
+    text = re.sub(r"\* +", " ", text)
+    text = re.sub(r" +\*", " ", text)
+    text = re.sub(r" +", " ", text).strip()
+    return text
+
 
 def _apply_emoji_placeholders(text: str) -> str:
     """Thay placeholder [TÊN] bằng emoji; xóa các [XXX] còn sót để không hiện dấu []."""
@@ -143,8 +172,22 @@ SYSTEM_PROMPT = (
     "Hãy trả lời ngắn gọn, chính xác và thân thiện bằng tiếng Việt. "
     "Nếu người dùng hỏi bằng ngôn ngữ khác, hãy trả lời bằng ngôn ngữ đó. "
     "Để tin nhắn sinh động, dùng emoji dạng [TÊN] (ví dụ [SUCCESS], [WARN], [TIP], [NOTE], [HEART], [FIRE], [PARTY], [STAR], [COFFEE], [MUSIC], [LINK], [SEARCH], [CLOCK], [GIFT], [ROCKET], [THUNDER], [SUNNY], [RAIN], [SNOW], [QUESTION], [SPARKLE], [GLOBE], [LOADING], [LOCK], [GROUP], [BELL], [MSG], [IMAGE], [FLOWER], [RAINBOW], [WAIT], [SHIELD], [HOME], [TROPHY], [ICE], [SWEET], [MEDAL], [WELCOME], [GEAR], [CAMERA], [PIN], [PHOTO], [DART], [GREEN], [VN], [ADMIN], [VIP], [KEY], [UPLOAD], [DOWNLOAD], [BACK], [NEXT], [MOVIE], [PIN_LOC], [USER], [ID], [TAG], [STAT], [MENU], [MEGAPHONE], [HEART2], [HEART3], [HEART4], [DIAMON], [GLARE], [SHOUT], [MAYCUTE], [GRASS], [RIGHT_ARROW]...). Mọi [TÊN] trong dorasuper/emoji.py đều dùng được. "
-    "Chỉ dùng [TÊN] khi cần emoji; không viết [xxx] hay ngoặc vuông cho nội dung khác. Giới hạn ~4000 ký tự."
+    "Chỉ dùng [TÊN] khi cần emoji; không viết [xxx] hay ngoặc vuông cho nội dung khác. Giới hạn ~4000 ký tự. "
+    "{DATE_PLACEHOLDER}"
+    "Bạn LUÔN dùng ngày này làm ngày hiện tại cho mọi câu trả lời về ngày tháng, lịch, thời tiết, tin tức... "
+    "Không bao giờ nói năm cũ sai so với ngày hiện tại."
 )
+
+
+def _get_system_prompt_with_date() -> str:
+    """Trả về SYSTEM_PROMPT với ngày giờ hiện tại (datetime) để AI luôn biết ngày chuẩn."""
+    now = datetime.now()
+    date_en = now.strftime("%B %d, %Y")  # e.g. March 02, 2026
+    date_vi = f"ngày {now.day} tháng {now.month} năm {now.year}"
+    return SYSTEM_PROMPT.replace(
+        "{DATE_PLACEHOLDER}",
+        f"Current date is {date_en}. Hôm nay là {date_vi}. ",
+    )
 
 MAX_RETRIES = 2
 
@@ -154,12 +197,14 @@ _user_chat_history: dict[int, deque] = {}
 _history_lock = asyncio.Lock()
 
 
-async def ask_gemini(prompt: str, system: str = SYSTEM_PROMPT, user_id: int | None = None) -> str:
+async def ask_gemini(prompt: str, system: str | None = None, user_id: int | None = None) -> str:
     """Gửi câu hỏi tới Grok (xAI) và nhận phản hồi. Nếu user_id có giá trị thì gửi kèm lịch sử gần nhất để AI nhớ ngữ cảnh."""
     if not grok_client:
         return f"{E_CROSS} AI chưa được cấu hình. Vui lòng thêm AI_API_KEY (xAI) vào config."
 
-    messages = [{"role": "system", "content": system}]
+    # Dùng ngày hiện tại (datetime) để AI biết ngày tháng chuẩn
+    system_content = system if system is not None else _get_system_prompt_with_date()
+    messages = [{"role": "system", "content": system_content}]
     if user_id is not None:
         async with _history_lock:
             history = _user_chat_history.get(user_id)
@@ -230,7 +275,9 @@ async def ai_chat(client: Client, message: Message):
     user_id = message.from_user.id if message.from_user else None
     answer = await ask_gemini(prompt, user_id=user_id)
 
-    # Chuyển **tên** (Markdown) thành <b>tên</b>; trong mọi *...* thay cắn môi/nháy mắt/mỉm cười   bằng emoji
+    # Chuẩn hóa lỗi AI: ?nháy mắt* → ? [emoji]
+    answer = _normalize_ai_answer(answer)
+    # Chuyển **tên** (Markdown) thành <b>tên</b>; trong mọi *...* thay cắn môi/nháy mắt/mỉm cười bằng emoji
     safe_name = html.escape(user_name)
     answer = re.sub(r"\*\*" + re.escape(user_name) + r"\*\*", f"<b>{safe_name}</b>", answer)
     answer = re.sub(r"\*\*DoraSuper\*\*", "<b>DoraSuper</b>", answer)
@@ -240,9 +287,11 @@ async def ai_chat(client: Client, message: Message):
         inner = inner.replace("mỉm cười  ", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
         return inner.strip()
     answer = re.sub(r"\*([^*]+)\*", _actions_to_emoji, answer)
+    # Escape HTML để tránh AI trả về <, >, & gây lỗi parse Telegram
+    answer_safe = html.escape(answer)
 
     # Format kết quả
-    result = f"{E_BOT} <b>DoraSuper AI</b>\nHỏi bởi: <b>{safe_name}</b>\n\n{answer}"
+    result = f"{E_BOT} <b>DoraSuper AI</b>\nHỏi bởi: <b>{safe_name}</b>\n\n{answer_safe}"
 
     # Lưu log đối thoại để huấn luyện AI (không chặn gửi tin)
     asyncio.create_task(
@@ -257,20 +306,28 @@ async def ai_chat(client: Client, message: Message):
     try:
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)
     except MessageTooLong:
-        url = await rentry(answer)
-        await wait_msg.edit(
-            f"{E_BOT} <b>Câu trả lời quá dài, đã dán vào Rentry:</b>\n{url}",
-            parse_mode=ParseMode.HTML,
-        )
-    except Exception:
-        # Thử gửi không parse mode nếu markdown bị lỗi
+        try:
+            url = await rentry(answer)
+            await wait_msg.edit(
+                f"{E_BOT} <b>Câu trả lời quá dài, đã dán vào Rentry:</b>\n{url}",
+                parse_mode=ParseMode.HTML,
+            )
+        except Exception:
+            await wait_msg.edit(f"{E_WARN} Câu trả lời quá dài, em không gửi được. Oppa thử hỏi ngắn hơn nha~", parse_mode=ParseMode.HTML)
+    except Exception as e:
+        LOGGER.warning("ai_chat edit failed: %s", e)
         try:
             await wait_msg.edit(result, parse_mode=ParseMode.DISABLED)
         except MessageTooLong:
-            url = await rentry(answer)
+            try:
+                url = await rentry(answer)
+                await wait_msg.edit(f"{E_BOT} Câu trả lời quá dài, đã dán vào Rentry:\n{url}", parse_mode=ParseMode.DISABLED)
+            except Exception:
+                await wait_msg.edit(f"{E_WARN} Em lỗi format tin nhắn rồi, oppa thử lại nha~", parse_mode=ParseMode.DISABLED)
+        except Exception:
             await wait_msg.edit(
-                f"{E_BOT} Câu trả lời quá dài, đã dán vào Rentry:\n{url}",
-                parse_mode=ParseMode.DISABLED,
+                f"{E_WARN} Em xử lý không kịp, oppa thử lại sau nha~ {E_WINK}",
+                parse_mode=ParseMode.HTML,
             )
 
 

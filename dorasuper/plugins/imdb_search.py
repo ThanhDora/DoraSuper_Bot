@@ -63,11 +63,11 @@ async def imdb_choose(_, ctx: Message):
     ranval = get_random_string(4)
     LIST_CARI.add(ranval, kuery, timeout=15)
     buttons.row(
-        InlineButton("🇺🇸 English", f"imdbcari#eng#{ranval}#{ctx.from_user.id}"),
+        InlineButton("English", f"imdbcari#eng#{ranval}#{ctx.from_user.id}"),
         InlineButton("Tiếng Việt", f"imdbcari#vie#{ranval}#{ctx.from_user.id}"),
     )
-    buttons.row(InlineButton("🚩 Đặt ngôn ngữ mặc định", f"imdbset#{ctx.from_user.id}"))
-    buttons.row(InlineButton(f"{E_CROSS} Đóng", f"close#{ctx.from_user.id}"))
+    buttons.row(InlineButton("Đặt ngôn ngữ mặc định", f"imdbset#{ctx.from_user.id}"))
+    buttons.row(InlineButton("Đóng", f"close#{ctx.from_user.id}"))
     await ctx.reply_photo(
         "https://api.dabeecao.org/data/imdb.jpg",
         caption=f"{E_MOVIE} Xin chào {ctx.from_user.mention}, hãy chọn ngôn ngữ bạn muốn sử dụng của công cụ tìm kiếm IMDB. Nếu bạn muốn thiết lập ngôn ngữ mặc định cho mọi người dùng trong nhóm, hãy nhấp vào nút thứ ba.\n\n{E_CLOCK} Thời gian còn lại: 10 giây",
@@ -83,15 +83,15 @@ async def imdblangset(_, query: CallbackQuery):
         return await query.answer("⚠️ Truy cập bị từ chối!", True)
     buttons = InlineKeyboard()
     buttons.row(
-        InlineButton("🇺🇸 English", f"setimdb#eng#{query.from_user.id}"),
+        InlineButton("English", f"setimdb#eng#{query.from_user.id}"),
         InlineButton("Tiếng Việt", f"setimdb#vie#{query.from_user.id}"),
     )
     is_imdb, _ = await is_imdbset(query.from_user.id)
     if is_imdb:
         buttons.row(
-            InlineButton("🗑 Xóa cài đặt người dùng", f"setimdb#rm#{query.from_user.id}")
+            InlineButton("Xóa cài đặt người dùng", f"setimdb#rm#{query.from_user.id}")
         )
-    buttons.row(InlineButton(f"{E_CROSS} Đóng", f"close#{query.from_user.id}"))
+    buttons.row(InlineButton("Đóng", f"close#{query.from_user.id}"))
     with contextlib.suppress(MessageIdInvalid, MessageNotModified):
         await query.message.edit_caption(
             f"<i>{E_STAR} Vui lòng chọn ngôn ngữ có sẵn bên dưới..</i>", reply_markup=buttons
@@ -167,11 +167,11 @@ async def imdb_search_vi(kueri, message):
             BTN.extend(
                 (
                     InlineKeyboardButton(
-                        text=f"🚩 Ngôn ngữ",
+                        text="Ngôn ngữ",
                         callback_data=f"imdbset#{message.from_user.id}",
                     ),
                     InlineKeyboardButton(
-                        text=f"{E_CROSS} Đóng",
+                        text="Đóng",
                         callback_data=f"close#{message.from_user.id}",
                     ),
                 )
@@ -231,11 +231,11 @@ async def imdb_search_en(kueri, message):
             BTN.extend(
                 (
                     InlineKeyboardButton(
-                        text="🚩 Language",
+                        text="Language",
                         callback_data=f"imdbset#{message.from_user.id}",
                     ),
                     InlineKeyboardButton(
-                        text="❌ Close",
+                        text="Close",
                         callback_data=f"close#{message.from_user.id}",
                     ),
                 )
@@ -301,10 +301,10 @@ async def imdbcari(_, query: CallbackQuery):
                 BTN.extend(
                     (
                         InlineKeyboardButton(
-                            text="🚩 Ngôn ngữ", callback_data=f"imdbset#{uid}"
+                            text="Ngôn ngữ", callback_data=f"imdbset#{uid}"
                         ),
                         InlineKeyboardButton(
-                            text=f"{E_CROSS} Đóng", callback_data=f"close#{uid}"
+                            text="Đóng", callback_data=f"close#{uid}"
                         ),
                     )
                 )
@@ -362,10 +362,10 @@ async def imdbcari(_, query: CallbackQuery):
                 BTN.extend(
                     (
                         InlineKeyboardButton(
-                            text="🚩 Language", callback_data=f"imdbset#{uid}"
+                            text="Language", callback_data=f"imdbset#{uid}"
                         ),
                         InlineKeyboardButton(
-                            text=f"{E_CROSS} Close", callback_data=f"close#{uid}"
+                            text="Close", callback_data=f"close#{uid}"
                         ),
                     )
                 )

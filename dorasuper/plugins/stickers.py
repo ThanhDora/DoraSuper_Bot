@@ -28,6 +28,7 @@ from pyrogram.raw.types import (
 )
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from dorasuper import app
+from dorasuper.emoji import E_GROUP, E_LOADING, E_TIP
 from dorasuper.helper import fetch, use_chat_lang
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.core.decorator.errors import capture_err
@@ -310,7 +311,7 @@ async def _del_user_cmd(client, chat_id, msg_id):
 @capture_err
 async def memify(client, message):
     if message.chat.type != enums.ChatType.GROUP and message.chat.type != enums.ChatType.SUPERGROUP:
-        await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ như @thuthuatjb_sp để sử dụng.")
+        await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ @thuthuatjb_sp để sử dụng.")
         await _del_user_cmd(client, message.chat.id, message.id)
         return
     rid = message.id
@@ -764,11 +765,11 @@ async def kang_sticker(self: Client, ctx: Message, strings):
 async def tosticker(self: Client, ctx: Message, strings):
     rid = ctx.id
     if not ctx.reply_to_message or not ctx.reply_to_message.media:
-        await ctx.reply_msg("Vui lòng trả lời một ảnh, video, hoặc GIF!", del_in=6, reply_to_message_id=rid)
+        await ctx.reply_msg(f"{E_TIP} Vui lòng trả lời một ảnh, video, hoặc GIF!", del_in=6, reply_to_message_id=rid)
         await _del_user_cmd(self, ctx.chat.id, ctx.id)
         return
 
-    prog_msg = await ctx.reply_msg("Đang chuyển đổi thành sticker...", reply_to_message_id=rid)
+    prog_msg = await ctx.reply_msg(f"{E_LOADING} Đang chuyển đổi thành sticker...", reply_to_message_id=rid)
     sticker_emoji = "🤔"
     resize = False
     convert = False

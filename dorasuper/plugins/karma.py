@@ -15,7 +15,7 @@ from database.karma_db import (
     reset_all_karma,
 )
 from dorasuper import app
-from dorasuper.emoji import E_ERROR, E_HEART, E_LIST
+from dorasuper.emoji import E_ERROR, E_HEART, E_LIST, E_LOADING, E_SUCCESS, E_TIP, E_WARN
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import adminsOnly
 from dorasuper.helper.functions import alpha_to_int, int_to_alpha
@@ -175,7 +175,7 @@ async def downvote(_, message):
 async def command_karma(_, message):
     chat_id = message.chat.id
 
-    m = await message.reply_text("Đang lấy điểm của toàn bộ thành viên...")
+    m = await message.reply_text(f"{E_LOADING} Đang lấy điểm của toàn bộ thành viên...")
 
     karma = await get_karmas(chat_id)
     if not karma:
@@ -219,7 +219,7 @@ async def command_karma(_, message):
 @app.on_message(filters.command("fame_reset") & ~filters.private)
 @adminsOnly("can_change_info")
 async def karma_reset(_, message):
-    usage = "**Cách sử dụng:**\n/fame_reset"
+    usage = f"{E_TIP} **Cách sử dụng:**\n/fame_reset"
     if len(message.command) != 1:
         return await message.reply_text(usage)
     
@@ -227,12 +227,12 @@ async def karma_reset(_, message):
     
     await reset_all_karma(chat_id)
     
-    await message.reply_text("Tất cả điểm danh tiếng đã được đặt lại cho nhóm này.")
+    await message.reply_text(f"{E_SUCCESS} Tất cả điểm danh tiếng đã được đặt lại cho nhóm này.")
 
 @app.on_message(filters.command("fame_toggle") & ~filters.private)
 @adminsOnly("can_change_info")
 async def fame_toggle(_, message):
-    usage = "**Cách sử dụng:**\n/fame_toggle [On/Off]"
+    usage = f"{E_TIP} **Cách sử dụng:**\n/fame_toggle [On/Off]"
     if len(message.command) != 2:
         return await message.reply_text(usage)
     
@@ -241,11 +241,11 @@ async def fame_toggle(_, message):
 
     if state == "on":
         await karma_on(chat_id)
-        await message.reply_text("Hệ thống điểm danh tiếng đã được bật cho nhóm này.")
+        await message.reply_text(f"{E_SUCCESS} Hệ thống điểm danh tiếng đã được bật cho nhóm này.")
     elif state == "off":
         await karma_off(chat_id)
         await reset_all_karma(chat_id)
-        await message.reply_text("Hệ thống điểm danh tiếng đã được tắt và toàn bộ điểm của thành viên đã được đặt lại.")
+        await message.reply_text(f"{E_SUCCESS} Hệ thống điểm danh tiếng đã được tắt và toàn bộ điểm của thành viên đã được đặt lại.")
     else:
         await message.reply_text(usage)
 
@@ -253,7 +253,7 @@ async def fame_toggle(_, message):
 @app.on_message(filters.command("fame_set") & filters.group)
 @adminsOnly("can_change_info")
 async def set_fame(_, message):
-    usage = "**Cách sử dụng:**\n/fame_set [số điểm]"
+    usage = f"{E_TIP} **Cách sử dụng:**\n/fame_set [số điểm]"
     
     if len(message.command) != 2:
         response_message = await message.reply_text(usage)
@@ -261,14 +261,14 @@ async def set_fame(_, message):
         return
     
     if not message.reply_to_message or not message.reply_to_message.from_user:
-        response_message = await message.reply_text("Hãy reply vào tin nhắn của thành viên bạn muốn đặt điểm.")
+        response_message = await message.reply_text(f"{E_TIP} Hãy reply vào tin nhắn của thành viên bạn muốn đặt điểm.")
         await auto_delete_message(response_message, 120)
         return
 
     try:
         points = int(message.command[1])
     except ValueError:
-        response_message = await message.reply_text("Số điểm phải là một số nguyên.")
+        response_message = await message.reply_text(f"{E_WARN} Số điểm phải là một số nguyên.")
         await auto_delete_message(response_message, 120)
         return
     
@@ -284,7 +284,7 @@ async def set_fame(_, message):
     new_karma = {"karma": karma}
     await update_karma(chat_id, await int_to_alpha(user_id), new_karma)
     
-    response_message = await message.reply_text(f"Điểm danh tiếng của thành viên đã được đặt thành {karma} điểm.")
+    response_message = await message.reply_text(f"{E_SUCCESS} Điểm danh tiếng của thành viên đã được đặt thành {karma} điểm.")
     await auto_delete_message(response_message, 120)
 		
 @app.on_message(filters.command("fame") & filters.group)
@@ -294,7 +294,7 @@ async def fame(_, message):
 
     # Kiểm tra nếu không có from_user (tức là người dùng tương tác dưới tư cách kênh)
     if message.from_user is None:
-        response_message = await message.reply_text("Người dùng tương tác bằng kênh sẽ không thể sử dụng hệ thống chấm điểm thành viên.")
+        response_message = await message.reply_text(f"{E_WARN} Người dùng tương tác bằng kênh sẽ không thể sử dụng hệ thống chấm điểm thành viên.")
         await auto_delete_message(response_message, 120)
         return
 
@@ -302,7 +302,7 @@ async def fame(_, message):
     if message.reply_to_message:
         if message.reply_to_message.sender_chat:
             # Nếu reply vào tin nhắn từ kênh
-            response_message = await message.reply_text("Người dùng tương tác bằng kênh sẽ không thể sử dụng hệ thống chấm điểm thành viên.")
+            response_message = await message.reply_text(f"{E_WARN} Người dùng tương tác bằng kênh sẽ không thể sử dụng hệ thống chấm điểm thành viên.")
             await auto_delete_message(response_message, 120)
             return
         elif message.reply_to_message.from_user:
@@ -320,7 +320,7 @@ async def fame(_, message):
 
     karma = await get_karmas(chat_id)
     if not karma:
-        response_message = await message.reply_text("Không tìm thấy dữ liệu điểm trong nhóm này. Có vẻ chế độ Fame chưa bật hoặc chưa có tương tác nào giữa người dùng.")
+        response_message = await message.reply_text(f"{E_LIST} Không tìm thấy dữ liệu điểm trong nhóm này. Chế độ Fame chưa bật hoặc chưa có tương tác nào.")
         await auto_delete_message(response_message, 120)
         return
 
@@ -334,9 +334,9 @@ async def fame(_, message):
 
     for rank, (uid, karma_count) in enumerate(sorted_karma, start=1):
         if uid == user_id:
-            response_message = await message.reply_text(f"{user_mention} đang ở vị trí thứ {rank} trong bảng xếp hạng điểm danh tiếng với {karma_count} điểm.")
+            response_message = await message.reply_text(f"{E_HEART} {user_mention} đang ở vị trí thứ {rank} trong bảng xếp hạng với {karma_count} điểm.")
             await auto_delete_message(response_message, 120)
             return
     
-    response_message = await message.reply_text(f"{user_mention} không có điểm danh tiếng trong bảng xếp hạng. Hãy tương tác với các thành viên trong nhóm để kiếm điểm nhé!!")
+    response_message = await message.reply_text(f"{E_HEART} {user_mention} chưa có điểm trong bảng xếp hạng. Hãy tương tác với thành viên trong nhóm để kiếm điểm!")
     await auto_delete_message(response_message, 120)

@@ -4,7 +4,7 @@ from logging import getLogger
 from pyrogram import enums, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from dorasuper import app
-from dorasuper.emoji import E_FIRE, E_LIMIT
+from dorasuper.emoji import E_ERROR, E_FIRE, E_LIMIT
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.vars import COMMAND_HANDLER
 from database.funny_db import can_use_command, update_user_command_usage
@@ -36,7 +36,7 @@ MEDIA = {
 }
 
 # Nút hỗ trợ
-BUTTON = [[InlineKeyboardButton("Ủng Hộ", url="https://dabeecao.org#donate")]]
+BUTTON = [[InlineKeyboardButton("Ủng Hộ", url="https://thanhdora3605.dev")]]
 
 # Hàm chung để xử lý các lệnh
 async def handle_fun_command(ctx, command, caption_template, emoji):
@@ -82,7 +82,7 @@ async def handle_fun_command(ctx, command, caption_template, emoji):
         await update_user_command_usage(chat_id, sender_id, command)
 
     except Exception as e:
-        await ctx.reply_msg(f"Lỗi, vui lòng thử lại sau.", quote=True)
+        await ctx.reply_msg(f"{E_ERROR} Lỗi, vui lòng thử lại sau.", quote=True)
 
 # Định nghĩa các lệnh
 @app.on_message(filters.command(["cutie"], COMMAND_HANDLER))

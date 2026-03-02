@@ -495,8 +495,12 @@ async def promoteFunc(client, message, strings):
             ),
         )
         await message.reply_msg(strings("normal_promote").format(umention=umention, **EMOJI_FMT))
+    except ChatAdminRequired:
+        await message.reply_msg(
+            f"{E_GEAR} Bot cần quyền **Thăng cấp thành viên** trong nhóm. Vui lòng cấp quyền trong Cài đặt nhóm → Quản trị viên."
+        )
     except Exception as err:
-        await message.reply_msg(err)
+        await message.reply_msg(str(err))
 
 
 # Demote Member
@@ -534,7 +538,7 @@ async def demote(client, message, strings):
         try:
             await message.reply_text(txt, parse_mode=enums.ParseMode.HTML)
         except DocumentInvalid:
-            await message.reply_text(re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), txt), parse_mode=enums.ParseMode.HTML)
+            await message.reply_text(txt, parse_mode=enums.ParseMode.HTML)
     except ChatAdminRequired:
         await message.reply_text(f"{E_GEAR} Xin hãy cho phép hạ cấp thành viên..")
     except Exception as e:
@@ -603,7 +607,11 @@ async def mute(client, message, strings):
     )
     
     if message.command[0] == "timmom":
-        split = (reason or "").split(None, 1)
+        split = (reason or "").strip().split(None, 1)
+        if not split:
+            return await message.reply_text(
+                f"{E_CLOCK} Vui lòng cung cấp thời gian tắt tiếng. Ví dụ: /timmom 1h hoặc /timmom 30m"
+            )
         time_value = split[0]
         temp_reason = split[1] if len(split) > 1 else ""
         temp_mute = await time_converter(message, time_value)
@@ -739,7 +747,6 @@ async def remove_warning(_, cq, strings):
     orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
     text = f"{orig_html}\n\n"
     text += strings("unwarn_msg").format(mention=from_user.mention, **EMOJI_FMT)
-    text = re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), text)
     await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)
 
 
@@ -758,9 +765,8 @@ async def unmute_user(_, cq, strings):
     user_id = int(cq.data.split("_")[1])
     orig = cq.message.text
     orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
-    text = f"<s>{orig_html}</s>\n\n"
+    text = f"{orig_html}\n\n"
     text += strings("rmmute_msg").format(mention=from_user.mention, **EMOJI_FMT)
-    text = re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), text)
     try:
         await cq.message.chat.unban_member(user_id)
         await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)

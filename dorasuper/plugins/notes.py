@@ -12,6 +12,7 @@ from database.notes_db import (
 )
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
+from dorasuper.emoji import E_LIST, E_SUCCESS, E_TIP, E_WARN
 from dorasuper.core.decorator.permissions import adminsOnly, member_permissions
 from dorasuper.core.keyboard import ikb
 from dorasuper.helper.functions import extract_text_and_keyb, extract_urls
@@ -43,13 +44,13 @@ async def save_notee(_, message):
     try:
         if len(message.command) < 2 or not message.reply_to_message:
             await message.reply_msg(
-                "**Usage:**\nTrả lời tin nhắn bằng /save [NOTE_NAME] để lưu một ghi chú mới."
+                f"{E_TIP} **Cách dùng:**\nTrả lời tin nhắn bằng /save [TÊN_GHI_CHÚ] để lưu ghi chú mới."
             )
         else:
             text = message.text.markdown
             name = text.split(None, 1)[1].strip()
             if not name:
-                return await message.reply_msg("**Sử dụng**\n__/save [Tên_ghi_chú]__")
+                return await message.reply_msg(f"{E_TIP} **Sử dụng:**\n__/save [Tên_ghi_chú]__")
             replied_message = message.reply_to_message
             text = name.split(" ", 1)
             if len(text) > 1:
@@ -108,10 +109,10 @@ async def save_notee(_, message):
             prefix = message.text.split()[0][0]
             chat_id = message.chat.id
             await save_note(chat_id, name, note)
-            await message.reply_msg(f"__**Đã lưu ghi chú {name}.**__")
+            await message.reply_msg(f"{E_SUCCESS} **Đã lưu ghi chú {name}.**")
     except UnboundLocalError:
         return await message.reply_text(
-            "**Tin nhắn đã trả lời không thể truy cập được.\n`Chuyển tiếp tin nhắn và thử lại`**"
+            f"{E_WARN} **Tin nhắn đã trả lời không thể truy cập.**\nChuyển tiếp tin nhắn và thử lại."
         )
 
 
@@ -122,9 +123,9 @@ async def get_notes(_, message):
     _notes = await get_note_names(chat_id)
 
     if not _notes:
-        return await message.reply("**Không có ghi chú nào trong cuộc trò chuyện này.**")
+        return await message.reply(f"{E_LIST} **Không có ghi chú nào trong cuộc trò chuyện này.**")
     _notes.sort()
-    msg = f"Danh sách ghi chú trong nhóm {message.chat.title} - {message.chat.id}\n"
+    msg = f"{E_LIST} **Ghi chú** trong {message.chat.title} (`{message.chat.id}`)\n\n"
     for note in _notes:
         msg += f"**-** `{note}`\n"
     await message.reply(msg)
@@ -219,19 +220,19 @@ async def get_one_note(_, message):
 @adminsOnly("can_change_info")
 async def del_note(_, message):
     if len(message.command) < 2:
-        return await message.reply_msg("**Cách sử dụng**\n__/delete [NOTE_NAME]__")
+        return await message.reply_msg(f"{E_TIP} **Cách sử dụng:**\n__/delete [TÊN_GHI_CHÚ]__")
     name = message.text.split(None, 1)[1].strip()
     if not name:
-        return await message.reply_msg("**Cách sử dụng**\n__/delete [NOTE_NAME]__")
+        return await message.reply_msg(f"{E_TIP} **Cách sử dụng:**\n__/delete [TÊN_GHI_CHÚ]__")
 
     prefix = message.text.split()[0][0]
     chat_id = message.chat.id
 
     deleted = await delete_note(chat_id, name)
     if deleted:
-        await message.reply_msg(f"**Ghi chú đã xóa {name} thành công.**")
+        await message.reply_msg(f"{E_SUCCESS} **Ghi chú đã xóa {name} thành công.**")
     else:
-        await message.reply_msg("**Không có ghi chú như vậy.**")
+        await message.reply_msg(f"{E_WARN} **Không có ghi chú như vậy.**")
 
 
 @app.on_message(filters.command("deleteall", COMMAND_HANDLER) & ~filters.private)
@@ -239,7 +240,7 @@ async def del_note(_, message):
 async def delete_all(_, message):
     _notes = await get_note_names(message.chat.id)
     if not _notes:
-        return await message.reply_text("**Không có ghi chú nào trong cuộc trò chuyện này.**")
+        return await message.reply_text(f"{E_LIST} **Không có ghi chú nào trong cuộc trò chuyện này.**")
     keyboard = InlineKeyboardMarkup(
         [
             [
@@ -249,7 +250,7 @@ async def delete_all(_, message):
         ]
     )
     await message.reply_text(
-        "**Bạn có chắc chắn muốn xóa tất cả ghi chú trong cuộc trò chuyện này mãi mãi không?.**",
+        f"{E_WARN} **Bạn có chắc muốn xóa tất cả ghi chú trong cuộc trò chuyện này vĩnh viễn?**",
         reply_markup=keyboard,
     )
 
@@ -262,7 +263,7 @@ async def delete_all_cb(_, cb):
     permission = "can_change_info"
     if permission not in permissions:
         return await cb.answer(
-            f"Bạn không có quyền cần thiết.\n Quyền cần thiết: {permission}",
+            f"Bạn không có quyền cần thiết để thực hiện lệnh này.\nQuyền cần thiết: {permission}",
             show_alert=True,
         )
     input = cb.data.split("_", 1)[1]
@@ -270,5 +271,5 @@ async def delete_all_cb(_, cb):
         stoped_all = await deleteall_notes(chat_id)
         if stoped_all:
             return await cb.message.edit(
-                "**Đã xóa thành công tất cả ghi chú trên cuộc trò chuyện này.**"
+                f"{E_SUCCESS} **Đã xóa thành công tất cả ghi chú trong cuộc trò chuyện này.**"
             )

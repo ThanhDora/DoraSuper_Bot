@@ -46,13 +46,13 @@ def paginate_modules(page_n, module_dict, prefix, chat=None):
         pairs = pairs[modulo_page * COLUMN_SIZE : COLUMN_SIZE * (modulo_page + 1)] + [
             (
                 EqInlineKeyboardButton(
-                    "❮", callback_data=f"{prefix}_prev({modulo_page})"
+                    "<", callback_data=f"{prefix}_prev({modulo_page})"
                 ),
                 EqInlineKeyboardButton(
                     "Trở lại", callback_data=f"{prefix}_home({modulo_page})"
                 ),
                 EqInlineKeyboardButton(
-                    "❯", callback_data=f"{prefix}_next({modulo_page})"
+                    ">", callback_data=f"{prefix}_next({modulo_page})"
                 ),
             )
         ]

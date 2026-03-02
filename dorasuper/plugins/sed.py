@@ -8,6 +8,7 @@ from pyrogram.errors import MessageEmpty
 from pyrogram.types import Message
 
 from dorasuper import app
+from dorasuper.emoji import E_ERROR, E_TIP, E_WARN
 
 LOGGER = getLogger("DoraSuper")
 
@@ -38,9 +39,9 @@ async def sed(self: Client, ctx: Message):
             pattern, replace_with, text, count=count, flags=rflags, timeout=1
         )
     except TimeoutError:
-        return await ctx.reply_msg("Oops, your regex pattern has run for too long.")
+        return await ctx.reply_msg(f"{E_WARN} Biểu thức regex chạy quá lâu, vui lòng đơn giản hóa.")
     except regex.error as e:
-        return await ctx.reply_msg(str(e))
+        return await ctx.reply_msg(f"{E_WARN} Regex: {e}")
     else:
         try:
             await self.send_msg(
@@ -50,7 +51,7 @@ async def sed(self: Client, ctx: Message):
             )
         except MessageEmpty:
             return await ctx.reply_msg(
-                "Please reply message to use this feature.", del_in=5
+                f"{E_TIP} Vui lòng trả lời tin nhắn để dùng tính năng này.", del_in=5
             )
         except Exception as e:
-            return await ctx.reply_msg(f"ERROR: {str(e)}")
+            return await ctx.reply_msg(f"{E_ERROR} Lỗi: {str(e)}")

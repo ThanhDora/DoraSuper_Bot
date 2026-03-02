@@ -140,3 +140,4 @@ E_BITE_YOUR_LIPS = '<emoji id="6073604955120344984">😇</emoji>'
 
 
 E_VIEW = '<emoji id="6190717121165531888">🙋</emoji>'
+E_UPD = '<emoji id="6190663167786358894">🎓</emoji>'

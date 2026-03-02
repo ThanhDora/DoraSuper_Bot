@@ -170,7 +170,7 @@ async def carbon_make(self: Client, ctx: Message):
                 "https://carbon.yasirapi.eu.org/api/cook", json=json_data, timeout=20
             )
         except httpx.HTTPError as exc:
-            return await ctx.reply_msg(f"HTTP Exception for {exc.request.url} - {exc}")
+            return await ctx.reply_msg(f"{E_ERROR} HTTP Exception: {exc.request.url} - {exc}")
     if response.status_code != 200:
         return await ctx.reply_photo(
             f"https://http.cat/{response.status_code}",
@@ -366,7 +366,7 @@ async def who_is(client, message):
         buttons = [
             [
                 InlineKeyboardButton(
-                    "🔐 Đóng", callback_data=f"close#{message.from_user.id}"
+                    "Đóng", callback_data=f"close#{message.from_user.id}"
                 )
             ]
         ]
@@ -384,7 +384,7 @@ async def who_is(client, message):
         buttons = [
             [
                 InlineKeyboardButton(
-                    "🔐 Đóng", callback_data=f"close#{message.from_user.id}"
+                    "Đóng", callback_data=f"close#{message.from_user.id}"
                 )
             ]
         ]

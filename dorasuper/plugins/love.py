@@ -1,3 +1,4 @@
+import html
 import os
 import random
 from logging import getLogger
@@ -151,17 +152,26 @@ def get_random_hate_message(hate_percentage):
         )
 
 async def process_command(ctx: Message, command_type: str):
-    # Phản hồi ngay lập tức khi nhận lệnh
+    rid = ctx.id
+    # Phản hồi ngay lập tức khi nhận lệnh (để user thấy bot đã nhận)
     msg = await ctx.reply_msg(
         f"{E_LOADING} Đang đo lường {'sức nóng tình yêu' if command_type == 'love' else 'mức độ ghét'}...",
         parse_mode=enums.ParseMode.HTML,
+        reply_to_message_id=rid,
     )
 
     try:
-        # Lấy thông tin người gửi
-        sender_id = ctx.from_user.id
-        sender_name = ctx.from_user.first_name
-        sender_mention = ctx.from_user.mention
+        if not ctx.from_user:
+            await msg.edit_msg(
+                f"{E_WARN} Không xác định được người gửi (ví dụ: gửi khi ẩn danh). Hãy tắt ẩn danh hoặc gửi lại.",
+                parse_mode=enums.ParseMode.HTML,
+            )
+            return
+        # Lấy thông tin người gửi (mention an toàn cho HTML)
+        u = ctx.from_user
+        sender_id = u.id
+        sender_name = u.first_name or ""
+        sender_mention = f'<a href="tg://user?id={sender_id}">{html.escape(sender_name)}</a>'
         chat_id = ctx.chat.id
 
         # Kiểm tra xem người gửi có thể sử dụng lệnh không
@@ -175,18 +185,26 @@ async def process_command(ctx: Message, command_type: str):
         # Kiểm tra xem có trả lời tin nhắn hợp lệ không
         target_name = None
         target_mention = None
-        if ctx.reply_to_message and ctx.reply_to_message.from_user:
-            target_name = ctx.reply_to_message.from_user.first_name
-            target_mention = ctx.reply_to_message.from_user.mention
-        else:
-            # Lấy tên từ tham số lệnh
-            command, *args = ctx.text.split(" ", 1)
-            if args and args[0].strip():
-                target_name = args[0].strip()
-                target_mention = target_name  # Non-mention for text input
+        if ctx.reply_to_message:
+            if ctx.reply_to_message.from_user:
+                u = ctx.reply_to_message.from_user
+                target_name = u.first_name or ""
+                target_mention = f'<a href="tg://user?id={u.id}">{html.escape(target_name)}</a>'
             else:
                 await msg.edit_msg(
-                    f"{E_TIP} Vui lòng nhập một tên sau lệnh hoặc trả lời một tin nhắn!",
+                    f"{E_TIP} Không lấy được người từ tin bạn reply (tin từ kênh hoặc ẩn danh?). Hãy gõ tên sau lệnh, ví dụ: /{command_type} Tên_người",
+                    parse_mode=enums.ParseMode.HTML,
+                )
+                return
+        if target_mention is None:
+            # Lấy tên từ tham số lệnh (escape để tránh ENTITY_TEXT_INVALID với ParseMode.HTML)
+            command, *args = (ctx.text or "").strip().split(" ", 1)
+            if args and args[0].strip():
+                target_name = args[0].strip()
+                target_mention = html.escape(target_name)
+            else:
+                await msg.edit_msg(
+                    f"{E_TIP} Vui lòng nhập một tên sau lệnh hoặc trả lời tin nhắn của thành viên!",
                     parse_mode=enums.ParseMode.HTML,
                 )
                 return
@@ -215,18 +233,18 @@ async def process_command(ctx: Message, command_type: str):
         # Cập nhật dữ liệu sử dụng lệnh cho người gửi
         await update_user_command_usage(chat_id, sender_id, command_type)
 
-        # Gửi phản hồi
+        # Gửi phản hồi (reply đúng tin lệnh)
         if image_exists:
             await ctx.reply_photo(
                 photo=image_path,
                 caption=response,
-                quote=True,
+                reply_to_message_id=rid,
                 parse_mode=enums.ParseMode.HTML,
             )
         else:
             await ctx.reply_msg(
                 response + f"\n\n{E_WARN} Không tìm thấy ảnh {command_type}.png trong thư mục assets!",
-                quote=True,
+                reply_to_message_id=rid,
                 parse_mode=enums.ParseMode.HTML,
             )
 
@@ -242,7 +260,8 @@ async def process_command(ctx: Message, command_type: str):
 @app.on_message(
     filters.command("love", COMMAND_HANDLER)
     & ~filters.forwarded
-    & ~filters.via_bot
+    & ~filters.via_bot,
+    group=2,
 )
 @capture_err
 async def love_command(_, ctx: Message):
@@ -251,7 +270,8 @@ async def love_command(_, ctx: Message):
 @app.on_message(
     filters.command("hate", COMMAND_HANDLER)
     & ~filters.forwarded
-    & ~filters.via_bot
+    & ~filters.via_bot,
+    group=2,
 )
 @capture_err
 async def hate_command(_, ctx: Message):

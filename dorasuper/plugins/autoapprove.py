@@ -60,7 +60,7 @@ async def approval_cb(_, cb: CallbackQuery):
     if permission not in permissions:
         if from_user.id not in SUDO:
             return await cb.answer(
-                f"Bạn không có quyền cần thiết.\n Quyền yêu cầu: {permission}",
+                f"Bạn không có quyền cần thiết để thực hiện lệnh này.\nQuyền cần thiết: {permission}",
                 show_alert=True,
             )
 

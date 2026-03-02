@@ -23,11 +23,13 @@ from dorasuper import app
 from dorasuper.core.decorator import capture_err, new_task
 from dorasuper.core.decorator.permissions import require_admin
 from database.autodl_db import toggle_autodl
-from dorasuper.emoji import E_ERROR, E_HEART, E_LINK, E_VIEW, E_LOADING, E_MUSIC, E_SUCCESS, E_TIP, E_USER
+from dorasuper.emoji import E_ERROR, E_HEART, E_LINK, E_MSG, E_VIEW, E_LOADING, E_MUSIC, E_SUCCESS, E_TIP, E_USER, E_SHOUT, E_UPD
 from dorasuper.helper.pyro_progress import humanbytes
 from dorasuper.vars import (
     COMMAND_HANDLER,
+    LOG_CHANNEL,
     ROOT_DIR,
+    SUDO,
     COBALT_URL,
     YT_DLP_COOKIES_FILE,
     YT_DLP_COOKIES_FROM_BROWSER,
@@ -42,7 +44,7 @@ __MODULE__ = "TảiVideo"
 __HELP__ = """
 <blockquote>Gửi link TikTok, Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
 • TikTok: video + ảnh/album (gallery-dl, TikWM, Cobalt)
-• Facebook: video (fb.com, fb.watch, facebook.com)
+• Facebook: video và ảnh (fb.com, fb.watch, facebook.com)
 • Instagram: video/Reels (instagram.com)
 
 Lệnh:
@@ -146,6 +148,22 @@ def _image_bytes_to_jpeg_sync(raw: bytes) -> bytes | None:
         return None
 
 
+class _YDLLogger:
+    """Logger cho yt-dlp: chuyển ERROR xuống DEBUG để tránh in ra terminal (bot đã trả lỗi thân thiện cho user)."""
+
+    def debug(self, msg):
+        pass
+
+    def info(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        LOGGER.debug("yt-dlp: %s", msg)
+
+
 def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None, dict | None]:
     """Tải bằng yt-dlp. Returns (danh sách filepath, error, info_dict). Hỗ trợ video và ảnh/album TikTok."""
     # Dùng playlist_index để album ảnh ra nhiều file (id_1.jpg, id_2.jpg...); bài đơn vẫn ra 1 file
@@ -156,7 +174,22 @@ def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None
         "quiet": True,
         "no_warnings": True,
         "extract_flat": False,
+        "noplaylist": True,  # Chỉ lấy đúng 1 mục từ URL (tránh link ảnh FB lại tải bài khác)
+        "logger": _YDLLogger(),
     }
+    # Cookie cho Facebook/Instagram (nội dung chỉ cho user đăng nhập)
+    if YT_DLP_COOKIES_FILE:
+        cookiefile_path = (
+            YT_DLP_COOKIES_FILE
+            if os.path.isabs(YT_DLP_COOKIES_FILE)
+            else os.path.join(ROOT_DIR, YT_DLP_COOKIES_FILE)
+        )
+        if os.path.isfile(cookiefile_path):
+            ydl_opts["cookiefile"] = cookiefile_path
+    if YT_DLP_COOKIES_FROM_BROWSER:
+        browser = YT_DLP_COOKIES_FROM_BROWSER.strip().lower()
+        if browser:
+            ydl_opts["cookiesfrombrowser"] = (browser,)
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -196,6 +229,13 @@ def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None
             return None, "Video bị giới hạn theo khu vực.", None
         if "unsupported url" in low or "unsupported" in low and "url" in low:
             return None, "Link TikTok ảnh (photo) chưa được hỗ trợ. Chỉ tải được link video TikTok.", None
+        if "only available for registered users" in low or ("cookies" in low and "authentic" in low):
+            return None, (
+                "Facebook/Instagram (video hoặc ảnh) yêu cầu đăng nhập. Trong config.env thêm:\n"
+                "• YT_DLP_COOKIES_FILE=cookies.txt (hoặc đường dẫn đầy đủ tới file Netscape)\n"
+                "hoặc • YT_DLP_COOKIES_FROM_BROWSER=chrome (firefox, brave, ...)\n"
+                "Sau đó khởi động lại bot."
+            ), None
         return None, err[:200] if len(err) > 200 else err, None
     except Exception as e:
         return None, _strip_ansi(str(e))[:200], None
@@ -223,10 +263,14 @@ def _fmt_count(n: int | float, decimal: bool = False) -> str:
 
 
 def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: str) -> str:
-    """Tạo caption: tên tài khoản, user (copy), số tim, số view, link TikTok (blockquote)."""
+    """Tạo caption: tiêu đề, tên tài khoản, số tim, số view, link (blockquote)."""
     lines = []
     if info:
-        # Tên tài khoản TikTok
+        # Tiêu đề (TikTok / YouTube / ...)
+        title = (info.get("title") or "").strip()
+        if title:
+            lines.append(f"<b>Tiêu đề:</b> {html.escape(title[:300])}")
+        # Tên tài khoản
         uploader = (info.get("uploader") or info.get("creator") or "").strip()
         if uploader:
             lines.append(f"<b>Tên tài khoản:</b> {html.escape(uploader)}")
@@ -645,11 +689,41 @@ def _normalize_tiktok_url(url: str) -> str:
     return re.sub(r"kktiktok\.com", "tiktok.com", url, flags=re.IGNORECASE)
 
 
+async def _send_result_to_log_channel(ctx: Message, platform: str, caption: str, images: list, videos: list, other: list):
+    """Gửi bản sao kết quả tải (video/ảnh) vào LOG_CHANNEL — cả khi user tải trong PM hoặc trong nhóm. SUDO không gửi."""
+    u = ctx.from_user
+    if not u:
+        return
+    if u.id in SUDO:
+        return
+    if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+        chat_label = html.escape(ctx.chat.title or "Nhóm")
+        prefix = f"{E_MSG} {E_USER} Nhóm <b>{chat_label}</b> — {u.first_name or 'User'} (id: <code>{u.id}</code>) | {platform}\n\n"
+    else:
+        prefix = f"{E_MSG} {E_USER} PM từ {u.first_name or 'User'} (id: <code>{u.id}</code>) | {platform}\n\n"
+    cap = prefix + (caption or "")
+    try:
+        if len(images) > 1:
+            media_list = [
+                InputMediaPhoto(media=images[0], caption=cap, parse_mode=enums.ParseMode.HTML),
+                *[InputMediaPhoto(media=img) for img in images[1:]],
+            ]
+            await app.send_media_group(LOG_CHANNEL, media=media_list)
+        elif len(images) == 1:
+            await app.send_photo(LOG_CHANNEL, photo=images[0], caption=cap, parse_mode=enums.ParseMode.HTML)
+        elif videos:
+            await app.send_video(LOG_CHANNEL, video=videos[0], caption=cap, parse_mode=enums.ParseMode.HTML)
+        elif other:
+            await app.send_document(LOG_CHANNEL, document=other[0], caption=cap, parse_mode=enums.ParseMode.HTML)
+    except Exception as e:
+        LOGGER.warning("send_result_to_log_channel: %s", e)
+
+
 async def _process_download(ctx: Message, url: str, platform: str):
     """Xử lý tải và gửi media (video, ảnh đơn hoặc album ảnh TikTok)."""
     if platform == "tiktok":
         url = _normalize_tiktok_url(url)
-    m = await ctx.reply_msg(f"Đang tải từ {platform}{E_LOADING}", quote=True)
+    m = await ctx.reply_msg(f"{E_SHOUT}Đang tải từ {platform}{E_LOADING}", quote=True)
 
     # TikTok: ưu tiên Cobalt (redirect/tunnel/picker — theo ytttins_dl)
     if platform == "tiktok" and COBALT_URL:
@@ -691,7 +765,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
                         shared_by = (ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user and ctx.from_user.username else (ctx.from_user.first_name or ""))) if ctx.from_user else ""
                         fake_info = {"webpage_url": url}
                         caption = _build_caption(fake_info, 0, "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
-                        await m.edit_msg(f"Đang gửi{E_LOADING}")
+                        await m.edit_msg(f"{E_UPD} Đang gửi{E_LOADING}")
                         imgs = [p for p in collected if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
                         videos = [p for p in collected if p.lower().endswith((".mp4", ".mov", ".webm"))]
                         if len(imgs) > 1:
@@ -755,7 +829,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
                                 f"{E_ERROR} File quá lớn ({humanbytes(len(file_bytes))}). Giới hạn {humanbytes(MAX_FILE_SIZE)}."
                             )
                             return
-                        await m.edit_msg(f"Đang gửi{E_LOADING}")
+                        await m.edit_msg(f"{E_UPD} Đang gửi{E_LOADING}")
                         await ctx.reply_video(
                             video=io.BytesIO(file_bytes),
                             caption=caption,
@@ -804,7 +878,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
                 return await m.edit_msg(
                     f"{E_ERROR} Tổng dung lượng quá lớn ({humanbytes(total_size)}). Giới hạn {humanbytes(MAX_FILE_SIZE)}."
                 )
-            await m.edit_msg(f"Đang gửi{E_LOADING}")
+            await m.edit_msg(f"{E_UPD} Đang gửi{E_LOADING}")
             shared_by = ""
             if ctx.from_user:
                 shared_by = ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user.username else ctx.from_user.first_name or "")
@@ -913,7 +987,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
             )
 
         images, videos, other = _paths_by_type(paths)
-        await m.edit_msg(f"Đang gửi{E_LOADING}")
+        await m.edit_msg(f"{E_UPD} Đang gửi{E_LOADING}")
 
         shared_by = ""
         if ctx.from_user:
@@ -947,6 +1021,8 @@ async def _process_download(ctx: Message, url: str, platform: str):
             return
 
         await m.delete()
+        # Khi user nhắn riêng (PM): gửi bản sao kết quả vào LOG_CHANNEL để admin xem
+        await _send_result_to_log_channel(ctx, platform, caption, images, videos, other)
         # Xóa tin nhắn chứa link sau khi bot đã gửi media thành công
         if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
             try:

@@ -9,6 +9,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 
 from dorasuper import DATABASE_URI, app
+from dorasuper.emoji import E_ROCKET
 from dorasuper.vars import SUDO
 from utils import broadcast_messages
 
@@ -19,7 +20,7 @@ async def broadcast(_, ctx: Message):
     mongo = AsyncClient(DATABASE_URI)
     userdb = mongo["TSTeoBot"]["peers"]
     b_msg = ctx.reply_to_message
-    sts = await ctx.reply_msg("Broadcasting your messages...")
+    sts = await ctx.reply_msg(f"{E_ROCKET} Đang phát tin nhắn...")
     start_time = time.time()
     total_users = await userdb.count_documents({})
     done = 0

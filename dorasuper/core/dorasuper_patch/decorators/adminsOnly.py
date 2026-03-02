@@ -86,7 +86,7 @@ async def anonymous_admin_verification(
         # Dịch permission sang tiếng Việt
         translated_perm = PERMISSION_TRANSLATIONS.get(permission, permission)
         return await CallbackQuery.message.edit_text(
-            f"{E_LOCK} Bạn đang thiếu quyền sau để sử dụng lệnh này:\n{translated_perm}",
+            f"Bạn đang thiếu quyền sau để sử dụng lệnh này:\n{translated_perm}",
             parse_mode=pyrogram.enums.ParseMode.HTML,
         )
     if isinstance(permission, list):
@@ -103,7 +103,7 @@ async def anonymous_admin_verification(
                 permissions += f"\n{translated_perm}"
         if permissions != "":
             return await CallbackQuery.message.edit_text(
-                f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n<b>Quyền cần thiết</b>: <code>{permissions}</code>",
+                f"Bạn không có quyền cần thiết để thực hiện lệnh này.\nQuyền cần thiết: {permissions}",
                 parse_mode=pyrogram.enums.ParseMode.HTML,
             )
     try:
@@ -178,7 +178,7 @@ def adminsOnly(
                 # Dịch permission sang tiếng Việt
                 translated_perm = PERMISSION_TRANSLATIONS.get(permission, permission)
                 return await message.reply_msg(
-                    f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n<b>Quyền cần thiết</b>: <code>{translated_perm}</code>", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
+                    f"Bạn không có quyền cần thiết để thực hiện lệnh này.\nQuyền cần thiết: <code>{translated_perm}</code>", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
                 )
             if isinstance(permission, list):
                 for perm in permission:
@@ -193,7 +193,7 @@ def adminsOnly(
                         permissions += f"\n{translated_perm}"
                 if permissions != "":
                     return await message.reply_msg(
-                        f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n<b>Quyền cần thiết</b>: <code>{permissions}</code>", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
+                        f"Bạn không có quyền cần thiết để thực hiện lệnh này.\nQuyền cần thiết: {permissions}", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
                     )
             try:
                 await func(client, message)

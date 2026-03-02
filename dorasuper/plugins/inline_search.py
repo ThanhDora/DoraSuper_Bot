@@ -158,12 +158,12 @@ async def inline_menu(self, inline_query: InlineQuery):
             [
                 [
                     InlineKeyboardButton(
-                        "Hiển thị tin nhắn 🔐", callback_data=f"prvtmsg({inline_query.id})"
+                        "Hiển thị tin nhắn", callback_data=f"prvtmsg({inline_query.id})"
                     )
                 ],
                 [
                     InlineKeyboardButton(
-                        "Hủy tin nhắn ☠️",
+                        "Hủy tin nhắn",
                         callback_data=f"destroy({inline_query.id})",
                     )
                 ],

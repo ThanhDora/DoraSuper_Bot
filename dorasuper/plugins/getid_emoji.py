@@ -126,7 +126,7 @@ async def getid_cmd(_, ctx: Message):
                         py_lines.append(f"# {var}: {eid}")
                 out = "\n".join(py_lines)
             else:
-                out = f"Emoji ID (chạm để copy):\n{ids_line}"
+                out = f"Emoji ID (chạm để copy):\n\n{ids_line}"
             await _send_safe(ctx.chat.id, out, ctx.id)
         except Exception as e:
             LOGGER.warning("getid_emoji: %s", e)

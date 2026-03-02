@@ -26,7 +26,7 @@ from pySmartDL import SmartDL
 
 from dorasuper import app
 from dorasuper.core.decorator import capture_err, new_task
-from dorasuper.emoji import E_DOWNLOAD, E_LINK, E_LOADING, E_ERROR, E_SUCCESS
+from dorasuper.emoji import E_DOWNLOAD, E_ERROR, E_GROUP, E_LINK, E_LOADING, E_SUCCESS, E_TIP, E_WARN
 from dorasuper.helper.http import fetch
 from dorasuper.helper.pyro_progress import humanbytes, progress_for_pyrogram
 from dorasuper.vars import (
@@ -97,7 +97,7 @@ def _upload_to_gdrive_sync(file_path: str, filename: str) -> str:
 @app.on_message(filters.command(["getdirect"], COMMAND_HANDLER))
 async def getdirect_handler(bot, message):
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
+        return await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
     
     if not message.reply_to_message:
         return await message.reply(f"{E_ERROR} Vui lòng trả lời tập tin phương tiện.")
@@ -129,7 +129,7 @@ async def getdirect_handler(bot, message):
             )
             btn = InlineKeyboardMarkup(
                 [
-                    [InlineKeyboardButton(f"{E_LINK} Mở / Chia sẻ", url=file_url)],
+                    [InlineKeyboardButton("Mở / Chia sẻ", url=file_url)],
                     [InlineKeyboardButton("Chia sẻ", url=f"https://t.me/share/url?url={file_url}")],
                 ]
             )
@@ -209,21 +209,21 @@ def generate_random_filename(extension=".ipa"):
 async def upload(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type != enums.ChatType.GROUP and message.chat.type != enums.ChatType.SUPERGROUP:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
+        return await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
     
     if not message.reply_to_message:
         return await message.reply(f"{E_ERROR} Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh")
     
     media = message.reply_to_message.document
     if not media or not media.file_name.endswith(('.ipa', '.tipa')):
-        return await message.reply("Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
+        return await message.reply(f"{E_WARN} Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
     
     # Kiểm tra kích thước tập tin
     file_size_mb = media.file_size / (1024 * 1024)  # Kích thước tập tin tính bằng MB
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return await message.reply("Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
+        return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
     
-    m = await message.reply("Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
@@ -347,21 +347,21 @@ async def upload(bot, message):
 async def cloneapp_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type != enums.ChatType.GROUP and message.chat.type != enums.ChatType.SUPERGROUP:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @DoraTeamMods để sử dụng.")
+        return await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @DoraTeamMods để sử dụng.")
     
     if not message.reply_to_message:
-        return await message.reply("Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
+        return await message.reply(f"{E_TIP} Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
     
     media = message.reply_to_message.document
     if not media or not media.file_name.endswith(('.ipa', '.tipa')):
-        return await message.reply("Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
+        return await message.reply(f"{E_WARN} Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
     
     # Kiểm tra kích thước tập tin
     file_size_mb = media.file_size / (1024 * 1024)  # Kích thước tập tin tính bằng MB
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return await message.reply("Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
+        return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
     
-    m = await message.reply("Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
@@ -441,20 +441,20 @@ async def cloneapp_handler(bot, message):
 async def inject_iap_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
+        return await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
 
     # Kiểm tra nếu người dùng trả lời tin nhắn có file đính kèm
     if not message.reply_to_message or not message.reply_to_message.document:
-        return await message.reply("Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
+        return await message.reply(f"{E_TIP} Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
 
     media = message.reply_to_message.document
     if not media.file_name.endswith(('.ipa', '.tipa')):
-        return await message.reply("Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
+        return await message.reply(f"{E_WARN} Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
     
     # Kiểm tra kích thước tập tin
     file_size_mb = media.file_size / (1024 * 1024)  # Kích thước tập tin tính bằng MB
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return await message.reply("Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
+        return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
 
     # Kiểm tra sự tồn tại của các tệp và đường dẫn cần thiết
     required_files = {
@@ -463,10 +463,10 @@ async def inject_iap_handler(bot, message):
     }
     for name, path in required_files.items():
         if not os.path.exists(path):
-            return await message.reply(f"Tệp {name} không tồn tại: {path}")
+            return await message.reply(f"{E_ERROR} Tệp {name} không tồn tại: {path}")
 
     # Tải file xuống
-    m = await message.reply("Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
@@ -537,20 +537,20 @@ async def inject_iap_handler(bot, message):
 async def inject_fix_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
+        return await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
 
     # Kiểm tra nếu người dùng trả lời tin nhắn có file đính kèm
     if not message.reply_to_message or not message.reply_to_message.document:
-        return await message.reply("Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
+        return await message.reply(f"{E_TIP} Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
 
     media = message.reply_to_message.document
     if not media.file_name.endswith(('.ipa', '.tipa')):
-        return await message.reply("Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
+        return await message.reply(f"{E_WARN} Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
     
     # Kiểm tra kích thước tập tin
     file_size_mb = media.file_size / (1024 * 1024)  # Kích thước tập tin tính bằng MB
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return await message.reply("Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
+        return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
 
     # Kiểm tra sự tồn tại của các tệp và đường dẫn cần thiết
     required_files = {
@@ -560,10 +560,10 @@ async def inject_fix_handler(bot, message):
     }
     for name, path in required_files.items():
         if not os.path.exists(path):
-            return await message.reply(f"Tệp {name} không tồn tại: {path}")
+            return await message.reply(f"{E_ERROR} Tệp {name} không tồn tại: {path}")
 
     # Tải file xuống
-    m = await message.reply("Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
@@ -635,27 +635,27 @@ async def inject_fix_handler(bot, message):
 async def inject_ext_handler(bot, message):
     # Kiểm tra nếu tin nhắn không phải là trong nhóm
     if message.chat.type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
+        return await message.reply(f"{E_GROUP} Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm @thuthuatjb_sp để sử dụng.")
 
     # Kiểm tra nếu người dùng trả lời tin nhắn có file đính kèm
     if not message.reply_to_message or not message.reply_to_message.document:
-        return await message.reply("Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
+        return await message.reply(f"{E_TIP} Vui lòng trả lời tập tin .ipa hoặc .tipa bằng lệnh.")
 
     media = message.reply_to_message.document
     if not media.file_name.endswith(('.ipa', '.tipa')):
-        return await message.reply("Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
+        return await message.reply(f"{E_WARN} Chỉ hỗ trợ tệp .ipa hoặc .tipa.")
 
     # Kiểm tra kích thước tập tin
     file_size_mb = media.file_size / (1024 * 1024)  # Kích thước tập tin tính bằng MB
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return await message.reply("Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
+        return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
 
     # Kiểm tra sự tồn tại của dylib
     if not os.path.exists(EXTENSIONFIX_PATH):
-        return await message.reply(f"Tệp EXTENSIONFIX không tồn tại: {EXTENSIONFIX_PATH}")
+        return await message.reply(f"{E_ERROR} Tệp EXTENSIONFIX không tồn tại: {EXTENSIONFIX_PATH}")
 
     # Tải file xuống
-    m = await message.reply("Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(

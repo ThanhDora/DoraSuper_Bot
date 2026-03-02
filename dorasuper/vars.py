@@ -39,7 +39,16 @@ else:
     sys.exit(1)
 # Optional ENV
 LOG_GROUP_ID = environ.get("LOG_GROUP_ID")
-USER_SESSION = environ.get("USER_SESSION")
+_raw_user_session = (environ.get("USER_SESSION") or "").strip()
+# Session string phải là ASCII (base64). Nếu có ký tự Unicode (VD: tiếng Việt) sẽ gây crash khi decode.
+if _raw_user_session and not _raw_user_session.isascii():
+    LOGGER.warning(
+        "USER_SESSION chứa ký tự không phải ASCII (có thể dán nhầm tên/tiếng Việt). "
+        "Đã bỏ qua; tạo lại session string bằng lệnh /session hoặc sửa config.env."
+    )
+    USER_SESSION = None
+else:
+    USER_SESSION = _raw_user_session or None
 DATABASE_NAME = environ.get("DATABASE_NAME", "dorasuperDB")
 TZ = environ.get("TZ", "Asia/Ho_Chi_Minh")
 COMMAND_HANDLER = environ.get("COMMAND_HANDLER", "! /").split()

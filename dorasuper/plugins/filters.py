@@ -274,8 +274,8 @@ async def stop_all(_, message):
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("✅ OK, LÀM ĐI", callback_data="xboloc_yes"),
-                InlineKeyboardButton("❌ Huỷ", callback_data="xboloc_no"),
+                InlineKeyboardButton("OK, LÀM ĐI", callback_data="xboloc_yes"),
+                InlineKeyboardButton("Huỷ", callback_data="xboloc_no"),
             ]
         ]
     )
@@ -294,7 +294,7 @@ async def stop_all_cb(_, cb):
     permission = "can_change_info"
     if permission not in permissions:
         return await cb.answer(
-            f"Bạn không có các quyền bắt buộc.\n Quyền cần thiết: {permission}",
+            f"Bạn không có quyền cần thiết để thực hiện lệnh này.\nQuyền cần thiết: {permission}",
             show_alert=True,
         )
     inp = cb.data.split("_", 1)[1]

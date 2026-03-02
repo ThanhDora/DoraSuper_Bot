@@ -24,7 +24,7 @@ async def jsonify(_, message: Message):
                 [
                     [
                         InlineKeyboardButton(
-                            text=f"{E_CROSS} Đóng",
+                            text="Đóng",
                             callback_data=f"close#{message.from_user.id if message.from_user else 2024984460}",
                         )
                     ]
