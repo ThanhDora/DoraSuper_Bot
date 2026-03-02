@@ -96,3 +96,5 @@ GDRIVE_CREDENTIALS_PATH = environ.get("GDRIVE_CREDENTIALS_PATH", "")  # Đườn
 GDRIVE_FOLDER_ID = environ.get("GDRIVE_FOLDER_ID", "")  # ID thư mục Drive (để trống = upload vào My Drive gốc)
 # Tmpfiles: tên field form (upload hoặc file). Đổi nếu server báo "No file uploaded"
 TMPFILES_UPLOAD_FIELD = environ.get("TMPFILES_UPLOAD_FIELD", "file").strip() or "file"
+# Cobalt API (TikTok video/ảnh): để trống = dùng yt-dlp + scrape. Ví dụ: https://api.cobalt.tools
+COBALT_URL = (environ.get("COBALT_URL", "") or "").strip().rstrip("/")

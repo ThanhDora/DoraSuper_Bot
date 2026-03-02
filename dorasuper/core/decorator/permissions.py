@@ -8,6 +8,7 @@ from pyrogram.errors import ChannelPrivate, ChatAdminRequired, ChatWriteForbidde
 from pyrogram.types import CallbackQuery, Message
 
 from dorasuper import app
+from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.sqlite_helper import Cache
 from dorasuper.vars import SUDO
 
@@ -72,7 +73,11 @@ async def check_perms(
         return True
     if user.status != enums.ChatMemberStatus.ADMINISTRATOR:
         if complain_missing_perms:
-            await sender(strings("no_admin_error"))
+            text = strings("no_admin_error").format(**EMOJI_FMT)
+            if isinstance(message, CallbackQuery):
+                await sender(text)
+            else:
+                await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
         return False
 
     if isinstance(permissions, str):
@@ -87,15 +92,16 @@ async def check_perms(
     if not missing_perms:
         return True
     if complain_missing_perms:
-        # Dịch các quyền còn thiếu
         translated_perms = [
             strings(perm) or perm for perm in missing_perms
         ]
-        await sender(
-            strings("no_permission_error").format(
-                permissions=", ".join(translated_perms)
-            )
+        text = strings("no_permission_error").format(
+            permissions=", ".join(translated_perms), **EMOJI_FMT
         )
+        if isinstance(message, CallbackQuery):
+            await sender(text)
+        else:
+            await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
     return False
 
 
@@ -152,12 +158,12 @@ async def unauthorised(message: Message, permission, subFunc2):
         lang,
         "admin",
     )
-    # Lấy bản dịch của quyền
     permission_translated = strings(permission) or permission
-    # Lấy thông báo lỗi và thay thế placeholder
-    text = strings("no_permission_error").format(permissions=permission_translated)
+    text = strings("no_permission_error").format(
+        permissions=permission_translated, **EMOJI_FMT
+    )
     try:
-        await message.reply_text(text)
+        await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
     except ChatWriteForbidden:
         await message.chat.leave()
     return subFunc2
@@ -225,7 +231,12 @@ def require_admin(
             if msg.chat.type == enums.ChatType.PRIVATE:
                 if allow_in_private:
                     return await func(client, message, *args, **kwargs)
-                return await sender(strings("private_not_allowed"))
+                text = strings("private_not_allowed").format(**EMOJI_FMT)
+                if isinstance(message, CallbackQuery):
+                    await sender(text)
+                else:
+                    await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
+                return
             if msg.chat.type == enums.ChatType.CHANNEL:
                 return await func(client, message, *args, **kwargs)
             has_perms = await check_perms(

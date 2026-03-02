@@ -1,17 +1,22 @@
-# Tải video/ảnh từ TikTok và các mạng xã hội khác (yt-dlp)
+# Tải video/ảnh từ TikTok và các mạng xã hội khác (Cobalt / yt-dlp / gallery-dl)
 # Bot tự nhận diện link trong tin nhắn, không cần lệnh
 
 import asyncio
 import html
+import io
 import os
 import re
+import shutil
+import subprocess
 import tempfile
 from logging import getLogger
 
+import aiohttp
 import yt_dlp
+from PIL import Image
 from pyrogram import enums, filters
 from pyrogram.enums import ChatType
-from pyrogram.types import Message
+from pyrogram.types import InputMediaPhoto, Message
 
 from dorasuper import app
 from dorasuper.core.decorator import capture_err, new_task
@@ -19,13 +24,14 @@ from dorasuper.core.decorator.permissions import require_admin
 from database.autodl_db import toggle_autodl
 from dorasuper.emoji import E_ERROR, E_HEART, E_LINK, E_VIEW, E_LOADING, E_MUSIC, E_SUCCESS, E_TIP, E_USER
 from dorasuper.helper.pyro_progress import humanbytes
-from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR
+from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR, COBALT_URL
 
 LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "TảiVideo"
 __HELP__ = """
-<blockquote>Gửi link TikTok - Bot tự tải và gửi video/ảnh.
+<blockquote>Gửi link TikTok - Bot tự tải và gửi video hoặc ảnh (cả bài 1 ảnh và album nhiều ảnh).
+Ảnh TikTok được tải bằng gallery-dl (ưu tiên), TikWM hoặc scrape.
 
 Lệnh:
 /autodl - Bật/tắt tự động tải link trong nhóm (admin)
@@ -33,6 +39,7 @@ Lệnh:
 """
 
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+MAX_ALBUM_PHOTOS = 10  # Telegram giới hạn media group tối đa 10 ảnh
 
 # Regex theo từng nền tảng (dễ mở rộng thêm Instagram, YouTube, ...)
 URL_PATTERNS = {
@@ -71,11 +78,61 @@ def _is_command_message(text: str) -> bool:
     return False
 
 
-def _download_sync(url: str, out_dir: str) -> tuple[str | None, str | None, dict | None]:
-    """Tải bằng yt-dlp. Returns (filepath, error, info_dict)."""
-    out_tpl = os.path.join(out_dir, "%(id)s.%(ext)s")
+# Định dạng ưu tiên: video mp4/webm trước, sau đó ảnh (TikTok ảnh/album)
+_FORMAT = "best[ext=mp4]/best[ext=webm]/best[ext=mp4]/best[ext=jpg]/best[ext=jpeg]/best[ext=png]/best[ext=webp]/best"
+_IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+_VIDEO_EXTS = (".mp4", ".webm", ".mkv", ".mov")
+
+
+def _is_valid_image_bytes(raw: bytes) -> bool:
+    """True nếu raw trông giống dữ liệu ảnh (magic bytes). Tránh gửi HTML/ corrupt."""
+    if not raw or len(raw) < 12:
+        return False
+    if raw[:1] == b"<" or raw[:2] == b"\x1b[":
+        return False  # HTML hoặc ANSI
+    if raw[:3] == b"\xff\xd8\xff":
+        return True  # JPEG
+    if raw[:8] == b"\x89PNG\r\n\x1a\n":
+        return True  # PNG
+    if raw[:4] == b"RIFF" and len(raw) >= 12 and raw[8:12] == b"WEBP":
+        return True  # WebP
+    return False
+
+
+def _image_to_jpeg_sync(path: str) -> bytes | None:
+    """Mở ảnh bằng PIL, chuyển sang JPEG (tránh IMAGE_PROCESS_FAILED). Trả về bytes hoặc None."""
+    if not path or not os.path.isfile(path) or os.path.getsize(path) == 0:
+        return None
+    try:
+        with open(path, "rb") as f:
+            return _image_bytes_to_jpeg_sync(f.read())
+    except Exception:
+        return None
+
+
+def _image_bytes_to_jpeg_sync(raw: bytes) -> bytes | None:
+    """Chuyển bytes ảnh (PNG/WebP/JPEG) sang JPEG. Tránh PHOTO_EXT_INVALID khi gửi file gốc."""
+    if not raw or len(raw) < 12:
+        return None
+    try:
+        with Image.open(io.BytesIO(raw)) as img:
+            if img.mode in ("RGBA", "P", "LA", "PA"):
+                img = img.convert("RGB")
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=92, optimize=True)
+            return buf.getvalue()
+    except Exception:
+        return None
+
+
+def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None, dict | None]:
+    """Tải bằng yt-dlp. Returns (danh sách filepath, error, info_dict). Hỗ trợ video và ảnh/album TikTok."""
+    # Dùng playlist_index để album ảnh ra nhiều file (id_1.jpg, id_2.jpg...); bài đơn vẫn ra 1 file
+    out_tpl = os.path.join(out_dir, "%(id)s_%(playlist_index)s.%(ext)s")
     ydl_opts = {
-        "format": "best[ext=mp4]/best",
+        "format": _FORMAT,
         "outtmpl": out_tpl,
         "quiet": True,
         "no_warnings": True,
@@ -86,21 +143,40 @@ def _download_sync(url: str, out_dir: str) -> tuple[str | None, str | None, dict
             info = ydl.extract_info(url, download=True)
             if not info:
                 return None, "Không lấy được thông tin.", None
-            filepath = ydl.prepare_filename(info)
-            if os.path.exists(filepath):
-                return filepath, None, info
-            base = os.path.splitext(filepath)[0]
-            for ext in (".mp4", ".webm", ".mkv", ".mov", ".m4a", ".jpg", ".jpeg", ".png", ".webp", ".gif"):
-                p = base + ext
-                if os.path.exists(p):
-                    return p, None, info
-            return None, "Không tìm thấy file tải về.", None
+            # Thu thập mọi file đã tải (1 video/ảnh hoặc nhiều ảnh trong album)
+            collected: list[str] = []
+            entries = info.get("entries") or [info]
+            for ent in entries:
+                if not ent:
+                    continue
+                filepath = ydl.prepare_filename(ent)
+                if os.path.exists(filepath):
+                    collected.append(filepath)
+                    continue
+                base = os.path.splitext(filepath)[0]
+                for ext in (*_VIDEO_EXTS, ".m4a", *_IMAGE_EXTS):
+                    p = base + ext
+                    if os.path.exists(p):
+                        collected.append(p)
+                        break
+            if not collected:
+                # Fallback: quét thư mục (trường hợp template khác)
+                for f in sorted(os.listdir(out_dir)):
+                    p = os.path.join(out_dir, f)
+                    if os.path.isfile(p):
+                        collected.append(p)
+            if not collected:
+                return None, "Không tìm thấy file tải về.", None
+            return collected, None, info
     except yt_dlp.utils.DownloadError as e:
         err = _strip_ansi(str(e))
-        if "private" in err.lower():
+        low = err.lower()
+        if "private" in low:
             return None, "Video riêng tư, không tải được.", None
-        if "region" in err.lower() or "blocked" in err.lower():
+        if "region" in low or "blocked" in low:
             return None, "Video bị giới hạn theo khu vực.", None
+        if "unsupported url" in low or "unsupported" in low and "url" in low:
+            return None, "Link TikTok ảnh (photo) chưa được hỗ trợ. Chỉ tải được link video TikTok.", None
         return None, err[:200] if len(err) > 200 else err, None
     except Exception as e:
         return None, _strip_ansi(str(e))[:200], None
@@ -163,51 +239,618 @@ def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: 
     return f"<blockquote>{content}</blockquote>" if content else ""
 
 
+def _paths_by_type(paths: list[str]) -> tuple[list[str], list[str], list[str]]:
+    """Chia danh sách đường dẫn thành ảnh, video, còn lại."""
+    images, videos, other = [], [], []
+    for p in paths:
+        ext = os.path.splitext(p)[1].lower()
+        if ext in _IMAGE_EXTS:
+            images.append(p)
+        elif ext in _VIDEO_EXTS:
+            videos.append(p)
+        else:
+            other.append(p)
+    return images, videos, other
+
+
+# Header giống trình duyệt/mobile để TikTok trả HTML có og:image / JSON
+_TIKTOK_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9,vi;q=0.8",
+}
+
+
+async def _resolve_tiktok_photo(url: str) -> tuple[bool, str | None]:
+    """(True, final_url) nếu URL sau redirect là link TikTok /photo/; (False, final_url) nếu không phải."""
+    if not url.strip():
+        return False, None
+    u = url.strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(u, allow_redirects=True, headers=_TIKTOK_HEADERS) as resp:
+                final = str(resp.url)
+                return "/photo/" in final, final
+    except Exception:
+        return False, None
+
+
+def _normalize_image_url(u: str) -> str:
+    """Chuẩn hóa URL ảnh (bỏ fragment, có thể giữ query)."""
+    u = (u or "").strip().split("#")[0]
+    return u
+
+
+def _extract_photo_urls_from_html(html_text: str) -> list[str]:
+    """Chỉ trích ảnh thuộc bài post: og:image (ảnh đại diện bài). Không quét avatar/thumbnail khác."""
+    urls: list[str] = []
+    seen: set[str] = set()
+
+    def add(u: str) -> None:
+        u = _normalize_image_url(u)
+        if not u or u in seen:
+            return
+        if not u.startswith("http"):
+            return
+        seen.add(u)
+        urls.append(u)
+
+    # Chỉ lấy og:image — đây là ảnh TikTok đặt cho bài post, không phải avatar/icon
+    for pattern in (
+        r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
+        r'property=["\']og:image["\'][^>]*content=["\'](https?://[^"\']+)["\']',
+    ):
+        for m in re.finditer(pattern, html_text, re.I):
+            add(m.group(1))
+            break  # chỉ cần 1 og:image
+        if urls:
+            break
+
+    return urls[:MAX_ALBUM_PHOTOS] if urls else []
+
+
+def _download_images_gallery_dl_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
+    """Tải ảnh bằng gallery-dl (TikTok, Instagram, nhiều gallery...). Trả về (danh sách path ảnh, None) hoặc (None, lỗi)."""
+    gdl = shutil.which("gallery-dl")
+    if not gdl:
+        return None, "Chưa cài gallery-dl (pip install gallery-dl)."
+    u = (url or "").strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        out_dir = os.path.abspath(out_dir)
+        proc = subprocess.run(
+            [gdl, "-d", out_dir, "--no-mtime", u],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if proc.returncode != 0:
+            err = (proc.stderr or proc.stdout or "")[:200]
+            return None, err.strip() or f"gallery-dl exit {proc.returncode}"
+        collected: list[str] = []
+        for root, _, files in os.walk(out_dir):
+            for f in files:
+                ext = os.path.splitext(f)[1].lower()
+                if ext in _IMAGE_EXTS:
+                    collected.append(os.path.join(root, f))
+        collected.sort()
+        if not collected:
+            return None, "gallery-dl không tải được ảnh."
+        return collected[:MAX_ALBUM_PHOTOS], None
+    except subprocess.TimeoutExpired:
+        return None, "gallery-dl quá thời gian."
+    except Exception as e:
+        return None, _strip_ansi(str(e))[:150]
+
+
+async def _download_tiktok_photo(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
+    """Tải ảnh từ link TikTok /photo/: fetch HTML (thử 2 User-Agent), trích og:image, tải về file."""
+    if not url.startswith("http"):
+        url = "https://" + url
+    try:
+        timeout = aiohttp.ClientTimeout(total=15)
+        image_urls = []
+        for headers in (
+            _TIKTOK_HEADERS,
+            {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.9"},
+        ):
+            try:
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    async with session.get(url, headers=headers) as resp:
+                        if resp.status != 200:
+                            continue
+                        html_text = await resp.text()
+                image_urls = _extract_photo_urls_from_html(html_text)
+                if image_urls:
+                    break
+            except Exception:
+                continue
+        if not image_urls:
+            return None, "Không tìm thấy ảnh trong trang. Thử lại sau."
+        paths = []
+        for i, img_url in enumerate(image_urls[:20]):
+            try:
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    async with session.get(img_url, headers=_TIKTOK_HEADERS) as r:
+                        if r.status != 200:
+                            continue
+                        raw = await r.read()
+                if not _is_valid_image_bytes(raw):
+                    continue
+                ext = ".jpg"
+                if raw[:3] == b"\xff\xd8\xff":
+                    ext = ".jpg"
+                elif raw[:8] == b"\x89PNG\r\n\x1a\n":
+                    ext = ".png"
+                elif raw[:4] == b"RIFF" and len(raw) >= 12 and raw[8:12] == b"WEBP":
+                    ext = ".webp"
+                path = os.path.join(out_dir, f"photo_{i:02d}{ext}")
+                with open(path, "wb") as f:
+                    f.write(raw)
+                if os.path.getsize(path) > 0:
+                    paths.append(path)
+            except Exception:
+                continue
+        if not paths:
+            return None, "Tải ảnh thất bại."
+        return paths, None
+    except asyncio.TimeoutError:
+        return None, "Trang TikTok phản hồi quá chậm."
+    except Exception as e:
+        LOGGER.exception("_download_tiktok_photo: %s", e)
+        return None, _strip_ansi(str(e))[:150]
+
+
+# TikWM API (fallback TikTok) — theo logic ytttins_dl
+TIKWM_API = "https://www.tikwm.com/api/"
+
+
+async def _fetch_cobalt_tiktok(url: str) -> dict | None:
+    """Gọi Cobalt API cho TikTok. Trả về response JSON nếu thành công, None nếu lỗi."""
+    if not COBALT_URL or not url.strip():
+        return None
+    u = url.strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                f"{COBALT_URL}/",
+                json={
+                    "url": u,
+                    "videoQuality": "1080",
+                    "downloadMode": "auto",
+                    "subtitleLang": "vi",
+                },
+            ) as resp:
+                if resp.status != 200:
+                    return None
+                return await resp.json()
+    except Exception as e:
+        LOGGER.warning("Cobalt TikTok: %s", e)
+        return None
+
+
+async def _fetch_tikwm_tiktok(url: str) -> dict | None:
+    """TikWM API (fallback TikTok): GET tikwm.com/api/?url=...&hd=1. Trả về data hoặc None."""
+    u = (url or "").strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        headers = {"User-Agent": _TIKTOK_HEADERS["User-Agent"], "Accept": "application/json"}
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            # Thử GET trước, không được thì POST
+            for method, kwargs in (
+                ("GET", {"params": {"url": u, "hd": 1}}),
+                ("POST", {"data": {"url": u, "hd": 1}}),
+            ):
+                try:
+                    if method == "GET":
+                        resp = await session.get(TIKWM_API, headers=headers, **kwargs)
+                    else:
+                        resp = await session.post(TIKWM_API, headers=headers, **kwargs)
+                    if resp.status != 200:
+                        continue
+                    data = await resp.json()
+                    if data.get("code") != 0:
+                        LOGGER.info("TikWM %s code=%s msg=%s", method, data.get("code"), data.get("msg"))
+                        continue
+                    return data.get("data") or {}
+                except Exception:
+                    continue
+        return None
+    except Exception as e:
+        LOGGER.warning("TikWM TikTok: %s", e)
+        return None
+
+
+def _normalize_tikwm_images(data: dict) -> list[str]:
+    """Lấy danh sách URL ảnh từ response TikWM (nhiều dạng: list string, list dict có url)."""
+    images = data.get("images") or data.get("image_post") or data.get("album") or []
+    if not isinstance(images, list):
+        images = [images] if images else []
+    urls = []
+    for x in images:
+        if isinstance(x, str) and x.strip().startswith("http"):
+            urls.append(x.strip())
+        elif isinstance(x, dict):
+            u = (x.get("url") or x.get("image_url") or x.get("src") or "").strip()
+            if u.startswith("http"):
+                urls.append(u)
+    return urls
+
+
+async def _download_tiktok_via_tikwm(url: str, out_dir: str) -> tuple[list[str] | None, dict | None, str | None]:
+    """Tải TikTok qua TikWM API (video hoặc ảnh slideshow). Returns (paths, metadata, error)."""
+    data = await _fetch_tikwm_tiktok(url)
+    if not data:
+        return None, None, "TikWM không lấy được dữ liệu."
+    # Video: hdplay hoặc play
+    video_url = (data.get("hdplay") or data.get("play") or "").strip()
+    images = _normalize_tikwm_images(data)
+    author = (data.get("author") or {})
+    if isinstance(author, dict):
+        author = author.get("unique_id") or author.get("nickname") or "TikTok"
+    else:
+        author = str(author)
+    title = (data.get("title") or "TikTok").strip()[:200]
+    meta = {"uploader": author, "title": title, "webpage_url": url}
+
+    if video_url:
+        try:
+            timeout = aiohttp.ClientTimeout(total=60)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(video_url, headers=_TIKTOK_HEADERS) as r:
+                    if r.status != 200:
+                        return None, None, f"Tải video thất bại (HTTP {r.status})"
+                    raw = await r.read()
+            if len(raw) > MAX_FILE_SIZE:
+                return None, None, f"Video quá lớn ({humanbytes(len(raw))})."
+            path = os.path.join(out_dir, "tikwm_video.mp4")
+            with open(path, "wb") as f:
+                f.write(raw)
+            return [path], meta, None
+        except Exception as e:
+            return None, None, _strip_ansi(str(e))[:150]
+
+    # Nếu không có mảng images, thử dùng cover/thumbnail (ít nhất 1 ảnh)
+    if not images:
+        for key in ("origin_cover", "cover", "thumbnail", "cover_url"):
+            u = (data.get(key) or "").strip()
+            if isinstance(u, str) and u.startswith("http"):
+                images = [u]
+                break
+    if not images:
+        return None, None, "Không có ảnh trong phản hồi TikWM."
+
+    paths = []
+    for i, img_url in enumerate((images or [])[:MAX_ALBUM_PHOTOS]):
+        try:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
+                async with session.get(img_url, headers=_TIKTOK_HEADERS) as r:
+                    if r.status != 200:
+                        continue
+                    raw = await r.read()
+            if not _is_valid_image_bytes(raw):
+                continue
+            path = os.path.join(out_dir, f"tikwm_{i:02d}.jpg")
+            with open(path, "wb") as f:
+                f.write(raw)
+            jpeg = await asyncio.to_thread(_image_to_jpeg_sync, path)
+            if jpeg:
+                jpath = os.path.join(out_dir, f"tikwm_{i:02d}_o.jpg")
+                with open(jpath, "wb") as f:
+                    f.write(jpeg)
+                paths.append(jpath)
+            elif os.path.getsize(path) > 0:
+                paths.append(path)
+        except Exception:
+            continue
+    if not paths:
+        return None, None, "Tải ảnh TikWM thất bại."
+    return paths, meta, None
+
+
 async def _process_download(ctx: Message, url: str, platform: str):
-    """Xử lý tải và gửi media."""
+    """Xử lý tải và gửi media (video, ảnh đơn hoặc album ảnh TikTok)."""
     m = await ctx.reply_msg(f"Đang tải từ {platform}{E_LOADING}", quote=True)
+
+    # TikTok: ưu tiên Cobalt (redirect/tunnel/picker — theo ytttins_dl)
+    if platform == "tiktok" and COBALT_URL:
+        data = await _fetch_cobalt_tiktok(url)
+        if data and data.get("status") == "picker":
+            picker = data.get("picker") or []
+            if picker:
+                try:
+                    out_dir = tempfile.mkdtemp(prefix="cobalt_picker_", dir=str(ROOT_DIR / "downloads"))
+                    collected: list[str] = []
+                    for idx, item in enumerate(picker[:MAX_ALBUM_PHOTOS]):
+                        u = (item.get("url") or "").strip()
+                        if not u:
+                            continue
+                        try:
+                            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
+                                async with session.get(u) as r:
+                                    if r.status != 200:
+                                        continue
+                                    raw = await r.read()
+                            if len(raw) > MAX_FILE_SIZE:
+                                continue
+                            ext = ".jpg"
+                            ct = (item.get("mime") or item.get("type") or "").lower()
+                            if "png" in ct:
+                                ext = ".png"
+                            elif "webp" in ct:
+                                ext = ".webp"
+                            elif "mp4" in ct or "video" in ct:
+                                ext = ".mp4"
+                            path = os.path.join(out_dir, f"p_{idx}{ext}")
+                            with open(path, "wb") as f:
+                                f.write(raw)
+                            if os.path.getsize(path) > 0:
+                                collected.append(path)
+                        except Exception:
+                            continue
+                    if collected:
+                        shared_by = (ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user and ctx.from_user.username else (ctx.from_user.first_name or ""))) if ctx.from_user else ""
+                        fake_info = {"webpage_url": url}
+                        caption = _build_caption(fake_info, 0, "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
+                        await m.edit_msg(f"Đang gửi{E_LOADING}")
+                        imgs = [p for p in collected if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
+                        videos = [p for p in collected if p.lower().endswith((".mp4", ".mov", ".webm"))]
+                        if len(imgs) > 1:
+                            jpegs = []
+                            for p in imgs[:MAX_ALBUM_PHOTOS]:
+                                b = await asyncio.to_thread(_image_to_jpeg_sync, p)
+                                if b:
+                                    jpegs.append(b)
+                            if jpegs:
+                                media_list = [
+                                    InputMediaPhoto(media=io.BytesIO(jpegs[0]), caption=caption, parse_mode=enums.ParseMode.HTML),
+                                    *[InputMediaPhoto(media=io.BytesIO(b)) for b in jpegs[1:]],
+                                ]
+                                await app.send_media_group(chat_id=ctx.chat.id, media=media_list, reply_to_message_id=ctx.id)
+                        elif imgs:
+                            b = await asyncio.to_thread(_image_to_jpeg_sync, imgs[0])
+                            await ctx.reply_photo(photo=io.BytesIO(b) if b else imgs[0], caption=caption, parse_mode=enums.ParseMode.HTML)
+                        elif videos:
+                            await ctx.reply_video(video=videos[0], caption=caption, parse_mode=enums.ParseMode.HTML)
+                        await m.delete()
+                        if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+                            try:
+                                await app.delete_messages(ctx.chat.id, ctx.id)
+                            except Exception:
+                                pass
+                        try:
+                            for f in os.listdir(out_dir):
+                                p = os.path.join(out_dir, f)
+                                if os.path.isfile(p):
+                                    os.remove(p)
+                            os.rmdir(out_dir)
+                        except OSError:
+                            pass
+                        return
+                except Exception as e:
+                    LOGGER.warning("Cobalt picker: %s", e)
+        if data and data.get("status") in ("tunnel", "redirect"):
+            download_url = (data.get("url") or "").strip()
+            if download_url:
+                shared_by = ""
+                if ctx.from_user:
+                    shared_by = ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user.username else ctx.from_user.first_name or "")
+                fake_info = {"webpage_url": url}
+                caption = _build_caption(fake_info, 0, "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
+                try:
+                    if download_url.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                        await ctx.reply_photo(
+                            photo=download_url,
+                            caption=caption,
+                            parse_mode=enums.ParseMode.HTML,
+                        )
+                    else:
+                        timeout = aiohttp.ClientTimeout(total=60)
+                        async with aiohttp.ClientSession(timeout=timeout) as session:
+                            async with session.get(download_url) as resp_file:
+                                if resp_file.status != 200:
+                                    raise ValueError(f"HTTP {resp_file.status}")
+                                file_bytes = await resp_file.read()
+                        if len(file_bytes) > MAX_FILE_SIZE:
+                            await m.edit_msg(
+                                f"{E_ERROR} File quá lớn ({humanbytes(len(file_bytes))}). Giới hạn {humanbytes(MAX_FILE_SIZE)}."
+                            )
+                            return
+                        await m.edit_msg(f"Đang gửi{E_LOADING}")
+                        await ctx.reply_video(
+                            video=io.BytesIO(file_bytes),
+                            caption=caption,
+                            parse_mode=enums.ParseMode.HTML,
+                            supports_streaming=True,
+                        )
+                    await m.delete()
+                    if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+                        try:
+                            await app.delete_messages(ctx.chat.id, ctx.id)
+                        except Exception:
+                            pass
+                    return
+                except Exception as e:
+                    LOGGER.warning("Cobalt send media: %s", e)
+                    # Fall through to yt-dlp / scrape
+
+    is_photo, final_url = await _resolve_tiktok_photo(url)
+    if platform == "tiktok" and is_photo and final_url:
+        # Tải ảnh TikTok: ưu tiên gallery-dl → TikWM → scrape og:image
+        dl_root = ROOT_DIR / "downloads"
+        dl_root.mkdir(parents=True, exist_ok=True)
+        out_dir = tempfile.mkdtemp(prefix="tiktok_photo_", dir=str(dl_root))
+        try:
+            paths, err = None, None
+            paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
+            if paths_gd:
+                paths = paths_gd
+            if not paths:
+                paths_tikwm, _, err_tikwm = await _download_tiktok_via_tikwm(url, out_dir)
+                if paths_tikwm:
+                    paths = paths_tikwm
+            if not paths:
+                paths, err = await _download_tiktok_photo(final_url, out_dir)
+            if err:
+                return await m.edit_msg(f"{E_ERROR} {err}")
+            if not paths:
+                return await m.edit_msg(f"{E_ERROR} Không tải được ảnh.")
+            total_size = sum(os.path.getsize(p) for p in paths)
+            if total_size > MAX_FILE_SIZE:
+                for p in paths:
+                    try:
+                        os.remove(p)
+                    except OSError:
+                        pass
+                return await m.edit_msg(
+                    f"{E_ERROR} Tổng dung lượng quá lớn ({humanbytes(total_size)}). Giới hạn {humanbytes(MAX_FILE_SIZE)}."
+                )
+            await m.edit_msg(f"Đang gửi{E_LOADING}")
+            shared_by = ""
+            if ctx.from_user:
+                shared_by = ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user.username else ctx.from_user.first_name or "")
+            fake_info = {"webpage_url": final_url} if final_url else None
+            caption = _build_caption(fake_info, os.path.getsize(paths[0]), "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
+            # Chuyển sang JPEG trước khi gửi để tránh Telegram IMAGE_PROCESS_FAILED
+            jpeg_list: list[bytes] = []
+            for p in paths[:MAX_ALBUM_PHOTOS]:  # Telegram tối đa 10 ảnh/album
+                b = await asyncio.to_thread(_image_to_jpeg_sync, p)
+                if b and len(b) <= MAX_FILE_SIZE:
+                    jpeg_list.append(b)
+            if not jpeg_list and paths:
+                one = await asyncio.to_thread(_image_to_jpeg_sync, paths[0])
+                if one and len(one) <= MAX_FILE_SIZE:
+                    jpeg_list = [one]
+            # Fallback: đọc file gốc rồi convert sang JPEG (tránh PHOTO_EXT_INVALID khi nội dung là WebP/PNG)
+            if not jpeg_list and paths:
+                for p in paths[:MAX_ALBUM_PHOTOS]:
+                    if not os.path.isfile(p) or os.path.getsize(p) == 0:
+                        continue
+                    try:
+                        with open(p, "rb") as f:
+                            raw = f.read()
+                        b = await asyncio.to_thread(_image_bytes_to_jpeg_sync, raw)
+                        if b and len(b) <= MAX_FILE_SIZE:
+                            jpeg_list.append(b)
+                    except Exception:
+                        continue
+            if not jpeg_list and paths:
+                one_raw = None
+                try:
+                    with open(paths[0], "rb") as f:
+                        one_raw = f.read()
+                    if one_raw:
+                        one = await asyncio.to_thread(_image_bytes_to_jpeg_sync, one_raw)
+                        if one and len(one) <= MAX_FILE_SIZE:
+                            jpeg_list = [one]
+                except Exception:
+                    pass
+            if not jpeg_list:
+                return await m.edit_msg(f"{E_ERROR} Ảnh không hợp lệ hoặc không xử lý được.")
+            if len(jpeg_list) > 1:
+                jpeg_list = jpeg_list[:MAX_ALBUM_PHOTOS]
+                media_list = [
+                    InputMediaPhoto(media=io.BytesIO(jpeg_list[0]), caption=caption, parse_mode=enums.ParseMode.HTML),
+                    *[InputMediaPhoto(media=io.BytesIO(b)) for b in jpeg_list[1:]],
+                ]
+                await app.send_media_group(chat_id=ctx.chat.id, media=media_list, reply_to_message_id=ctx.id)
+            else:
+                await ctx.reply_photo(photo=io.BytesIO(jpeg_list[0]), caption=caption, parse_mode=enums.ParseMode.HTML)
+            await m.delete()
+            if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+                try:
+                    await app.delete_messages(ctx.chat.id, ctx.id)
+                except Exception:
+                    pass
+        except Exception as e:
+            LOGGER.exception("downloadsVideo photo: %s", e)
+            await m.edit_msg(f"{E_ERROR} Lỗi: {_strip_ansi(str(e))[:150]}")
+        finally:
+            try:
+                for f in os.listdir(out_dir):
+                    p = os.path.join(out_dir, f)
+                    if os.path.isfile(p):
+                        os.remove(p)
+                os.rmdir(out_dir)
+            except OSError:
+                pass
+        return
     dl_root = ROOT_DIR / "downloads"
     dl_root.mkdir(parents=True, exist_ok=True)
     out_dir = tempfile.mkdtemp(prefix=f"{platform}_", dir=str(dl_root))
     try:
-        filepath, err, info = await asyncio.to_thread(_download_sync, url, out_dir)
+        paths, err, info = await asyncio.to_thread(_download_sync, url, out_dir)
+        # TikTok: fallback TikWM khi yt-dlp thất bại (theo ytttins_dl)
+        if (err or not paths) and platform == "tiktok":
+            paths_tikwm, info_tikwm, err_tikwm = await _download_tiktok_via_tikwm(url, out_dir)
+            if paths_tikwm and not err_tikwm:
+                paths, err, info = paths_tikwm, None, info_tikwm or info
         if err:
             return await m.edit_msg(f"{E_ERROR} {err}")
 
-        if not filepath or not os.path.exists(filepath):
+        if not paths:
             return await m.edit_msg(f"{E_ERROR} Tải thất bại.")
 
-        size = os.path.getsize(filepath)
-        if size > MAX_FILE_SIZE:
-            try:
-                os.remove(filepath)
-            except OSError:
-                pass
+        total_size = sum(os.path.getsize(p) for p in paths if os.path.isfile(p))
+        if total_size > MAX_FILE_SIZE:
+            for p in paths:
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
             return await m.edit_msg(
-                f"{E_ERROR} File quá lớn ({humanbytes(size)}). Giới hạn {humanbytes(MAX_FILE_SIZE)}."
+                f"{E_ERROR} Tổng dung lượng quá lớn ({humanbytes(total_size)}). Giới hạn {humanbytes(MAX_FILE_SIZE)}."
             )
 
-        ext = os.path.splitext(filepath)[1].lower()
-        is_image = ext in (".jpg", ".jpeg", ".png", ".webp", ".gif")
-        is_video = ext in (".mp4", ".webm", ".mkv", ".mov")
-
+        images, videos, other = _paths_by_type(paths)
         await m.edit_msg(f"Đang gửi{E_LOADING}")
 
         shared_by = ""
         if ctx.from_user:
             shared_by = ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user.username else ctx.from_user.first_name or "")
-        caption = _build_caption(info, size, platform, shared_by) or f"{E_SUCCESS} Tải từ {platform.title()}"
-        if is_image:
-            await ctx.reply_photo(photo=filepath, caption=caption, parse_mode=enums.ParseMode.HTML)
-        elif is_video:
-            await ctx.reply_video(video=filepath, caption=caption, parse_mode=enums.ParseMode.HTML)
+        first_size = os.path.getsize(paths[0]) if paths else 0
+        caption = _build_caption(info, first_size, platform, shared_by) or f"{E_SUCCESS} Tải từ {platform.title()}"
+
+        # Nhiều ảnh → gửi album (media group, tối đa 10 ảnh)
+        if len(images) > 1:
+            images = images[:MAX_ALBUM_PHOTOS]
+            media_list = [
+                InputMediaPhoto(media=images[0], caption=caption, parse_mode=enums.ParseMode.HTML),
+                *[InputMediaPhoto(media=img) for img in images[1:]],
+            ]
+            await app.send_media_group(
+                chat_id=ctx.chat.id,
+                media=media_list,
+                reply_to_message_id=ctx.id,
+            )
+        # Một ảnh
+        elif len(images) == 1:
+            await ctx.reply_photo(photo=images[0], caption=caption, parse_mode=enums.ParseMode.HTML)
+        # Một video (ưu tiên nếu có cả video và ảnh)
+        elif videos:
+            await ctx.reply_video(video=videos[0], caption=caption, parse_mode=enums.ParseMode.HTML)
+        # File khác (document)
+        elif other:
+            await ctx.reply_document(document=other[0], caption=caption, parse_mode=enums.ParseMode.HTML)
         else:
-            await ctx.reply_document(document=filepath, caption=caption, parse_mode=enums.ParseMode.HTML)
+            await m.edit_msg(f"{E_ERROR} Không có file media hợp lệ.")
+            return
+
         await m.delete()
-        # Xóa tin nhắn chứa link (chỉ trong nhóm, cần quyền xóa tin nhắn)
+        # Xóa tin nhắn chứa link sau khi bot đã gửi media thành công
         if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
             try:
-                await ctx.delete()
+                await app.delete_messages(ctx.chat.id, ctx.id)
             except Exception:
                 pass
     except Exception as e:

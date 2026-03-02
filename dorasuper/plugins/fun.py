@@ -366,11 +366,12 @@ async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, st
         prompt = f"[{user_name}]: {question.strip()}"
         if reply_context and reply_context.strip():
             prompt += f"\n(Ngữ cảnh reply: {reply_context[:500].strip()})"
-        answer = await ask_gemini(prompt)
+        user_id = from_user.id if from_user else None
+        answer = await ask_gemini(prompt, user_id=user_id)
 
         def _actions_to_emoji(m):
             inner = m.group(1)
-            inner = inner.replace("mỉm cười nghiêng đầu", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
+            inner = inner.replace("mỉm cười  ", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
             return inner.strip()
         answer = re.sub(r"\*([^*]+)\*", _actions_to_emoji, answer)
         result = f"{E_BOT} <b>DoraSuper</b>\n\n{answer}"

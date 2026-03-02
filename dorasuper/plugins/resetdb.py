@@ -14,6 +14,7 @@ LOGGER = getLogger("DoraSuper")
 # Danh sách collection đã dùng trong project (để drop khi reset)
 COLLECTION_NAMES = [
     "users",
+    "ai_chat_logs",
     "cleanmode",
     "filters",
     "sangmata",

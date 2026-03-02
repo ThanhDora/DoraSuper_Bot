@@ -737,7 +737,7 @@ async def remove_warning(_, cq, strings):
     await add_warn(chat_id, await int_to_alpha(user_id), warn)
     orig = cq.message.text
     orig_html = orig.html if hasattr(orig, "html") else html.escape(str(orig or ""))
-    text = f"<s>{orig_html}</s>\n\n"
+    text = f"{orig_html}\n\n"
     text += strings("unwarn_msg").format(mention=from_user.mention, **EMOJI_FMT)
     text = re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda m: m.group(1), text)
     await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)

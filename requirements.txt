@@ -45,6 +45,7 @@ standard-imghdr
 # audioop bị gỡ từ stdlib từ Python 3.13; 3.12 không cần audioop-lts
 audioop-lts; python_version >= "3.13"
 yt-dlp
+gallery-dl
 openai
 google-api-python-client
 google-auth

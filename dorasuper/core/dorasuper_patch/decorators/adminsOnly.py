@@ -5,10 +5,11 @@ import pyrogram
 from cachetools import TTLCache
 from pyrogram.methods import Decorators
 
-from dorasuper.emoji import E_ADMIN, E_CLOCK, E_GROUP, E_LOCK, E_TIP, E_WARN, E_VIP
+from dorasuper.emoji import E_ADMIN, E_CLOCK, E_GROUP, E_LOCK, E_TIP, E_WARN
 from ..utils import check_rights, handle_error, is_admin
 
 ANON = TTLCache(maxsize=250, ttl=30)
+_ANON_HANDLER_ADDED = False
 
 # Từ điển dịch quyền sang tiếng Việt
 PERMISSION_TRANSLATIONS = {
@@ -102,7 +103,7 @@ async def anonymous_admin_verification(
                 permissions += f"\n{translated_perm}"
         if permissions != "":
             return await CallbackQuery.message.edit_text(
-                f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n**Quyền cần thiết**: __{permissions}__",
+                f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n<b>Quyền cần thiết</b>: <code>{permissions}</code>",
                 parse_mode=pyrogram.enums.ParseMode.HTML,
             )
     try:
@@ -166,7 +167,7 @@ def adminsOnly(
                 client=client,
             ):
                 return await message.reply_msg(
-                    f"{E_VIP} Chỉ có quản trị viên mới có thể thực hiện lệnh này!", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
+                    f"{E_WARN} Bạn phải là quản trị viên để sử dụng lệnh này.", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
                 )
             if isinstance(permission, str) and not await check_rights(
                 message.chat.id,
@@ -177,7 +178,7 @@ def adminsOnly(
                 # Dịch permission sang tiếng Việt
                 translated_perm = PERMISSION_TRANSLATIONS.get(permission, permission)
                 return await message.reply_msg(
-                    f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n**Quyền cần thiết**: __{translated_perm}__", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
+                    f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n<b>Quyền cần thiết</b>: <code>{translated_perm}</code>", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
                 )
             if isinstance(permission, list):
                 for perm in permission:
@@ -192,7 +193,7 @@ def adminsOnly(
                         permissions += f"\n{translated_perm}"
                 if permissions != "":
                     return await message.reply_msg(
-                        f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n**Quyền cần thiết**: __{permissions}__", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
+                        f"{E_LOCK} Bạn không có quyền cần thiết để thực hiện lệnh này.\n<b>Quyền cần thiết</b>: <code>{permissions}</code>", del_in=_del, parse_mode=pyrogram.enums.ParseMode.HTML
                     )
             try:
                 await func(client, message)
@@ -201,12 +202,15 @@ def adminsOnly(
             except BaseException as exception:
                 await handle_error(exception, message)
 
-        self.add_handler(
-            pyrogram.handlers.CallbackQueryHandler(
-                anonymous_admin_verification,
-                pyrogram.filters.regex("^anon."),
-            ),
-        )
+        global _ANON_HANDLER_ADDED
+        if not _ANON_HANDLER_ADDED:
+            _ANON_HANDLER_ADDED = True
+            self.add_handler(
+                pyrogram.handlers.CallbackQueryHandler(
+                    anonymous_admin_verification,
+                    pyrogram.filters.regex("^anon."),
+                ),
+            )
         return decorator
 
     return wrapper

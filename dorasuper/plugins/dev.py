@@ -56,7 +56,19 @@ from dorasuper.helper.http import fetch
 from dorasuper.helper.human_read import get_readable_file_size, get_readable_time
 from dorasuper.helper.emoji_fmt import EMOJI_FMT, EMOJI_FMT_BTN
 from dorasuper.helper.localization import use_chat_lang
-from dorasuper.emoji import E_ERROR, E_LOADING, E_SUCCESS, E_WARN
+from dorasuper.emoji import (
+    E_CLOCK,
+    E_ERROR,
+    E_GIFT,
+    E_HEART,
+    E_LIST,
+    E_LOADING,
+    E_NOTE,
+    E_STAT,
+    E_SUCCESS,
+    E_USER,
+    E_WARN,
+)
 from dorasuper.vars import AUTO_RESTART, COMMAND_HANDLER, LOG_CHANNEL, SUDO, THUMB_PATH
 
 LOGGER = getLogger("DoraSuper")
@@ -126,7 +138,9 @@ async def pre_checkout_query_handler(_: Client, query: PreCheckoutQuery):
 async def successful_payment_handler(_: Client, message: Message):
     if message.successful_payment:
         await message.reply(
-            f"Cảm ơn vì đã ủng hộ <b>{message.successful_payment.total_amount} {message.successful_payment.currency}</b>! Your transaction ID is : <code>{message.successful_payment.telegram_payment_charge_id}</code>"
+            f"{E_HEART} Cảm ơn bạn đã ủng hộ <b>{message.successful_payment.total_amount} {message.successful_payment.currency}</b>!\n"
+            f"Transaction ID: <code>{message.successful_payment.telegram_payment_charge_id}</code>",
+            parse_mode=enums.ParseMode.HTML,
         )
 
 
@@ -134,16 +148,16 @@ async def successful_payment_handler(_: Client, message: Message):
 async def refund_star_payment(client: Client, message: Message):
     if len(message.command) == 1:
         return await message.reply_msg(
-            "Please input telegram_payment_charge_id after command."
+            f"{E_WARN} Vui lòng nhập telegram_payment_charge_id sau lệnh."
         )
     trx_id = message.command[1]
     try:
         await client.refund_star_payment(message.from_user.id, trx_id)
         await message.reply_msg(
-            f"Great {message.from_user.mention}, your stars has been refunded to your balance."
+            f"{E_SUCCESS} {message.from_user.mention}, stars đã được hoàn lại vào tài khoản của bạn."
         )
     except Exception as e:
-        await message.reply_msg(e)
+        await message.reply_msg(f"{E_ERROR} {e}")
 
 
 @app.on_message(filters.command(["logs"], COMMAND_HANDLER) & filters.user(SUDO))
@@ -157,7 +171,8 @@ async def log_file(_, ctx: Message, strings):
             file_size = os.path.getsize("DoraLogs.txt")
             await ctx.reply_document(
                 "DoraLogs.txt",
-                caption=f"Log Bot\nKích cỡ: {get_readable_file_size(file_size)}",
+                caption=f"{E_LIST} <b>Log Bot</b>\n{E_STAT} Kích cỡ: <code>{get_readable_file_size(file_size)}</code>",
+                parse_mode=enums.ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
@@ -171,7 +186,7 @@ async def log_file(_, ctx: Message, strings):
             )
             await msg.delete_msg()
         except Exception as e:
-            await msg.edit_msg(f"Lỗi khi gửi logs: {str(e)}")
+            await msg.edit_msg(f"{E_ERROR} Lỗi khi gửi logs: {str(e)}")
             asyncio.create_task(_auto_del_msg(msg, 8))
             
     elif len(ctx.command) == 2:
@@ -182,7 +197,7 @@ async def log_file(_, ctx: Message, strings):
                 s.name = "Logs-Tail.txt"
                 await ctx.reply_document(
                     s,
-                    caption=f"{val[1]} dòng cuối Logs của bot",
+                    caption=f"{E_NOTE} {val[1]} dòng cuối Logs của bot",
                     reply_markup=InlineKeyboardMarkup(
                         [
                             [
@@ -196,18 +211,18 @@ async def log_file(_, ctx: Message, strings):
                 )
             await msg.delete_msg()
         except Exception as e:
-            await msg.edit_msg(f"Lỗi khi xử lý lệnh: {str(e)}")
+            await msg.edit_msg(f"{E_ERROR} Lỗi khi xử lý lệnh: {str(e)}")
             asyncio.create_task(_auto_del_msg(msg, 8))
             
     else:
-        await msg.edit_msg("Không hỗ trợ kiểu")
+        await msg.edit_msg(f"{E_WARN} Không hỗ trợ kiểu này.")
         asyncio.create_task(_auto_del_msg(msg, 8))
 
 @app.on_message(filters.command(["dlogs"], COMMAND_HANDLER) & filters.user(SUDO))
 @use_chat_lang()
 async def delete_logs(_, ctx: Message, strings):
     """Delete log file content"""
-    msg = await ctx.reply_msg("<b>Đang xử lý xóa log ...</b>", quote=True)
+    msg = await ctx.reply_msg(f"<b>{E_LOADING} Đang xử lý xóa log ...</b>", quote=True)
     try:
         # Ghi đè file log bằng file rỗng
         with open("DoraLogs.txt", "w") as file:
@@ -219,14 +234,35 @@ async def delete_logs(_, ctx: Message, strings):
         asyncio.create_task(_auto_del_msg(msg, 8))
 
 
+DONATE_MOMO_URL = "https://me.momo.vn/lDIjiWsjuDtos8TNi3IJ"
+DONATE_PAYPAL_URL = "https://paypal.me/dabeecao"
+
+
 @app.on_message(filters.command(["donate"], COMMAND_HANDLER))
 async def donate(self: Client, ctx: Message):
     try:
+        caption = (
+            f"{E_HEART} Xin chào! Nếu bạn thấy bot này hữu ích, hãy ủng hộ để bot chạy ổn định.\n\n"
+            f"{E_GIFT} <b>Phương thức ủng hộ:</b>\n"
+            "• <b>Momo</b> (Cao Duy Anh) – bấm nút bên dưới\n"
+            "• <b>Ngân hàng</b> Vietinbank, MBBank, OCB: <code>0869261804</code> (Cao Duy Anh)\n"
+            "• <b>PayPal</b> – bấm nút bên dưới"
+        )
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("Momo", url=DONATE_MOMO_URL),
+                    InlineKeyboardButton("PayPal", url=DONATE_PAYPAL_URL),
+                ],
+            ]
+        )
         await self.send_photo(
             ctx.chat.id,
             "https://api.dabeecao.org/data/tin-toi-di.jpg",
-            caption="Xin chào, Nếu bạn thấy bot này hữu ích, bạn có thể quyên góp vào tài khoản bên dưới. Bởi vì bot này chạy trên server không miễn phí. Cảm ơn.\n\n<b>Các phương thức ủng hộ:</b>\n<b>Momo:</b> https://me.momo.vn/lDIjiWsjuDtos8TNi3IJ (Cao Duy Anh)\n<b>Ngân hàng Vietinbank, MBBank, OCB:</b> 0869261804 (Cao Duy Anh)\n\nHoặc ủng hộ qua Paypal tại địa chỉ:\nhttps://paypal.me/dabeecao",
+            caption=caption,
             reply_to_message_id=ctx.id,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML,
             message_effect_id=5159385139981059251
             if ctx.chat.type.value == "private"
             else None,
@@ -234,7 +270,8 @@ async def donate(self: Client, ctx: Message):
     except (ChatSendPlainForbidden, ChatSendPhotosForbidden):
         await self.send_message(
             LOG_CHANNEL,
-            f"❗️ <b>WARNING</b>\nI'm leaving from {ctx.chat.id} since i didn't have sufficient admin permissions.",
+            f"{E_WARN} <b>WARNING</b>\nBot rời nhóm {ctx.chat.id} do không đủ quyền admin.",
+            parse_mode=enums.ParseMode.HTML,
         )
         await ctx.chat.leave()
 
@@ -269,7 +306,17 @@ async def server_stats(_, ctx: Message) -> "Message":
 
     neofetch = (await shell_exec("neofetch --stdout"))[0]
 
-    caption = f"<b>{BOT_NAME} {dorasuper_version} is Up and Running successfully.</b>\n\n<code>{neofetch}</code>\n\n**OS Uptime:** <code>{osuptime}</code>\n<b>Bot Uptime:</b> <code>{currentTime}</code>\n**Bot Usage:** <code>{botusage}</code>\n\n**Total Space:** <code>{disk_total}</code>\n**Free Space:** <code>{disk_free}</code>\n\n**Download:** <code>{download}</code>\n**Upload:** <code>{upload}</code>\n\n<b>PyroFork Version</b>: <code>{pyrover}</code>\n<b>Python Version</b>: <code>{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]} {sys.version_info[3].title()}</code>"
+    caption = (
+        f"{E_STAT} <b>{BOT_NAME} {dorasuper_version}</b> đang chạy ổn định.\n\n"
+        f"<code>{neofetch}</code>\n\n"
+        f"{E_CLOCK} <b>OS Uptime:</b> <code>{osuptime}</code>\n"
+        f"{E_CLOCK} <b>Bot Uptime:</b> <code>{currentTime}</code>\n"
+        f"{E_USER} <b>Bot RAM:</b> <code>{botusage}</code>\n\n"
+        f"<b>Disk:</b> <code>{disk_used}</code> / <code>{disk_total}</code> ({disk_percenatge}%)\n"
+        f"<b>Free:</b> <code>{disk_free}</code>\n\n"
+        f"<b>Download:</b> <code>{download}</code> | <b>Upload:</b> <code>{upload}</code>\n\n"
+        f"<b>PyroFork</b>: <code>{pyrover}</code> | <b>Python</b>: <code>{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}</code>"
+    )
 
     if "oracle" in platform.uname().release:
         return await ctx.reply_msg(caption, quote=True)
@@ -336,9 +383,9 @@ async def server_stats(_, ctx: Message) -> "Message":
 async def ban_globally(self: Client, ctx: Message):
     user_id, reason = await extract_user_and_reason(ctx)
     if not user_id:
-        return await ctx.reply_text("Tôi không thể tìm thấy người dùng đó.")
+        return await ctx.reply_text(f"{E_ERROR} Tôi không thể tìm thấy người dùng đó.")
     if not reason:
-        return await ctx.reply("Không có lý do được cung cấp.")
+        return await ctx.reply(f"{E_WARN} Vui lòng cung cấp lý do cấm.")
 
     try:
         getuser = await app.get_users(user_id)
@@ -351,10 +398,10 @@ async def ban_globally(self: Client, ctx: Message):
     from_user = ctx.from_user
 
     if user_id in [from_user.id, self.me.id] or user_id in SUDO:
-        return await ctx.reply_text("Tôi không thể cấm người dùng đó.")
+        return await ctx.reply_text(f"{E_WARN} Tôi không thể cấm người dùng đó.")
     served_chats = await db.get_all_chats()
     m = await ctx.reply_text(
-        f"**Cấm {user_mention} Toàn bộ! Việc này có thể mất nhiều thời gian.**"
+        f"{E_LOADING} Đang cấm {user_mention} toàn bộ nhóm... Có thể mất vài phút."
     )
     await add_gban_user(user_id)
     number_of_chats = 0
@@ -372,7 +419,7 @@ async def ban_globally(self: Client, ctx: Message):
             user_id,
             f"Xin chào, Bạn đã bị cấm trên toàn cầu bởi {from_user.mention}, Bạn có thể kháng cáo lệnh cấm này bằng cách nói chuyện với anh ấy.",
         )
-    await m.edit(f"Đã cấm {user_mention} toàn cầu!")
+    await m.edit(f"{E_SUCCESS} Đã cấm {user_mention} toàn cầu!")
     ban_text = f"""
 __**New Global Ban**__
 **Origin:** {ctx.chat.title}
@@ -387,12 +434,14 @@ __**New Global Ban**__
             disable_web_page_preview=True,
         )
         await m.edit(
-            f"Đã cấm {user_mention} toàn cầu!\nNhật ký hành động: {m2.link}",
-            disable_web_page_preview=True,
+            f"{E_SUCCESS} Đã cấm {user_mention} toàn cầu!",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Xem nhật ký hành động", url=m2.link)]]
+            ),
         )
     except Exception:
         await ctx.reply_text(
-            "Người Dùng Đã Bị Cấm, Nhưng Hành Động Gban Này Không Được Ghi Lại, Thêm Tôi Vào LOG_CHANNEL"
+            f"{E_WARN} Đã cấm người dùng nhưng không ghi được log. Thêm bot vào LOG_CHANNEL."
         )
 
 
@@ -401,7 +450,7 @@ __**New Global Ban**__
 async def unban_globally(_, ctx: Message):
     user_id = await extract_user(ctx)
     if not user_id:
-        return await ctx.reply_text("Tôi không thể tìm thấy người dùng đó.")
+        return await ctx.reply_text(f"{E_ERROR} Tôi không thể tìm thấy người dùng đó.")
     try:
         getuser = await app.get_users(user_id)
         user_mention = getuser.mention
@@ -412,10 +461,10 @@ async def unban_globally(_, ctx: Message):
 
     is_gbanned = await is_gbanned_user(user_id)
     if not is_gbanned:
-        await ctx.reply_text("Tôi không nhớ đã cấm anh ấy.")
+        await ctx.reply_text(f"{E_WARN} Người này không có trong danh sách cấm toàn cầu.")
     else:
         await remove_gban_user(user_id)
-        await ctx.reply_text(f"Đã bỏ lệnh cấm {user_mention}.'")
+        await ctx.reply_text(f"{E_SUCCESS} Đã bỏ lệnh cấm toàn cầu {user_mention}.")
 
 
 @app.on_message(
@@ -642,7 +691,7 @@ async def update_restart(_, ctx: Message, strings):
 # Dừng bot hoàn toàn (chỉ SUDO)
 @app.on_message(filters.command(["stop", "shutdown"], COMMAND_HANDLER) & filters.user(SUDO))
 async def stop_bot(_, ctx: Message):
-    await ctx.reply_msg("Đang dừng bot...")
+    await ctx.reply_msg(f"{E_WARN} Đang dừng bot...")
     sys.exit(0)
 
 

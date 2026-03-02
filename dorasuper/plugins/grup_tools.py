@@ -45,8 +45,7 @@ from dorasuper.helper import fetch, use_chat_lang
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.vars import COMMAND_HANDLER, SUDO, SUPPORT_CHAT
 from utils import temp
-from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_OTO, E_SUCCESS, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
-from dorasuper.vars import COMMAND_HANDLER, SUDO
+from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_NOTE, E_OTO, E_SUCCESS, E_USER, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
 
 
 LOGGER = getLogger("DoraSuper")
@@ -604,22 +603,29 @@ async def tag_by_id(client, message):
 @capture_err
 async def adminlist(_, message):
     if message.chat.type == enums.ChatType.PRIVATE:
-        return await message.reply(f"{E_ERROR} Lệnh này chỉ dành cho nhóm")
+        return await message.reply(f"{E_ERROR} Lệnh này chỉ dành cho nhóm.")
     try:
-        msg = await message.reply_msg(f"{E_LOADING} Đang lấy danh sách quản trị viên trong {message.chat.title}..")
+        msg = await message.reply_msg(
+            f"{E_LOADING} Đang lấy danh sách quản trị viên trong {message.chat.title}...",
+            parse_mode=enums.ParseMode.HTML,
+        )
         administrators = []
         async for m in app.get_chat_members(
             message.chat.id, filter=enums.ChatMembersFilter.ADMINISTRATORS
         ):
-            uname = f"@{m.user.username}" if m.user.username else ""
-            administrators.append(f"{m.user.first_name} [{uname}]")
+            u = m.user
+            name = (u.first_name or "") if u else "Deleted"
+            uname = f"@{u.username}" if u and getattr(u, "username", None) else ""
+            administrators.append(f"{name} [{uname}]".strip())
 
-        res = "".join(f"💠 {i}\n" for i in administrators)
-        return await msg.edit_msg(
-            f"Admin trong nhóm <b>{message.chat.title}</b> ({message.chat.id}):\n{res}"
+        res = "".join(f"• {i}\n" for i in administrators)
+        text = (
+            f"<b>Admin trong nhóm {message.chat.title}</b> (<code>{message.chat.id}</code>):\n\n{res}"
         )
+        await msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
-        await message.reply(f"{E_ERROR} ERROR: {str(e)}")
+        LOGGER.exception("dsadmin error")
+        await message.reply(f"{E_ERROR} Lỗi: {str(e)}")
 
 @app.on_message(filters.command(["suttoi"], COMMAND_HANDLER))
 @capture_err

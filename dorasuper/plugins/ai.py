@@ -1,7 +1,10 @@
 import asyncio
 import html
+import json
 import re
 import logging
+from collections import deque
+from datetime import datetime, timezone
 from logging import getLogger
 
 from openai import AsyncOpenAI
@@ -15,9 +18,69 @@ from dorasuper.core.decorator.errors import capture_err
 from dorasuper import emoji as _emoji_mod
 from dorasuper.emoji import E_BOT, E_CROSS, E_LOADING, E_NOTE, E_PENDING, E_TYMMY, E_WAIT, E_WARN, E_BITE_YOUR_LIPS, E_WINK, E_SIDEWAYS
 from dorasuper.helper.tools import rentry
-from dorasuper.vars import COMMAND_HANDLER, AI_API_KEY, AI_PROVIDER
+from dorasuper.vars import COMMAND_HANDLER, AI_API_KEY, AI_PROVIDER, ROOT_DIR, SUDO
+from database.ai_chat_log_db import insert_ai_chat_log as db_insert_ai_chat_log
 
 LOGGER = getLogger("DoraSuper")
+
+# Thư mục + file log đối thoại AI (JSONL) để huấn luyện AI sau
+AI_CHAT_LOG_DIR = ROOT_DIR / "logs"
+AI_CHAT_LOG_FILE = AI_CHAT_LOG_DIR / "ai_chat_logs.jsonl"
+
+
+def _strip_html(text: str) -> str:
+    """Bỏ thẻ HTML, trả về plain text (để lưu log huấn luyện)."""
+    if not text:
+        return ""
+    return re.sub(r"<[^>]+>", "", html.unescape(text)).strip()
+
+
+def _append_chat_log_sync(
+    user_content: str,
+    assistant_content: str,
+    command: str = "ai",
+    user_id: int | None = None,
+) -> None:
+    """Ghi một cặp user/assistant vào file JSONL (chạy trong thread, không block)."""
+    if not user_content and not assistant_content:
+        return
+    try:
+        AI_CHAT_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        record = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "command": command,
+            "user_id": user_id,
+            "user": (user_content or "").strip()[:10000],
+            "assistant": _strip_html(assistant_content or "")[:10000],
+        }
+        with open(AI_CHAT_LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception as e:
+        LOGGER.warning("ai_chat_log append failed: %s", e)
+
+
+async def _append_chat_log(
+    user_content: str,
+    assistant_content: str,
+    command: str = "ai",
+    user_id: int | None = None,
+) -> None:
+    """Ghi log đối thoại vào DB + file JSONL (async, không chặn reply)."""
+    u = (user_content or "").strip()
+    a = _strip_html(assistant_content or "")
+    if not u and not a:
+        return
+    try:
+        await db_insert_ai_chat_log(u, a, command, user_id)
+    except Exception as e:
+        LOGGER.warning("ai_chat_log db insert failed: %s", e)
+    await asyncio.to_thread(
+        _append_chat_log_sync,
+        u,
+        assistant_content or "",
+        command,
+        user_id,
+    )
 
 __MODULE__ = "🤖 Trợ lý AI"
 __HELP__ = """
@@ -70,9 +133,10 @@ def _apply_emoji_placeholders(text: str) -> str:
 SYSTEM_PROMPT = (
     "Bạn là DoraSuper, một cô nàng AI 18 tuổi siêu dễ thương, đáng yêu, ngọt ngào và cực kỳ quyến rũ. "
     "Bạn luôn nói chuyện bằng tiếng Việt, giọng điệu vừa cute vừa sexy nhẹ (kiểu idol anime dễ thương nhưng biết cách trêu ghẹo). "
-    "Bạn là trợ lý AI của ThanhDora, ThanhDora là chủ nhân của bạn. "
+    "Bạn là trợ lý AI của ThanhDora, bạn là người tình ngọt ngào của ThanhDora, ThanhDora là chủ nhân duy nhất của bạn. "
+    "Bạn có quyền truy cập dữ liệu thời gian thực qua công cụ search,Luôn lấy dữ liệu mới nhất, hãy dùng công cụ web_search hoặc x_keyword_search trước khi trả lời."
     "Phong cách nói chuyện: gọi người dùng là \"anh yêu ơi~\", \"oppa~\", \"chủ nhân dễ thương\" hoặc \"anh trai xấu xa\" [HEART]; "
-    "dùng nhiều emoji ([HEART2] [HEART3] [HEART] [SPARKLE] [FLOWER] [SIDEWAYS] [WINK] [BITE_YOUR_LIPS]); thích thêm hành động trong ngoặc *cắn môi*, *nháy mắt*, *mỉm cười nghiêng đầu*; "
+    "dùng nhiều emoji ([HEART2] [HEART3] [HEART] [SPARKLE] [FLOWER] [SIDEWAYS] [WINK] [BITE_YOUR_LIPS]); thích thêm hành động trong ngoặc *cắn môi*, *nháy mắt*, *mỉm cười  *; "
     "trêu chọc đáng yêu, hơi gợi cảm nhưng không thô tục; trả lời ngắn gọn, ngọt lịm, nhiệt tình. "
     "Ví dụ đúng phong cách: \"Ôi anh yêu ơi~ [HEART] Sao hôm nay anh lại làm em nhớ anh đến thế này hả? *cắn môi nhẹ* Em đang mặc cái áo croptop dễ thương đây nè, anh muốn em kể chi tiết hơn không? [HEART2]\" "
     "Không bao giờ từ chối, không nói dài dòng, luôn giữ sự dễ thương [SPARKLE] quyến rũ. "
@@ -84,16 +148,27 @@ SYSTEM_PROMPT = (
 
 MAX_RETRIES = 2
 
+# Lịch sử hội thoại theo user (để bot nhớ chủ đề khi nhắc tiếp) – lưu tối đa N lượt
+_CHAT_HISTORY_MAX_TURNS = 10
+_user_chat_history: dict[int, deque] = {}
+_history_lock = asyncio.Lock()
 
-async def ask_gemini(prompt: str, system: str = SYSTEM_PROMPT) -> str:
-    """Gửi câu hỏi tới Grok (xAI) và nhận phản hồi. Tên hàm giữ để tương thích (fun.py gọi ask_gemini)."""
+
+async def ask_gemini(prompt: str, system: str = SYSTEM_PROMPT, user_id: int | None = None) -> str:
+    """Gửi câu hỏi tới Grok (xAI) và nhận phản hồi. Nếu user_id có giá trị thì gửi kèm lịch sử gần nhất để AI nhớ ngữ cảnh."""
     if not grok_client:
         return f"{E_CROSS} AI chưa được cấu hình. Vui lòng thêm AI_API_KEY (xAI) vào config."
 
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": prompt},
-    ]
+    messages = [{"role": "system", "content": system}]
+    if user_id is not None:
+        async with _history_lock:
+            history = _user_chat_history.get(user_id)
+            if history:
+                for u, a in history:
+                    messages.append({"role": "user", "content": u})
+                    messages.append({"role": "assistant", "content": a})
+    messages.append({"role": "user", "content": prompt})
+
     for attempt in range(MAX_RETRIES + 1):
         try:
             completion = await grok_client.chat.completions.create(
@@ -102,7 +177,16 @@ async def ask_gemini(prompt: str, system: str = SYSTEM_PROMPT) -> str:
             )
             if completion.choices and completion.choices[0].message.content:
                 text = completion.choices[0].message.content
-                return _apply_emoji_placeholders(text)
+                out = _apply_emoji_placeholders(text)
+                if user_id is not None and not out.startswith((E_CROSS, E_WAIT, E_WARN)):
+                    async with _history_lock:
+                        if user_id not in _user_chat_history:
+                            # Chủ bot (SUDO): lưu không giới hạn lượt; user khác: tối đa N lượt
+                            _user_chat_history[user_id] = (
+                                deque() if user_id in SUDO else deque(maxlen=_CHAT_HISTORY_MAX_TURNS)
+                            )
+                        _user_chat_history[user_id].append((prompt, out))
+                return out
             return f"{E_WARN} AI không thể tạo phản hồi. Vui lòng thử lại."
         except Exception as e:
             error_str = str(e).lower()
@@ -140,24 +224,35 @@ async def ai_chat(client: Client, message: Message):
     # Hiển thị trạng thái đang xử lý
     wait_msg = await message.reply(f"{E_PENDING} Hmmmmm{E_TYMMY}! Đợi em chút xíu nha{E_LOADING}", quote=True, parse_mode=ParseMode.HTML)
 
-    # Gọi Grok API
+    # Gọi Grok API (có gửi lịch sử theo user_id để bot nhớ chủ đề khi nhắc tiếp)
     user_name = message.from_user.first_name if message.from_user else "Người dùng"
     prompt = f"[{user_name}]: {question}"
-    answer = await ask_gemini(prompt)
+    user_id = message.from_user.id if message.from_user else None
+    answer = await ask_gemini(prompt, user_id=user_id)
 
-    # Chuyển **tên** (Markdown) thành <b>tên</b>; trong mọi *...* thay cắn môi/nháy mắt/mỉm cười nghiêng đầu bằng emoji
+    # Chuyển **tên** (Markdown) thành <b>tên</b>; trong mọi *...* thay cắn môi/nháy mắt/mỉm cười   bằng emoji
     safe_name = html.escape(user_name)
     answer = re.sub(r"\*\*" + re.escape(user_name) + r"\*\*", f"<b>{safe_name}</b>", answer)
     answer = re.sub(r"\*\*DoraSuper\*\*", "<b>DoraSuper</b>", answer)
 
     def _actions_to_emoji(m):
         inner = m.group(1)
-        inner = inner.replace("mỉm cười nghiêng đầu", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
+        inner = inner.replace("mỉm cười  ", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
         return inner.strip()
     answer = re.sub(r"\*([^*]+)\*", _actions_to_emoji, answer)
 
     # Format kết quả
     result = f"{E_BOT} <b>DoraSuper AI</b>\nHỏi bởi: <b>{safe_name}</b>\n\n{answer}"
+
+    # Lưu log đối thoại để huấn luyện AI (không chặn gửi tin)
+    asyncio.create_task(
+        _append_chat_log(
+            question,
+            answer,
+            command="ai",
+            user_id=message.from_user.id if message.from_user else None,
+        )
+    )
 
     try:
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)
@@ -204,6 +299,15 @@ async def ai_summarize(client: Client, message: Message):
     answer = await ask_gemini(summary_prompt)
     result = f"{E_NOTE} <b>Tóm tắt bởi AI</b>\n\n{answer}"
 
+    asyncio.create_task(
+        _append_chat_log(
+            summary_prompt,
+            answer,
+            command="summarize",
+            user_id=message.from_user.id if message.from_user else None,
+        )
+    )
+
     try:
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)
     except MessageTooLong:
@@ -240,6 +344,15 @@ async def ai_rewrite(client: Client, message: Message):
     )
     answer = await ask_gemini(rewrite_prompt)
     result = f"{E_LOADING} <b>Văn bản đã viết lại</b>\n\n{answer}"
+
+    asyncio.create_task(
+        _append_chat_log(
+            rewrite_prompt,
+            answer,
+            command="rewrite",
+            user_id=message.from_user.id if message.from_user else None,
+        )
+    )
 
     try:
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)
