@@ -100,7 +100,7 @@ __HELP__ = """
 
 # Cấu hình Grok (xAI) – chỉ dùng khi AI_PROVIDER=grok
 XAI_BASE_URL = "https://api.x.ai/v1"
-GROK_MODEL = "grok-4-1-fast-non-reasoning"
+GROK_MODEL = "grok-4-1-fast-reasoning"
 grok_client = AsyncOpenAI(api_key=AI_API_KEY, base_url=XAI_BASE_URL) if (AI_API_KEY and AI_PROVIDER == "grok") else None
 
 # Placeholder cho AI: [TÊN] → emoji từ dorasuper/emoji.py (tất cả E_* dạng chuỗi)

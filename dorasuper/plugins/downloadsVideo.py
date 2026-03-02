@@ -6,6 +6,7 @@ import html
 import io
 import os
 import re
+from pathlib import Path
 import shutil
 import subprocess
 import tempfile
@@ -24,14 +25,25 @@ from dorasuper.core.decorator.permissions import require_admin
 from database.autodl_db import toggle_autodl
 from dorasuper.emoji import E_ERROR, E_HEART, E_LINK, E_VIEW, E_LOADING, E_MUSIC, E_SUCCESS, E_TIP, E_USER
 from dorasuper.helper.pyro_progress import humanbytes
-from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR, COBALT_URL
+from dorasuper.vars import (
+    COMMAND_HANDLER,
+    ROOT_DIR,
+    COBALT_URL,
+    YT_DLP_COOKIES_FILE,
+    YT_DLP_COOKIES_FROM_BROWSER,
+    INSTAGRAM_USERNAME,
+    INSTAGRAM_PASSWORD,
+    INSTAGRAM_SESSION,
+)
 
 LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "TảiVideo"
 __HELP__ = """
-<blockquote>Gửi link TikTok - Bot tự tải và gửi video hoặc ảnh (cả bài 1 ảnh và album nhiều ảnh).
-Ảnh TikTok được tải bằng gallery-dl (ưu tiên), TikWM hoặc scrape.
+<blockquote>Gửi link TikTok, Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
+• TikTok: video + ảnh/album (gallery-dl, TikWM, Cobalt)
+• Facebook: video (fb.com, fb.watch, facebook.com)
+• Instagram: video/Reels (instagram.com)
 
 Lệnh:
 /autodl - Bật/tắt tự động tải link trong nhóm (admin)
@@ -41,13 +53,20 @@ Lệnh:
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 MAX_ALBUM_PHOTOS = 10  # Telegram giới hạn media group tối đa 10 ảnh
 
-# Regex theo từng nền tảng (dễ mở rộng thêm Instagram, YouTube, ...)
+# Regex theo từng nền tảng (dễ mở rộng thêm YouTube, ...)
 URL_PATTERNS = {
     "tiktok": re.compile(
-        r"(?:https?://)?(?:www\.|vm\.|vt\.|m\.|t\.)?(?:tiktok\.com|tiktokv\.com)/[^\s]+",
+        r"(?:https?://)?(?:www\.|vm\.|vt\.|m\.|t\.)?(?:tiktok\.com|tiktokv\.com|kktiktok\.com)/[^\s]+",
         re.IGNORECASE,
     ),
-    # Thêm sau: "instagram": ..., "youtube": ...
+    "facebook": re.compile(
+        r"(?:https?://)?(?:www\.|m\.|mbasic\.|fb\.)?(?:facebook\.com|fb\.com|fb\.watch|fb\.me)/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "instagram": re.compile(
+        r"(?:https?://)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)/[^\s]+",
+        re.IGNORECASE,
+    ),
 }
 
 
@@ -313,6 +332,67 @@ def _extract_photo_urls_from_html(html_text: str) -> list[str]:
     return urls[:MAX_ALBUM_PHOTOS] if urls else []
 
 
+def _download_instagram_instagrapi_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
+    """Tải ảnh/video bài post Instagram bằng instagrapi (cần đăng nhập). Trả về (danh sách path, None) hoặc (None, lỗi)."""
+    if not INSTAGRAM_USERNAME or not (INSTAGRAM_PASSWORD or INSTAGRAM_SESSION):
+        return None, "Chưa cấu hình INSTAGRAM_USERNAME và INSTAGRAM_PASSWORD (hoặc INSTAGRAM_SESSION) trong config.env."
+    u = (url or "").strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    if "instagram.com" not in u.lower():
+        return None, "URL không phải Instagram."
+    try:
+        from instagrapi import Client
+
+        cl = Client()
+        if INSTAGRAM_SESSION:
+            cl.login_by_sessionid(INSTAGRAM_SESSION)
+        else:
+            cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
+        out_path = Path(os.path.abspath(out_dir))
+        media_pk = cl.media_pk_from_url(u)
+        info = cl.media_info(media_pk)
+        media_type = getattr(info, "media_type", None) or (info.dict().get("media_type") if hasattr(info, "dict") else None)
+        paths: list[str] = []
+        if media_type == 1:
+            # Photo
+            p = cl.photo_download(media_pk, folder=out_path)
+            if p and os.path.isfile(p):
+                paths.append(str(p))
+        elif media_type == 8:
+            # Album / carousel
+            downloaded = cl.album_download(media_pk, folder=out_path)
+            if isinstance(downloaded, list):
+                for x in downloaded:
+                    if x and os.path.isfile(x):
+                        paths.append(str(x))
+            elif downloaded and os.path.isfile(downloaded):
+                paths.append(str(downloaded))
+        else:
+            # Video / reel / igtv
+            try:
+                p = cl.video_download(media_pk, folder=out_path)
+                if p and os.path.isfile(p):
+                    paths.append(str(p))
+            except Exception:
+                try:
+                    p = cl.clip_download(media_pk, folder=out_path)
+                    if p and os.path.isfile(p):
+                        paths.append(str(p))
+                except Exception:
+                    pass
+        if not paths:
+            return None, "instagrapi không tải được file."
+        return paths[:MAX_ALBUM_PHOTOS], None
+    except ImportError:
+        return None, "Chưa cài instagrapi (pip install instagrapi)."
+    except Exception as e:
+        msg = _strip_ansi(str(e))[:200]
+        if "login" in msg.lower() or "challenge" in msg.lower():
+            msg = "Đăng nhập Instagram thất bại hoặc cần xác minh. Thử đổi mật khẩu hoặc dùng sessionid."
+        return None, msg
+
+
 def _download_images_gallery_dl_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
     """Tải ảnh bằng gallery-dl (TikTok, Instagram, nhiều gallery...). Trả về (danh sách path ảnh, None) hoặc (None, lỗi)."""
     gdl = shutil.which("gallery-dl")
@@ -558,8 +638,17 @@ async def _download_tiktok_via_tikwm(url: str, out_dir: str) -> tuple[list[str] 
     return paths, meta, None
 
 
+def _normalize_tiktok_url(url: str) -> str:
+    """kktiktok.com → tiktok.com (bỏ 'kk' là ra link gốc)."""
+    if not url or "kktiktok" not in url.lower():
+        return url
+    return re.sub(r"kktiktok\.com", "tiktok.com", url, flags=re.IGNORECASE)
+
+
 async def _process_download(ctx: Message, url: str, platform: str):
     """Xử lý tải và gửi media (video, ảnh đơn hoặc album ảnh TikTok)."""
+    if platform == "tiktok":
+        url = _normalize_tiktok_url(url)
     m = await ctx.reply_msg(f"Đang tải từ {platform}{E_LOADING}", quote=True)
 
     # TikTok: ưu tiên Cobalt (redirect/tunnel/picker — theo ytttins_dl)
@@ -795,6 +884,17 @@ async def _process_download(ctx: Message, url: str, platform: str):
             paths_tikwm, info_tikwm, err_tikwm = await _download_tiktok_via_tikwm(url, out_dir)
             if paths_tikwm and not err_tikwm:
                 paths, err, info = paths_tikwm, None, info_tikwm or info
+        # Instagram: thử instagrapi (đăng nhập) rồi gallery-dl
+        if (err or not paths) and platform == "instagram":
+            paths_ig, err_ig = await asyncio.to_thread(_download_instagram_instagrapi_sync, url, out_dir)
+            if paths_ig:
+                paths, err, info = paths_ig, None, {}
+            else:
+                paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
+                if paths_gd:
+                    paths, err, info = paths_gd, None, {}
+                else:
+                    err = f"Instagram: {err_gd or err_ig or err}"
         if err:
             return await m.edit_msg(f"{E_ERROR} {err}")
 
@@ -953,7 +1053,7 @@ async def cmd_download(_, ctx: Message):
 
     if not url:
         return await ctx.reply_msg(
-            f"{E_ERROR} Gửi link hoặc trả lời tin có link.\nVí dụ: <code>/dl https://vm.tiktok.com/xxx</code>",
+            f"{E_ERROR} Gửi link hoặc trả lời tin có link.\nVí dụ: <code>/dl https://vm.tiktok.com/xxx</code> hoặc link Facebook/Instagram.",
             parse_mode=enums.ParseMode.HTML,
         )
     await _process_download(ctx, url, platform)

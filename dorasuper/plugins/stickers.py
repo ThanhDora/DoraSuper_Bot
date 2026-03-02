@@ -300,32 +300,47 @@ async def convert_video(filename: str) -> str:
         os.remove(filename)
     return webm_video
 
+async def _del_user_cmd(client, chat_id, msg_id):
+    try:
+        await client.delete_messages(chat_id, msg_id)
+    except Exception:
+        pass
+
 @app.on_message(filters.command(["mmf"], COMMAND_HANDLER))
 @capture_err
-async def memify(_, message):
+async def memify(client, message):
     if message.chat.type != enums.ChatType.GROUP and message.chat.type != enums.ChatType.SUPERGROUP:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ như @thuthuatjb_sp để sử dụng.")
+        await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ như @thuthuatjb_sp để sử dụng.")
+        await _del_user_cmd(client, message.chat.id, message.id)
+        return
+    rid = message.id
     if not message.reply_to_message:
         await message.reply_msg(
-            "Vui lòng trả lời một sticker, ảnh hoặc video. Sử dụng dấu ; để phân tách văn bản trên và dưới."
+            "Vui lòng trả lời một sticker, ảnh hoặc video. Sử dụng dấu ; để phân tách văn bản trên và dưới.",
+            reply_to_message_id=rid,
         )
+        await _del_user_cmd(client, message.chat.id, message.id)
         return
 
     reply = message.reply_to_message
     if not (reply.sticker or reply.photo or reply.video or reply.animation or reply.document):
         await message.reply_msg(
-            "Vui lòng reply đến một sticker, ảnh, video, sticker động hoặc GIF."
+            "Vui lòng reply đến một sticker, ảnh, video, sticker động hoặc GIF.",
+            reply_to_message_id=rid,
         )
+        await _del_user_cmd(client, message.chat.id, message.id)
         return
 
     if not message.text or len(message.text.split()) < 2:
         await message.reply_msg(
-            "Vui lòng cung cấp văn bản cho meme, ví dụ: /mmf Văn bản trên;Văn bản dưới"
+            "Vui lòng cung cấp văn bản cho meme, ví dụ: /mmf Văn bản trên;Văn bản dưới",
+            reply_to_message_id=rid,
         )
+        await _del_user_cmd(client, message.chat.id, message.id)
         return
 
     # Thông báo đang xử lý
-    processing_msg = await message.reply_msg(f"{E_LOADING} Đang xử lý...")
+    processing_msg = await message.reply_msg(f"{E_LOADING} Đang xử lý...", reply_to_message_id=rid)
 
     webp = None
     png = None
@@ -336,6 +351,7 @@ async def memify(_, message):
         file_path = await reply.download(file_name=os.path.join(tempfile.gettempdir(), f"temp_{unique_id}"))
         if not file_path:
             await processing_msg.edit(f"{E_ERROR} Không thể tải xuống tệp.")
+            await _del_user_cmd(client, message.chat.id, message.id)
             return
 
         # Lấy thông tin mime_type và file_name
@@ -345,6 +361,7 @@ async def memify(_, message):
         if not await check_file_size(file_path):
             hapus(file_path)
             await processing_msg.edit(f"{E_ERROR} Tệp quá lớn! Kích thước tối đa là 50MB.")
+            await _del_user_cmd(client, message.chat.id, message.id)
             return
 
         # Kiểm tra sticker động TGS
@@ -352,6 +369,7 @@ async def memify(_, message):
         if is_tgs:
             hapus(file_path)
             await processing_msg.edit(f"{E_ERROR} Sticker động định dạng TGS không được hỗ trợ.")
+            await _del_user_cmd(client, message.chat.id, message.id)
             return
 
         # Kiểm tra sticker động (WebM)
@@ -362,43 +380,51 @@ async def memify(_, message):
             if not output_file:
                 hapus(file_path)
                 await processing_msg.edit(f"{E_ERROR} Không thể xử lý video/GIF. Đảm bảo FFmpeg được cài đặt và file hợp lệ.")
+                await _del_user_cmd(client, message.chat.id, message.id)
                 return
             hapus(file_path)
             await processing_msg.delete()
             await message.reply_video(
                 output_file,
                 caption=f"{E_SUCCESS} Meme Video/GIF by DoraSuper",
-                disable_notification=True
+                disable_notification=True,
+                reply_to_message_id=rid,
             )
+            await _del_user_cmd(client, message.chat.id, message.id)
         elif reply.sticker and (reply.sticker.is_animated or is_webm):
             temp_image = await get_middle_frame(file_path)
             if not temp_image:
                 hapus(file_path)
                 await processing_msg.edit(f"{E_ERROR} Không thể xử lý sticker động. Đảm bảo FFmpeg được cài đặt và file hợp lệ.")
+                await _del_user_cmd(client, message.chat.id, message.id)
                 return
             hapus(file_path)
             file_path = temp_image
             webp, png = await draw_meme_text(file_path, message.text.split(None, 1)[1].strip())
             await processing_msg.delete()
             await gather(
-                message.reply_document(png, caption=f"{E_SUCCESS} Meme PNG by DoraSuper"),
-                message.reply_sticker(webp, emoji="😄", disable_notification=True)
+                message.reply_document(png, caption=f"{E_SUCCESS} Meme PNG by DoraSuper", reply_to_message_id=rid),
+                message.reply_sticker(webp, emoji="😄", disable_notification=True, reply_to_message_id=rid)
             )
+            await _del_user_cmd(client, message.chat.id, message.id)
         else:
             if not await is_valid_image(file_path):
                 hapus(file_path)
                 await processing_msg.edit(f"{E_ERROR} File tải xuống không phải ảnh hợp lệ.")
+                await _del_user_cmd(client, message.chat.id, message.id)
                 return
             webp, png = await draw_meme_text(file_path, message.text.split(None, 1)[1].strip())
             await processing_msg.delete()
             await gather(
-                message.reply_document(png, caption=f"{E_SUCCESS} Meme PNG by DoraSuper"),
-                message.reply_sticker(webp, emoji="😄", disable_notification=True)
+                message.reply_document(png, caption=f"{E_SUCCESS} Meme PNG by DoraSuper", reply_to_message_id=rid),
+                message.reply_sticker(webp, emoji="😄", disable_notification=True, reply_to_message_id=rid)
             )
+            await _del_user_cmd(client, message.chat.id, message.id)
 
     except Exception as err:
         LOGGER.error(f"Error in memify: {str(err)}", exc_info=True)
         await processing_msg.edit(f"{E_ERROR} Lỗi: {str(err)}")
+        await _del_user_cmd(client, message.chat.id, message.id)
     finally:
         for file in [webp, png, file_path, output_file]:
             try:
@@ -407,48 +433,64 @@ async def memify(_, message):
             except:
                 pass
 
-@app.on_message(filters.command(["laysticker"], COMMAND_HANDLER))
+@app.on_message(filters.command(["laysticker"], COMMAND_HANDLER), group=2)
 @use_chat_lang()
 async def getsticker_(self: Client, ctx: Message, strings):
+    rid = ctx.id
     if not ctx.reply_to_message:
-        return await ctx.reply_msg(strings("not_sticker").format(**EMOJI_FMT))
+        await ctx.reply_msg(strings("not_sticker").format(**EMOJI_FMT), reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
     sticker = ctx.reply_to_message.sticker
     if not sticker:
-        return await ctx.reply_msg(f"{E_ERROR} Chỉ hỗ trợ sticker..")
+        await ctx.reply_msg(f"{E_ERROR} Chỉ hỗ trợ sticker..", reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
     if sticker.is_animated:
-        return await ctx.reply_msg(strings("no_anim_stick").format(**EMOJI_FMT))
+        await ctx.reply_msg(strings("no_anim_stick").format(**EMOJI_FMT), reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
     with tempfile.TemporaryDirectory() as tempdir:
         path = os.path.join(tempdir, "getsticker")
         sticker_file = await self.download_media(
             message=ctx.reply_to_message,
             file_name=f"{path}/{sticker.set_name}.png",
         )
-        await ctx.reply_to_message.reply_document(
+        await ctx.reply_document(
             document=sticker_file,
             caption=f"<b>Emoji:</b> {sticker.emoji}\n"
             f"<b>Sticker ID:</b> <code>{sticker.file_id}</code>\n\n"
             f"<b>Gửi bởi:</b> @{self.me.username}",
+            reply_to_message_id=rid,
         )
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
         shutil.rmtree(tempdir, ignore_errors=True)
 
-@app.on_message(filters.command("stickerid", COMMAND_HANDLER) & filters.reply)
+@app.on_message(filters.command("stickerid", COMMAND_HANDLER) & filters.reply, group=2)
 async def getstickerid(_, ctx: Message):
     if ctx.reply_to_message.sticker:
         await ctx.reply_msg(
             "ID của nhãn dán này là: <code>{stickerid}</code>".format(
                 stickerid=ctx.reply_to_message.sticker.file_id
-            )
+            ),
+            reply_to_message_id=ctx.id,
         )
+        await _del_user_cmd(app, ctx.chat.id, ctx.id)
 
-@app.on_message(filters.command("unkang", COMMAND_HANDLER) & filters.reply)
+@app.on_message(filters.command("unkang", COMMAND_HANDLER) & filters.reply, group=2)
 @use_chat_lang()
 async def unkangs(self: Client, ctx: Message, strings):
+    rid = ctx.id
     if not ctx.from_user:
-        return await ctx.reply_msg(strings("unkang_anon").format(**EMOJI_FMT))
+        await ctx.reply_msg(strings("unkang_anon").format(**EMOJI_FMT), reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
     if sticker := ctx.reply_to_message.sticker:
         if str(ctx.from_user.id) not in sticker.set_name:
-            return await ctx.reply_msg(strings("unkang_no").format(**EMOJI_FMT))
-        pp = await ctx.reply_msg(strings("unkang_msg").format(**EMOJI_FMT))
+            await ctx.reply_msg(strings("unkang_no").format(**EMOJI_FMT), reply_to_message_id=rid)
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
+            return
+        pp = await ctx.reply_msg(strings("unkang_msg").format(**EMOJI_FMT), reply_to_message_id=rid)
         try:
             decoded = FileId.decode(sticker.file_id)
             sticker = InputDocument(
@@ -460,15 +502,21 @@ async def unkangs(self: Client, ctx: Message, strings):
             await pp.edit_msg(strings("unkang_success").format(**EMOJI_FMT))
         except Exception as e:
             await pp.edit_msg(strings("unkang_error").format(e=e, **EMOJI_FMT))
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
     else:
-        await ctx.reply_msg(strings("unkang_help").format(c=self.me.username, **EMOJI_FMT), del_in=6)
+        await ctx.reply_msg(strings("unkang_help").format(c=self.me.username, **EMOJI_FMT), del_in=6, reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
 
-@app.on_message(filters.command("kang", COMMAND_HANDLER))
+@app.on_message(filters.command("kang", COMMAND_HANDLER), group=2)
+@capture_err
 @use_chat_lang()
 async def kang_sticker(self: Client, ctx: Message, strings):
+    rid = ctx.id
     if not ctx.from_user:
-        return await ctx.reply_msg(strings("anon_warn").format(**EMOJI_FMT), del_in=6)
-    prog_msg = await ctx.reply_msg(strings("kang_msg").format(**EMOJI_FMT))
+        await ctx.reply_msg(strings("anon_warn").format(**EMOJI_FMT), del_in=6, reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
+    prog_msg = await ctx.reply_msg(strings("kang_msg").format(**EMOJI_FMT), reply_to_message_id=rid)
     sticker_emoji = "🤔"
     packnum = 0
     packname_found = False
@@ -489,19 +537,18 @@ async def kang_sticker(self: Client, ctx: Message, strings):
             convert = True
             videos = True
         elif reply.document:
-            if "image" in reply.document.mime_type:
+            if "image" in (reply.document.mime_type or ""):
                 resize = True
-            elif reply.document.mime_type in (
-                enums.MessageMediaType.VIDEO,
-                enums.MessageMediaType.ANIMATION,
-            ):
+            elif "video" in (reply.document.mime_type or "") or "gif" in (reply.document.mime_type or ""):
                 videos = True
                 convert = True
-            elif "tgsticker" in reply.document.mime_type:
+            elif "tgsticker" in (reply.document.mime_type or ""):
                 animated = True
         elif reply.sticker:
             if not reply.sticker.file_name:
-                return await prog_msg.edit_msg(strings("stick_no_name").format(**EMOJI_FMT))
+                await prog_msg.edit_msg(strings("stick_no_name").format(**EMOJI_FMT))
+                await _del_user_cmd(self, ctx.chat.id, ctx.id)
+                return
             if reply.sticker.emoji:
                 sticker_emoji = reply.sticker.emoji
             animated = reply.sticker.is_animated
@@ -511,7 +558,9 @@ async def kang_sticker(self: Client, ctx: Message, strings):
             elif not reply.sticker.file_name.endswith(".tgs"):
                 resize = True
         else:
-            return await prog_msg.edit_msg("Tôi không thể thêm kiểu sticker này.")
+            await prog_msg.edit_msg("Tôi không thể thêm kiểu sticker này.")
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
+            return
 
         pack_prefix = "anim" if animated else "vid" if videos else "a"
         packname = f"{pack_prefix}_{ctx.from_user.id}_by_{self.me.username}"
@@ -521,9 +570,9 @@ async def kang_sticker(self: Client, ctx: Message, strings):
             and ctx.command[1].isdigit()
             and int(ctx.command[1]) > 0
         ):
-            packnum = ctx.command.pop(1)
+            packnum = int(ctx.command.pop(1))
             packname = (
-                f"{pack_prefix}{packnum}_{ctx.from_user.id}_by_{self.me.username}"
+                f"{pack_prefix}_{packnum}_{ctx.from_user.id}_by_{self.me.username}"
             )
         if len(ctx.command) > 1:
             sticker_emoji = (
@@ -533,6 +582,7 @@ async def kang_sticker(self: Client, ctx: Message, strings):
         filename = await self.download_media(ctx.reply_to_message)
         if not filename:
             await prog_msg.delete()
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
             return
     elif ctx.entities and len(ctx.entities) > 1:
         pack_prefix = "a"
@@ -549,6 +599,7 @@ async def kang_sticker(self: Client, ctx: Message, strings):
 
         if not img_url:
             await prog_msg.delete()
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
             return
         try:
             r = await fetch.get(img_url)
@@ -556,11 +607,13 @@ async def kang_sticker(self: Client, ctx: Message, strings):
                 with open(filename, mode="wb") as f:
                     f.write(r.read())
         except Exception as r_e:
-            return await prog_msg.edit_msg(f"{r_e.__class__.__name__} : {r_e}")
+            await prog_msg.edit_msg(f"{r_e.__class__.__name__} : {r_e}")
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
+            return
         if len(ctx.command) > 2:
             if ctx.command[2].isdigit() and int(ctx.command[2]) > 0:
-                packnum = ctx.command.pop(2)
-                packname = f"a{packnum}_{ctx.from_user.id}_by_{self.me.username}"
+                packnum = int(ctx.command.pop(2))
+                packname = f"a_{packnum}_{ctx.from_user.id}_by_{self.me.username}"
             if len(ctx.command) > 2:
                 sticker_emoji = (
                     "".join(set(EMOJI_PATTERN.findall("".join(ctx.command[2:]))))
@@ -568,14 +621,18 @@ async def kang_sticker(self: Client, ctx: Message, strings):
                 )
             resize = True
     else:
-        return await prog_msg.edit_msg(strings("kang_help").format(**EMOJI_FMT))
+        await prog_msg.edit_msg(strings("kang_help").format(**EMOJI_FMT))
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
     try:
         if resize:
             filename = resize_image(filename)
         elif convert:
             filename = await convert_video(filename)
             if filename is False:
-                return await prog_msg.edit_msg("Error", del_in=6)
+                await prog_msg.edit_msg("Error", del_in=6)
+                await _del_user_cmd(self, ctx.chat.id, ctx.id)
+                return
         max_stickers = 50 if animated else 120
         while not packname_found:
             try:
@@ -650,7 +707,7 @@ async def kang_sticker(self: Client, ctx: Message, strings):
                     )
                 )
             except PeerIdInvalid:
-                return await prog_msg.edit_msg(
+                await prog_msg.edit_msg(
                     strings("please_start_msg").format(**EMOJI_FMT),
                     reply_markup=InlineKeyboardMarkup(
                         [
@@ -663,11 +720,21 @@ async def kang_sticker(self: Client, ctx: Message, strings):
                         ]
                     ),
                 )
+                await _del_user_cmd(self, ctx.chat.id, ctx.id)
+                return
 
     except BadRequest:
-        return await prog_msg.edit_msg(strings("pack_full").format(**EMOJI_FMT))
+        await prog_msg.edit_msg(strings("pack_full").format(**EMOJI_FMT))
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
     except Exception as all_e:
-        await prog_msg.edit_msg(f"{all_e.__class__.__name__} : {all_e}")
+        LOGGER.exception("kang_sticker: %s", all_e)
+        err_text = f"{all_e.__class__.__name__}: {str(all_e)}"[:250].replace("<", "").replace(">", "")
+        try:
+            await prog_msg.edit_msg(err_text)
+        except Exception:
+            pass
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
     else:
         markup = InlineKeyboardMarkup(
             [
@@ -683,6 +750,7 @@ async def kang_sticker(self: Client, ctx: Message, strings):
             strings("kang_success").format(emot=sticker_emoji, **EMOJI_FMT),
             reply_markup=markup,
         )
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
         await self.delete_messages(
             chat_id=LOG_CHANNEL, message_ids=msg_.id, revoke=True
         )
@@ -691,13 +759,16 @@ async def kang_sticker(self: Client, ctx: Message, strings):
         except OSError:
             pass
 
-@app.on_message(filters.command("taosticker", COMMAND_HANDLER))
+@app.on_message(filters.command("taosticker", COMMAND_HANDLER), group=2)
 @use_chat_lang()
 async def tosticker(self: Client, ctx: Message, strings):
+    rid = ctx.id
     if not ctx.reply_to_message or not ctx.reply_to_message.media:
-        return await ctx.reply_msg("Vui lòng trả lời một ảnh, video, hoặc GIF!", del_in=6)
+        await ctx.reply_msg("Vui lòng trả lời một ảnh, video, hoặc GIF!", del_in=6, reply_to_message_id=rid)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
+        return
 
-    prog_msg = await ctx.reply_msg("Đang chuyển đổi thành sticker...")
+    prog_msg = await ctx.reply_msg("Đang chuyển đổi thành sticker...", reply_to_message_id=rid)
     sticker_emoji = "🤔"
     resize = False
     convert = False
@@ -722,6 +793,7 @@ async def tosticker(self: Client, ctx: Message, strings):
         convert = True
     else:
         await prog_msg.edit_msg("Định dạng không hỗ trợ! Chỉ hỗ trợ ảnh, video, hoặc GIF.", del_in=6)
+        await _del_user_cmd(self, ctx.chat.id, ctx.id)
         return
 
     # Download media
@@ -732,6 +804,7 @@ async def tosticker(self: Client, ctx: Message, strings):
         )
         if not filename:
             await prog_msg.edit_msg("Không thể tải xuống tệp!", del_in=6)
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
             return
 
         try:
@@ -742,17 +815,21 @@ async def tosticker(self: Client, ctx: Message, strings):
                 filename = await convert_video(filename)
                 if filename is False:
                     await prog_msg.edit_msg("Lỗi khi chuyển đổi video/GIF!", del_in=6)
+                    await _del_user_cmd(self, ctx.chat.id, ctx.id)
                     return
 
             # Send sticker
             await ctx.reply_sticker(
                 sticker=filename,
-                emoji=sticker_emoji
+                emoji=sticker_emoji,
+                reply_to_message_id=rid,
             )
             await prog_msg.delete()
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
 
         except Exception as e:
             await prog_msg.edit_msg(f"Lỗi: {str(e)}", del_in=6)
+            await _del_user_cmd(self, ctx.chat.id, ctx.id)
         finally:
             # Cleanup
             try:

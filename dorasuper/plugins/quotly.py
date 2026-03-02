@@ -13,7 +13,9 @@ from httpx import AsyncClient, Timeout
 from pyrogram import filters, enums
 from pyrogram.types import Message
 from dorasuper import app
+from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import E_LOADING, E_ERROR
+from dorasuper.vars import COMMAND_HANDLER
 
 LOGGER = getLogger("DoraSuper")
 
@@ -292,6 +294,14 @@ async def pyrogram_to_quotly(messages, is_reply: bool, client: app) -> bytes:
     
     return response.content
 
+def _safe_err(s: str, max_len: int = 200) -> str:
+    """Bỏ ký tự gây lỗi HTML/Telegram, giới hạn độ dài."""
+    if not s:
+        return "Lỗi không xác định"
+    s = str(s).replace("<", "").replace(">", "")[:max_len]
+    return s.strip() or "Lỗi không xác định"
+
+
 def is_arg_int(text: str) -> tuple[bool, int]:
     """Check if argument is a valid integer."""
     try:
@@ -304,46 +314,64 @@ async def delete_after_delay(message: Message, seconds: int):
     await asyncio.sleep(seconds)
     await message.delete()
 
-@app.on_message(filters.command(["q", "r"]) & filters.reply)
+@app.on_message(filters.command(["q", "r"], COMMAND_HANDLER) & filters.reply, group=2)
+@capture_err
 async def msg_quotly_cmd(client: app, message: Message):
     """Handle /q and /r commands to generate quote stickers."""
-    if message.chat.type != enums.ChatType.GROUP and message.chat.type != enums.ChatType.SUPERGROUP:
-        return await message.reply("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ như @thuthuatjb_sp để sử dụng.")
-    processing_msg = await message.reply_text(f"{E_LOADING} Đang xử lý...")
-    
+    reply_id = message.id
+    if not message.chat or message.chat.type not in (enums.ChatType.GROUP, enums.ChatType.SUPERGROUP):
+        await message.reply_msg("Lệnh này chỉ hỗ trợ trong nhóm. Hãy tham gia nhóm ví dụ như @thuthuatjb_sp để sử dụng.", reply_to_message_id=reply_id)
+        try:
+            await client.delete_messages(message.chat.id, message.id)
+        except Exception:
+            pass
+        return
+    processing_msg = await message.reply_msg(f"{E_LOADING} Đang xử lý...", reply_to_message_id=reply_id)
+
     try:
-        is_reply = message.command[0].endswith("r")
-        
-        if message.command[0].startswith("q") and len(message.command) > 1:
-            is_valid, count = is_arg_int(message.command[1])
+        cmd_list = getattr(message, "command", None) or []
+        if not cmd_list and (message.text or message.caption):
+            parts = (message.text or message.caption or "").strip().split()
+            if parts:
+                cmd_list = [parts[0].lstrip("/!").lower()] + parts[1:]
+        cmd = (cmd_list[0] if cmd_list else "").replace("/", "").replace("!", "").strip().lower()
+        if cmd not in ("q", "r"):
+            cmd = "r" if len(cmd_list) <= 1 else "q"
+        is_reply = cmd == "r"
+
+        if cmd == "q" and len(cmd_list) > 1:
+            is_valid, count = is_arg_int(cmd_list[1])
             if is_valid:
                 if count < 1 or count > 10:
-                    await processing_msg.delete()
-                    error_msg = await message.reply_text(f"{E_ERROR} Phạm vi không hợp lệ (1-10)")
-                    asyncio.create_task(delete_after_delay(error_msg, 6))
+                    await processing_msg.edit_msg(f"{E_ERROR} Phạm vi không hợp lệ (1-10)")
                     return
-                
+
+                msg_list = await client.get_messages(
+                    chat_id=message.chat.id,
+                    message_ids=list(range(
+                        message.reply_to_message.id,
+                        message.reply_to_message.id + count,
+                    )),
+                    replies=-1,
+                )
                 messages = [
-                    msg for msg in await client.get_messages(
-                        chat_id=message.chat.id,
-                        message_ids=range(
-                            message.reply_to_message.id,
-                            message.reply_to_message.id + count
-                        ),
-                        replies=-1
-                    ) if not msg.empty and (msg.text or msg.caption or msg.sticker or msg.photo or msg.video or msg.animation)
+                    msg for msg in (msg_list if isinstance(msg_list, list) else [msg_list])
+                    if msg and not getattr(msg, "empty", True)
+                    and (msg.text or msg.caption or msg.sticker or msg.photo or msg.video or msg.animation)
                 ]
             else:
-                await processing_msg.delete()
-                error_msg = await message.reply_text(f"{E_ERROR} Đối số không hợp lệ")
-                asyncio.create_task(delete_after_delay(error_msg, 6))
+                await processing_msg.edit_msg(f"{E_ERROR} Đối số không hợp lệ")
                 return
         else:
-            messages = [await client.get_messages(
+            single = await client.get_messages(
                 chat_id=message.chat.id,
                 message_ids=message.reply_to_message.id,
-                replies=-1
-            )]
+                replies=-1,
+            )
+            if single and not getattr(single, "empty", True):
+                messages = [single] if not isinstance(single, list) else single
+            else:
+                messages = []
 
         if not messages:
             raise QuotlyException(f"{E_ERROR} Không tìm thấy tin nhắn hợp lệ")
@@ -354,13 +382,30 @@ async def msg_quotly_cmd(client: app, message: Message):
         sticker.name = f"quote_{uuid4()}.webp"
         
         await processing_msg.delete()
-        await message.reply_sticker(sticker)
+        await message.reply_sticker(sticker, reply_to_message_id=reply_id)
+        try:
+            await client.delete_messages(message.chat.id, message.id)
+        except Exception:
+            pass
 
     except QuotlyException as e:
-        await processing_msg.delete()
-        error_msg = await message.reply_text(f"{E_ERROR} Lỗi: {str(e)}")
-        asyncio.create_task(delete_after_delay(error_msg, 10))
+        LOGGER.exception("quotly QuotlyException: %s", e)
+        try:
+            await processing_msg.edit_msg(f"{E_ERROR} Lỗi: {str(e)}")
+        except Exception:
+            await message.reply_msg(f"{E_ERROR} Lỗi: {str(e)}", reply_to_message_id=reply_id)
+        try:
+            await client.delete_messages(message.chat.id, message.id)
+        except Exception:
+            pass
     except Exception as e:
-        await processing_msg.delete()
-        error_msg = await message.reply_text(f"{E_ERROR} Đã xảy ra lỗi khi tạo sticker: {str(e)}")
-        asyncio.create_task(delete_after_delay(error_msg, 10))
+        LOGGER.exception("quotly Exception: %s", e)
+        err_text = f"{E_ERROR} Lỗi: {_safe_err(str(e))}"
+        try:
+            await processing_msg.edit_msg(err_text)
+        except Exception:
+            await message.reply_msg(err_text, reply_to_message_id=reply_id)
+        try:
+            await client.delete_messages(message.chat.id, message.id)
+        except Exception:
+            pass

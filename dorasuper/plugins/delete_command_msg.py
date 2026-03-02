@@ -14,8 +14,14 @@ _prefixes = [p for p in (COMMAND_HANDLER or ["/"]) if p]
 _prefix_re = "|".join(re.escape(p) for p in _prefixes) if _prefixes else re.escape("/")
 COMMAND_ANY_RE = re.compile(r"^(" + _prefix_re + r")\s*(\S+)", re.IGNORECASE)
 
-# Lệnh không tự động xóa tin nhắn (downloadsVideo: giữ link để user tham chiếu)
-NO_DELETE_COMMANDS = {"autodl", "dl", "tt", "tiktok"}
+# Lệnh không tự động xóa tin nhắn (giữ để user tham chiếu hoặc bot cần reply_to_message)
+NO_DELETE_COMMANDS = {
+    "autodl", "dl", "tt", "tiktok",  # downloadsVideo
+    "q", "r",  # quotly — cần reply để tạo sticker
+    "kang", "unkang", "taosticker", "stickerid", "laysticker",  # stickers — cần reply
+    "broadcast",  # reply để broadcast
+    "summarize", "tomtat", "rewrite", "vietlai",  # ai reply
+}
 
 
 async def _is_command_msg(_, __, msg: Message):

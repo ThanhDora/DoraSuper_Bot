@@ -46,6 +46,7 @@ standard-imghdr
 audioop-lts; python_version >= "3.13"
 yt-dlp
 gallery-dl
+instagrapi
 openai
 google-api-python-client
 google-auth
