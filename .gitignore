@@ -4,6 +4,9 @@ config.env
 .env.*
 !.env.example
 
+# Cookies (có thể chứa secret trình duyệt / Canva)
+cookies.txt
+
 # Google Cloud / service account credentials (never commit)
 gen-lang-client-*.json
 *-credentials*.json
