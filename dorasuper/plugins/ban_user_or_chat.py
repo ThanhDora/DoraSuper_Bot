@@ -72,12 +72,25 @@ async def grp_bd(self: Client, ctx: Message, strings):
                 await db.set_welcomed(ctx.chat.id)
             except Exception as e:
                 LOGGER.warning("Không gửi được tin chào nhóm %s: %s", ctx.chat.id, e)
+        # Lấy link nhóm để gửi vào nhóm thông báo (public = t.me/username, private = export invite)
+        group_link = "—"
+        raw_link = ""
+        if getattr(ctx.chat, "username", None):
+            raw_link = f"https://t.me/{ctx.chat.username}"
+            group_link = f'<a href="{raw_link}">{raw_link}</a>'
+        else:
+            try:
+                raw_link = await self.export_chat_invite_link(ctx.chat.id)
+                group_link = f'<a href="{raw_link}">Link nhóm (invite)</a>' if raw_link.startswith("http") else raw_link
+            except Exception:
+                group_link = "— (cần quyền tạo link)"
         try:
             await self.send_message(
                 LOG_CHANNEL,
                 strings("log_bot_added", context="grup_tools").format(
-                    ttl=ctx.chat.title, cid=ctx.chat.id, tot=total, r_j=r_j, **EMOJI_FMT
+                    ttl=ctx.chat.title, cid=ctx.chat.id, tot=total, r_j=r_j, link=group_link, **EMOJI_FMT
                 ),
+                parse_mode=enums.ParseMode.HTML,
             )
         except Exception as e:
             LOGGER.warning("Không gửi được tin lên LOG: %s", e)

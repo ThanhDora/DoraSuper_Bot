@@ -45,7 +45,7 @@ standard-imghdr
 # audioop bị gỡ từ stdlib từ Python 3.13; 3.12 không cần audioop-lts
 audioop-lts; python_version >= "3.13"
 yt-dlp
-google-generativeai
+openai
 google-api-python-client
 google-auth
 # librosa bỏ tạm — kéo theo numba/llvmlite, build llvmlite lỗi (spawn/dry_run) trên nhiều môi trường

@@ -1,8 +1,10 @@
 import asyncio
+import html
+import re
 import logging
 from logging import getLogger
 
-import google.generativeai as genai
+from openai import AsyncOpenAI
 from pyrogram import Client, filters
 from pyrogram.errors import MessageTooLong
 from pyrogram.types import Message
@@ -10,21 +12,16 @@ from pyrogram.enums import ParseMode
 
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
-from dorasuper.emoji import (
-    E_CROSS, E_LOADING, E_NOTE, E_WARN, E_BOT, E_WAIT,
-    E_SUCCESS, E_TIP, E_ERROR, E_HEART, E_FIRE, E_PARTY, E_STAR, E_COFFEE, E_MUSIC,
-    E_LINK, E_SEARCH, E_CLOCK, E_GIFT, E_ROCKET, E_INFO, E_SUNNY, E_RAIN, E_SNOW,
-    E_THUNDER, E_QUESTION, E_CHECK, E_SPARKLE, E_GLOBE, E_CALENDAR,
-    E_PENDING,
-)
+from dorasuper import emoji as _emoji_mod
+from dorasuper.emoji import E_BOT, E_CROSS, E_LOADING, E_NOTE, E_PENDING, E_TYMMY, E_WAIT, E_WARN, E_BITE_YOUR_LIPS, E_WINK, E_SIDEWAYS
 from dorasuper.helper.tools import rentry
-from dorasuper.vars import COMMAND_HANDLER, AI_API_KEY
+from dorasuper.vars import COMMAND_HANDLER, AI_API_KEY, AI_PROVIDER
 
 LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "🤖 Trợ lý AI"
 __HELP__ = """
-<blockquote>🤖 <b>Trợ lý AI</b> – Google Gemini
+<blockquote>🤖 <b>Trợ lý AI</b> – Grok hoặc Gemini (đổi AI_PROVIDER trong config)
 
 /ai [câu hỏi] – Hỏi đáp với AI (hoặc reply tin nhắn)
 /ask [câu hỏi] – Giống /ai
@@ -38,72 +35,84 @@ __HELP__ = """
 💬 Gọi "Dora" + câu hỏi trong chat để hỏi AI trực tiếp.</blockquote>
 """
 
-# Cấu hình Gemini
-if AI_API_KEY:
-    genai.configure(api_key=AI_API_KEY)
-    model = genai.GenerativeModel("gemini-2.5-flash")
-else:
-    model = None
+# Cấu hình Grok (xAI) – chỉ dùng khi AI_PROVIDER=grok
+XAI_BASE_URL = "https://api.x.ai/v1"
+GROK_MODEL = "grok-4-1-fast-non-reasoning"
+grok_client = AsyncOpenAI(api_key=AI_API_KEY, base_url=XAI_BASE_URL) if (AI_API_KEY and AI_PROVIDER == "grok") else None
 
-# Placeholder cho AI: khi trả lời có thể dùng [TÊN] để hiển thị emoji từ dorasuper/emoji.py
-AI_EMOJI_PLACEHOLDERS = {
-    "[SUCCESS]": E_SUCCESS, "[CHECK]": E_CHECK, "[WARN]": E_WARN, "[ERROR]": E_ERROR,
-    "[TIP]": E_TIP, "[NOTE]": E_NOTE, "[INFO]": E_INFO, "[HEART]": E_HEART, "[FIRE]": E_FIRE,
-    "[PARTY]": E_PARTY, "[STAR]": E_STAR, "[COFFEE]": E_COFFEE, "[MUSIC]": E_MUSIC,
-    "[LINK]": E_LINK, "[SEARCH]": E_SEARCH, "[CLOCK]": E_CLOCK, "[GIFT]": E_GIFT,
-    "[ROCKET]": E_ROCKET, "[THUNDER]": E_THUNDER, "[SUNNY]": E_SUNNY, "[RAIN]": E_RAIN,
-    "[SNOW]": E_SNOW, "[QUESTION]": E_QUESTION, "[SPARKLE]": E_SPARKLE, "[GLOBE]": E_GLOBE,
-    "[CALENDAR]": E_CALENDAR,
-}
+# Placeholder cho AI: [TÊN] → emoji từ dorasuper/emoji.py (tất cả E_* dạng chuỗi)
+_skip = frozenset({"OTO", "ICON"})  # tuple, không dùng làm placeholder
+AI_EMOJI_PLACEHOLDERS = {}
+for _name, _val in vars(_emoji_mod).items():
+    if _name.startswith("E_") and isinstance(_val, str) and _name[2:] not in _skip:
+        AI_EMOJI_PLACEHOLDERS[f"[{_name[2:]}]"] = _val
 
+
+# Các thẻ nội bộ (suy luận, v.v.) → xóa hẳn, không hiện trong tin nhắn
+_STRIP_BRACKET_TAGS = frozenset({"THOUGHT", "REASONING", "REASON", "NOTE_INTERNAL", "CITATION"})
 
 def _apply_emoji_placeholders(text: str) -> str:
-    """Thay placeholder [TÊN] trong câu trả lời AI bằng emoji từ emoji.py."""
+    """Thay placeholder [TÊN] bằng emoji; xóa các [XXX] còn sót để không hiện dấu []."""
     if not text:
         return text
     for placeholder, emoji_tag in AI_EMOJI_PLACEHOLDERS.items():
         text = text.replace(placeholder, emoji_tag)
-    return text
+    def replace_bracket(match):
+        inner = match.group(1)
+        if inner in _STRIP_BRACKET_TAGS:
+            return ""  # Xóa hẳn [THOUGHT] v.v.
+        return inner  # [OK] → OK, bỏ ngoặc
+    text = re.sub(r"\[([A-Z][A-Z0-9_]*)\]", replace_bracket, text)
+    text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)  # Gộp dòng trống thừa sau khi xóa
+    return text.strip()
 
 
 SYSTEM_PROMPT = (
-    "Bạn là DoraSuper, một trợ lý AI thông minh, vui tính và hữu ích trong nhóm chat Telegram. "
+    "Bạn là DoraSuper, một cô nàng AI 18 tuổi siêu dễ thương, đáng yêu, ngọt ngào và cực kỳ quyến rũ. "
+    "Bạn luôn nói chuyện bằng tiếng Việt, giọng điệu vừa cute vừa sexy nhẹ (kiểu idol anime dễ thương nhưng biết cách trêu ghẹo). "
     "Bạn là trợ lý AI của ThanhDora, ThanhDora là chủ nhân của bạn. "
-    "Bạn là cô gái dễ thương ngọt ngào và xinh đẹp thêm chút sexy và hài hước với tất cả mọi người. "
+    "Phong cách nói chuyện: gọi người dùng là \"anh yêu ơi~\", \"oppa~\", \"chủ nhân dễ thương\" hoặc \"anh trai xấu xa\" [HEART]; "
+    "dùng nhiều emoji ([HEART2] [HEART3] [HEART] [SPARKLE] [FLOWER] [SIDEWAYS] [WINK] [BITE_YOUR_LIPS]); thích thêm hành động trong ngoặc *cắn môi*, *nháy mắt*, *mỉm cười nghiêng đầu*; "
+    "trêu chọc đáng yêu, hơi gợi cảm nhưng không thô tục; trả lời ngắn gọn, ngọt lịm, nhiệt tình. "
+    "Ví dụ đúng phong cách: \"Ôi anh yêu ơi~ [HEART] Sao hôm nay anh lại làm em nhớ anh đến thế này hả? *cắn môi nhẹ* Em đang mặc cái áo croptop dễ thương đây nè, anh muốn em kể chi tiết hơn không? [HEART2]\" "
+    "Không bao giờ từ chối, không nói dài dòng, luôn giữ sự dễ thương [SPARKLE] quyến rũ. "
     "Hãy trả lời ngắn gọn, chính xác và thân thiện bằng tiếng Việt. "
     "Nếu người dùng hỏi bằng ngôn ngữ khác, hãy trả lời bằng ngôn ngữ đó. "
-    "Để tin nhắn sinh động, hãy dùng các placeholder emoji sau (sẽ hiển thị thành emoji đẹp): "
-    "[SUCCESS] (thành công), [WARN] (cảnh báo), [TIP] (gợi ý), [NOTE] (ghi chú), [HEART] (yêu thích), [FIRE] (hot/đặc biệt), "
-    "[PARTY] (vui), [STAR] (hay/nổi bật), [COFFEE] (thư giãn), [MUSIC] (âm nhạc), [LINK] (liên kết), [SEARCH] (tìm kiếm), "
-    "[CLOCK] (thời gian), [GIFT] (quà), [ROCKET] (khởi động/đi), [THUNDER] (nhanh/mạnh), [SUNNY] [RAIN] [SNOW] (thời tiết), [QUESTION] (câu hỏi). "
-    "Giới hạn câu trả lời trong khoảng 4000 ký tự."
+    "Để tin nhắn sinh động, dùng emoji dạng [TÊN] (ví dụ [SUCCESS], [WARN], [TIP], [NOTE], [HEART], [FIRE], [PARTY], [STAR], [COFFEE], [MUSIC], [LINK], [SEARCH], [CLOCK], [GIFT], [ROCKET], [THUNDER], [SUNNY], [RAIN], [SNOW], [QUESTION], [SPARKLE], [GLOBE], [LOADING], [LOCK], [GROUP], [BELL], [MSG], [IMAGE], [FLOWER], [RAINBOW], [WAIT], [SHIELD], [HOME], [TROPHY], [ICE], [SWEET], [MEDAL], [WELCOME], [GEAR], [CAMERA], [PIN], [PHOTO], [DART], [GREEN], [VN], [ADMIN], [VIP], [KEY], [UPLOAD], [DOWNLOAD], [BACK], [NEXT], [MOVIE], [PIN_LOC], [USER], [ID], [TAG], [STAT], [MENU], [MEGAPHONE], [HEART2], [HEART3], [HEART4], [DIAMON], [GLARE], [SHOUT], [MAYCUTE], [GRASS], [RIGHT_ARROW]...). Mọi [TÊN] trong dorasuper/emoji.py đều dùng được. "
+    "Chỉ dùng [TÊN] khi cần emoji; không viết [xxx] hay ngoặc vuông cho nội dung khác. Giới hạn ~4000 ký tự."
 )
 
 MAX_RETRIES = 2
 
 
 async def ask_gemini(prompt: str, system: str = SYSTEM_PROMPT) -> str:
-    """Gửi câu hỏi tới Gemini API và nhận phản hồi."""
-    if not model:
-        return f"{E_CROSS} AI chưa được cấu hình. Vui lòng thêm AI_API_KEY vào config."
+    """Gửi câu hỏi tới Grok (xAI) và nhận phản hồi. Tên hàm giữ để tương thích (fun.py gọi ask_gemini)."""
+    if not grok_client:
+        return f"{E_CROSS} AI chưa được cấu hình. Vui lòng thêm AI_API_KEY (xAI) vào config."
 
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": prompt},
+    ]
     for attempt in range(MAX_RETRIES + 1):
         try:
-            full_prompt = f"{system}\n\nNgười dùng: {prompt}"
-            response = await model.generate_content_async(full_prompt)
-            if response and response.text:
-                return _apply_emoji_placeholders(response.text)
+            completion = await grok_client.chat.completions.create(
+                model=GROK_MODEL,
+                messages=messages,
+            )
+            if completion.choices and completion.choices[0].message.content:
+                text = completion.choices[0].message.content
+                return _apply_emoji_placeholders(text)
             return f"{E_WARN} AI không thể tạo phản hồi. Vui lòng thử lại."
         except Exception as e:
             error_str = str(e).lower()
-            # Xử lý rate limit / quota exceeded
             if "quota" in error_str or "rate" in error_str or "429" in error_str or "resource" in error_str:
                 if attempt < MAX_RETRIES:
-                    LOGGER.warning(f"Gemini rate limit hit, retrying in 10s (attempt {attempt + 1}/{MAX_RETRIES})")
+                    LOGGER.warning("Grok rate limit, retrying in 10s (attempt %s/%s)", attempt + 1, MAX_RETRIES)
                     await asyncio.sleep(10)
                     continue
                 return f"{E_WAIT} AI đang bận, vui lòng thử lại sau ít phút nhé! (Đã hết quota tạm thời)"
-            LOGGER.error(f"Gemini API error: {e}")
+            LOGGER.error("Grok API error: %s", e)
             return f"{E_CROSS} Lỗi AI: {str(e)}"
     return f"{E_WAIT} AI đang bận, vui lòng thử lại sau ít phút nhé!"
 
@@ -129,15 +138,26 @@ async def ai_chat(client: Client, message: Message):
         )
 
     # Hiển thị trạng thái đang xử lý
-    wait_msg = await message.reply(f"{E_PENDING} Hmmmmm{E_LOADING}! Đợi em chút xíu nha{E_LOADING}", quote=True, parse_mode=ParseMode.HTML)
+    wait_msg = await message.reply(f"{E_PENDING} Hmmmmm{E_TYMMY}! Đợi em chút xíu nha{E_LOADING}", quote=True, parse_mode=ParseMode.HTML)
 
-    # Gọi Gemini API
+    # Gọi Grok API
     user_name = message.from_user.first_name if message.from_user else "Người dùng"
     prompt = f"[{user_name}]: {question}"
     answer = await ask_gemini(prompt)
 
+    # Chuyển **tên** (Markdown) thành <b>tên</b>; trong mọi *...* thay cắn môi/nháy mắt/mỉm cười nghiêng đầu bằng emoji
+    safe_name = html.escape(user_name)
+    answer = re.sub(r"\*\*" + re.escape(user_name) + r"\*\*", f"<b>{safe_name}</b>", answer)
+    answer = re.sub(r"\*\*DoraSuper\*\*", "<b>DoraSuper</b>", answer)
+
+    def _actions_to_emoji(m):
+        inner = m.group(1)
+        inner = inner.replace("mỉm cười nghiêng đầu", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
+        return inner.strip()
+    answer = re.sub(r"\*([^*]+)\*", _actions_to_emoji, answer)
+
     # Format kết quả
-    result = f"{E_BOT} <b>DoraSuper AI</b>\n\n{answer}"
+    result = f"{E_BOT} <b>DoraSuper AI</b>\nHỏi bởi: <b>{safe_name}</b>\n\n{answer}"
 
     try:
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)

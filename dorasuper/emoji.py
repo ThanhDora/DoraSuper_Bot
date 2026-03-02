@@ -132,3 +132,8 @@ E_RAIN = '<emoji id="5399913388845322366">🌧</emoji>'
 E_SNOW = '<emoji id="5449449325434266744">❄️</emoji>'
 
 E_PENDING = '<emoji id="6327920744789444368">🥰</emoji>'
+E_TYMMY = '<emoji id="6188184400425918123">🤷</emoji>'
+
+E_SIDEWAYS = '<emoji id="6327735399770752519">😒</emoji>'
+E_WINK = '<emoji id="6073232409657088703">🥺</emoji>'
+E_BITE_YOUR_LIPS = '<emoji id="6073604955120344984">😇</emoji>'

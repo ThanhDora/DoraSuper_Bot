@@ -87,6 +87,9 @@ BLOCKED_EXTENSIONS = list(
 MINIMUM_FILE_SIZE = environ.get("MINIMUM_FILE_SIZE")
 CURRENCY_API = environ.get("CURRENCY_API")
 AI_API_KEY = environ.get("AI_API_KEY", "")
+# AI: grok (xAI) hoặc gemini. Khi gemini cần thêm GEMINI_API_KEY
+AI_PROVIDER = (environ.get("AI_PROVIDER", "grok") or "grok").strip().lower()
+GEMINI_API_KEY = environ.get("GEMINI_API_KEY", "")
 # Google Drive upload (getdirect): true = upload lên GDrive, false = dùng tmpfiles
 USE_GDRIVE = environ.get("USE_GDRIVE", "").strip().lower() in ("1", "true", "yes")
 GDRIVE_CREDENTIALS_PATH = environ.get("GDRIVE_CREDENTIALS_PATH", "")  # Đường dẫn file JSON service account

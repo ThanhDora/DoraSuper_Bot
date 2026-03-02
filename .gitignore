@@ -1,3 +1,9 @@
+# Config chứa secret (API key, token) – không commit
+config.env
+.env
+.env.*
+!.env.example
+
 # Google Cloud / service account credentials (never commit)
 gen-lang-client-*.json
 *-credentials*.json

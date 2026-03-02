@@ -67,9 +67,8 @@ async def save_filters(_, message):
                 if replied_message.text
                 else replied_message.caption.markdown
             )
-        if replied_message.text:
-            _type = "text"
-            file_id = None
+        _type = "text"
+        file_id = None
         if replied_message.sticker:
             _type = "sticker"
             file_id = replied_message.sticker.file_id
@@ -94,7 +93,7 @@ async def save_filters(_, message):
         if replied_message.voice:
             _type = "voice"
             file_id = replied_message.voice.file_id
-        if replied_message.reply_markup and not re.findall(r"\[.+\,.+\]", data):
+        if data and replied_message.reply_markup and not re.findall(r"\[.+\,.+\]", data):
             if urls := extract_urls(replied_message.reply_markup):
                 response = "\n".join(
                     [f"{name}=[{text}, {url}]" for name, text, url in urls]
@@ -149,12 +148,11 @@ async def del_filter(_, m):
     filters.text & ~filters.private & ~filters.channel & ~filters.via_bot & ~filters.forwarded,
     group=103,
 )
-async def filters_re(self, message):
+async def filters_re(_, message):
     try:
         from_user = message.from_user if message.from_user else message.sender_chat
-        user_id = from_user.id
     except AttributeError:
-        self.log.info(message)
+        return
     chat_id = message.chat.id
     text = message.text.lower().strip()
     if not text or (
@@ -167,11 +165,13 @@ async def filters_re(self, message):
         pattern = r"( |^|[^\w])" + re.escape(word) + r"( |$|[^\w])"
         if re.search(pattern, text, flags=re.IGNORECASE):
             _filter = await get_filter(chat_id, word)
+            if _filter is False:
+                continue
             data_type = _filter["type"]
             data = _filter.get("data")
             file_id = _filter.get("file_id")
             keyb = None
-            if data:
+            if data is not None:
                 if "{chat}" in data:
                     data = data.replace(
                         "{chat}", message.chat.title
@@ -180,7 +180,7 @@ async def filters_re(self, message):
                     data = data.replace(
                         "{name}", (from_user.mention if message.from_user else from_user.title)
                     )
-                if re.findall(r"\[.+\,.+\]", data):
+                if data and re.findall(r"\[.+\,.+\]", data):
                     keyboard = extract_text_and_keyb(ikb, data)
                     if keyboard:
                         data, keyb = keyboard
@@ -189,7 +189,7 @@ async def filters_re(self, message):
                 replied_user = replied_message.from_user if replied_message.from_user else replied_message.sender_chat
                 if text.startswith("~"):
                     await message.delete()
-                if replied_user.id != from_user.id:
+                if replied_user and replied_user.id != from_user.id:
                     message = replied_message
 
             if data_type == "text":
@@ -280,13 +280,17 @@ async def stop_all_cb(_, cb):
             f"Bạn không có các quyền bắt buộc.\n Quyền cần thiết: {permission}",
             show_alert=True,
         )
-    input = cb.data.split("_", 1)[1]
-    if input == "yes":
-        stoped_all = await deleteall_filters(chat_id)
-        if stoped_all:
-            return await cb.message.edit(
+    inp = cb.data.split("_", 1)[1]
+    await cb.answer()
+    if inp == "yes":
+        result = await deleteall_filters(chat_id)
+        if result and result.deleted_count:
+            await cb.message.edit(
                 "**Đã xóa thành công tất cả các bộ lọc trên cuộc trò chuyện này.**"
             )
-    if input == "no":
-        await cb.message.reply_to_message.delete()
+        else:
+            await cb.message.edit("**Không có bộ lọc nào để xóa.**")
+    elif inp == "no":
+        if cb.message.reply_to_message:
+            await cb.message.reply_to_message.delete()
         await cb.message.delete()

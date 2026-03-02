@@ -17,7 +17,8 @@ from dorasuper.emoji import (
     E_NOTE, E_SEARCH, E_WARN, E_BOT, E_PARTY, E_WAIT, E_MSG,
     E_QUESTION, E_STAR, E_BELL, E_MEGAPHONE, E_HEART, E_MUSIC, E_FIRE,
     E_GLOBE, E_SOS, E_SHIELD, E_PIN_LOC, E_SPARKLE, E_ROCKET, E_HEART3,
-    E_THUNDER, E_MENU, E_COFFEE, E_SUCCESS, E_LOCK,
+    E_THUNDER, E_MENU, E_COFFEE, E_SUCCESS, E_LOCK, E_LOADING, E_PENDING,
+    E_TYMMY, E_BITE_YOUR_LIPS, E_WINK, E_SIDEWAYS,
 )
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import member_permissions, list_admins
@@ -26,6 +27,7 @@ from dorasuper.helper.localization import use_chat_lang
 from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR, SUDO
 from database.chat_ban_db import add_chat_ban
 
+LOGGER = getLogger(__name__)
 
 __MODULE__ = "🎮 Fun & Game"
 __HELP__ = """
@@ -35,7 +37,7 @@ __HELP__ = """
 /tungxu [sấp|ngửa] – Tung đồng xu, đoán sấp hoặc ngửa
 
 👤 /anony [tin nhắn] – Gửi tin nhắn nặc danh (reply tin người nhận)
-💬 Gọi "Dora" + câu hỏi – Hỏi AI trực tiếp trong chat</blockquote>
+💬 Chỉ gọi "Dora" + câu hỏi (không cần @ hay /): trong nhóm phải tắt Group Privacy thì bot mới nhận được. Cách tắt: BotFather → chọn bot → Bot Settings → Group Privacy → Turn Off.</blockquote>
 """
 
 
@@ -227,38 +229,67 @@ def _is_reply_to_bot_ai(message) -> bool:
 
 # Từ khóa khi gọi Dora + reply user → thực hiện lệnh admin (khoá mõm / đá / cấm)
 _DORA_CMD_MUTE = ("khoá mõm", "khóa mõm", "mute", "tắt tiếng", "im mồm", "câm mồm", "khoa mom", "khóa mom")
-_DORA_CMD_KICK = ("xoá khỏi nhóm", "xóa khỏi nhóm", "đá khỏi", "kick", "đá ra", "xoá khỏi", "xóa khỏi")
+_DORA_CMD_KICK = ("xoá khỏi nhóm", "xóa khỏi nhóm", "xoa khoi nhom", "đá khỏi", "đá ra", "da khoi", "kick", "xoá khỏi", "xóa khỏi", "đá đi")
 _DORA_CMD_BAN = ("cấm", "ban", "cam")
 
 
 async def _try_execute_dora_command(message, text: str) -> bool:
     """
     Nếu tin nhắn là reply vào một user và text chứa từ lệnh (khoá mõm, xoá khỏi nhóm, cấm...)
-    thì thực hiện mute/kick/ban với user được reply. Trả về True nếu đã thực hiện.
+    thì thực hiện mute/kick/ban với user được reply. Trả về True nếu đã xử lý (thành công hoặc báo lỗi).
     """
-    reply = message.reply_to_message
-    if not reply or not reply.from_user or not text or not message.from_user:
+    if not text or not message.from_user:
         return False
     chat = message.chat
     if chat.type not in ("supergroup", "group"):
         return False
+
+    t = text.lower().strip()
+    has_cmd = any(phrase in t for phrase in _DORA_CMD_MUTE) or any(phrase in t for phrase in _DORA_CMD_KICK) or any(phrase in t for phrase in _DORA_CMD_BAN)
+    if not has_cmd:
+        return False
+
+    # Có lệnh kick/mute/ban → bắt buộc phải reply đúng tin của người cần xử lý
+    reply = message.reply_to_message
+    if not reply or not reply.from_user:
+        await message.reply(
+            f"{E_WARN} Hãy <b>reply trực tiếp vào tin nhắn</b> của người cần đá/khoá/cấm, rồi gõ Dora kick (hoặc khoá mõm, cấm).",
+            parse_mode=ParseMode.HTML,
+        )
+        return True
+
     target_id = reply.from_user.id
     sender_id = message.from_user.id
-    if target_id == getattr(app.me, "id", None) or target_id == sender_id:
-        return False
+    bot_id = getattr(app.me, "id", None)
+
+    if target_id == bot_id or target_id == sender_id:
+        await message.reply(
+            f"{E_WARN} Hãy reply vào tin của <b>người cần đá</b>, không reply tin của bot hay tin của bạn.",
+            parse_mode=ParseMode.HTML,
+        )
+        return True
     if target_id in (SUDO or []):
-        return False
+        await message.reply(f"{E_WARN} Không thể thực hiện với user này.", parse_mode=ParseMode.HTML)
+        return True
     try:
         admins = await list_admins(chat.id)
         if target_id in admins:
-            return False
+            await message.reply(
+                f"{E_WARN} Không thể đá/khoá/cấm quản trị viên trong nhóm.",
+                parse_mode=ParseMode.HTML,
+            )
+            return True
     except Exception:
         return False
+
     perms = await member_permissions(chat.id, sender_id)
     if "can_restrict_members" not in perms:
-        return False
+        await message.reply(
+            f"{E_WARN} Bạn cần quyền hạn chế thành viên (restrict) để dùng lệnh Dora này.",
+            parse_mode=ParseMode.HTML,
+        )
+        return True
 
-    t = text.lower().strip()
     try:
         target_mention = reply.from_user.mention
     except Exception:
@@ -266,42 +297,54 @@ async def _try_execute_dora_command(message, text: str) -> bool:
 
     if any(phrase in t for phrase in _DORA_CMD_MUTE):
         try:
-            await chat.restrict_member(target_id, permissions=ChatPermissions(all_perms=False))
+            await app.restrict_chat_member(chat.id, target_id, permissions=ChatPermissions(all_perms=False))
             await message.reply(
                 f"{E_LOCK} Đã khoá mõm {target_mention}.",
                 parse_mode=ParseMode.HTML,
             )
             return True
-        except Exception:
-            pass
-        return False
+        except Exception as e:
+            LOGGER.warning("Dora mute failed: %s", e)
+            await message.reply(
+                f"{E_WARN} Không thể khoá mõm (bot cần quyền hạn chế thành viên trong nhóm).",
+                parse_mode=ParseMode.HTML,
+            )
+            return True
 
     if any(phrase in t for phrase in _DORA_CMD_KICK):
         try:
-            await chat.ban_member(target_id)
+            await app.ban_chat_member(chat.id, target_id)
             await asyncio.sleep(0.5)
-            await chat.unban_member(target_id)
+            await app.unban_chat_member(chat.id, target_id)
             await message.reply(
                 f"{E_SUCCESS} Đã đá {target_mention} khỏi nhóm.",
                 parse_mode=ParseMode.HTML,
             )
             return True
-        except Exception:
-            pass
-        return False
+        except Exception as e:
+            LOGGER.warning("Dora kick failed chat_id=%s target_id=%s: %s", chat.id, target_id, e)
+            await message.reply(
+                f"{E_WARN} Không thể đá khỏi nhóm (bot cần quyền ban thành viên). Lỗi: {str(e)[:100]}",
+                parse_mode=ParseMode.HTML,
+            )
+            return True
 
     if any(phrase in t for phrase in _DORA_CMD_BAN):
         try:
-            await chat.ban_member(target_id)
+            await app.ban_chat_member(chat.id, target_id)
             await add_chat_ban(chat.id, target_id)
             await message.reply(
                 f"{E_LOCK} Đã cấm {target_mention} khỏi nhóm.",
                 parse_mode=ParseMode.HTML,
             )
             return True
-        except Exception:
-            pass
-        return False
+        except Exception as e:
+            LOGGER.warning("Dora ban failed chat_id=%s target_id=%s: %s", chat.id, target_id, e)
+            await message.reply(
+                f"{E_WARN} Không thể cấm (bot cần quyền ban thành viên). Lỗi: {str(e)[:100]}",
+                parse_mode=ParseMode.HTML,
+            )
+            return True
 
     return False
 
@@ -315,15 +358,21 @@ async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, st
 
         try:
             wait_msg = await client.send_message(
-                chat_id, f"{E_PENDING} Hmmmmm{E_LOADING}! Đợi em chút xíu nha{E_LOADING}", reply_to_message_id=reply_to_id, parse_mode=ParseMode.HTML
+                chat_id, f"{E_PENDING} Hmmmmm{E_TYMMY}! Đợi em chút xíu nha{E_LOADING}", reply_to_message_id=reply_to_id, parse_mode=ParseMode.HTML
             )
         except Exception:
-            wait_msg = await client.send_message(chat_id, "Hmmmmm{E_LOADING}! Đợi em chút xíu nha{E_LOADING}", reply_to_message_id=reply_to_id)
+            wait_msg = await client.send_message(chat_id, f"Hmmmmm{E_TYMMY}! Đợi em chút xíu nha{E_LOADING}", reply_to_message_id=reply_to_id, parse_mode=ParseMode.HTML)
         user_name = from_user.first_name if from_user else "Người dùng"
-        prompt = f"[{user_name}]: {question}"
+        prompt = f"[{user_name}]: {question.strip()}"
         if reply_context and reply_context.strip():
-            prompt += f"\n(Ngữ cảnh - tin được reply: {reply_context[:800].strip()})"
+            prompt += f"\n(Ngữ cảnh reply: {reply_context[:500].strip()})"
         answer = await ask_gemini(prompt)
+
+        def _actions_to_emoji(m):
+            inner = m.group(1)
+            inner = inner.replace("mỉm cười nghiêng đầu", E_SIDEWAYS).replace("nháy mắt", E_WINK).replace("cắn môi", E_BITE_YOUR_LIPS)
+            return inner.strip()
+        answer = re.sub(r"\*([^*]+)\*", _actions_to_emoji, answer)
         result = f"{E_BOT} <b>DoraSuper</b>\n\n{answer}"
         try:
             await wait_msg.edit(result, parse_mode=ParseMode.HTML)
@@ -347,6 +396,26 @@ async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, st
             await client.send_message(chat_id, fallback, reply_to_message_id=reply_to_id)
 
 
+# /dora [câu hỏi] – Gọi Dora bằng lệnh (hoạt động khi reply, kể cả khi bật Group Privacy)
+@app.on_message(filters.command("dora", COMMAND_HANDLER))
+@use_chat_lang()
+async def cmd_dora(c, m, strings):
+    if len(m.command) > 1:
+        question = m.text.split(maxsplit=1)[1].strip()
+    elif m.reply_to_message and (m.reply_to_message.text or m.reply_to_message.caption):
+        question = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
+    else:
+        await m.reply(
+            f"{E_BOT} Dùng: <code>/dora [câu hỏi]</code> hoặc reply tin nhắn + <code>/dora</code>",
+            parse_mode=ParseMode.HTML,
+        )
+        return
+    reply_context = None
+    if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
+        reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
+    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings, reply_context=reply_context)
+
+
 # Reply vào tin AI của bot → trả lời tiếp không cần gõ "Dora" nữa (ưu tiên group 0)
 @app.on_message(filters.reply & filters.text & ~filters.via_bot, group=0)
 @use_chat_lang()
@@ -357,35 +426,51 @@ async def reply_to_ai_followup(c, m, strings):
     await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings)
 
 
-# Gọi "Dora" / "Dora ơi" trong tin – không cần @ hay / (cần tắt Group Privacy trong BotFather)
+# Gọi "Dora" / "Dora ơi" trong tin – group -1 để chạy trước, không dùng use_chat_lang tránh lỗi locale
+def _dora_strings(key):
+    return key
+
+def _has_dora_text(_, __, m):
+    return bool(regex.search(r"(?i).*[DdĐđ]ora.*", (m.text or m.caption or "") or ""))
+
 @app.on_message(
-    filters.text & ~filters.via_bot & filters.regex(r"(?i).*[DdĐđ]ora.*"),
-    group=0,
+    (filters.text | filters.caption) & ~filters.via_bot & filters.create(_has_dora_text),
+    group=-1,
 )
-@use_chat_lang()
-async def reply_to_dora(c, m, strings):
+async def reply_to_dora(c, m):
     import re
 
-    # Nếu là reply vào tin AI của bot thì để handler reply_to_ai_followup xử lý
-    if _is_reply_to_bot_ai(m):
-        return
-    # Nếu có @mention bot thì để handler bên dưới xử lý, tránh trùng
-    if _is_bot_mentioned(m):
-        return
+    try:
+        LOGGER.info("reply_to_dora triggered chat_id=%s", m.chat.id)
+        # Nếu là reply vào tin AI của bot thì để handler reply_to_ai_followup xử lý
+        if _is_reply_to_bot_ai(m):
+            return
+        # Nếu có @mention bot thì để handler bên dưới xử lý, tránh trùng
+        if _is_bot_mentioned(m):
+            return
 
-    # Reply tin user + có từ lệnh (khoá mõm, xoá khỏi nhóm, cấm...) → thực hiện lệnh admin
-    full_text = m.text or ""
-    await _try_execute_dora_command(m, full_text)
+        full_text = (m.text or m.caption or "").strip()
+        if await _try_execute_dora_command(m, full_text):
+            return
 
-    # Ngữ cảnh: nếu reply tin của user thì đưa nội dung tin đó cho AI
-    reply_context = None
-    if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
-        reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
+        # Ngữ cảnh: nếu reply tin của user thì đưa nội dung tin đó cho AI
+        reply_context = None
+        if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
+            reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
 
-    # Lấy phần câu hỏi (bỏ "Dora", "Dora ơi", ...)
-    question = re.sub(r"(?i)[dDđĐ]ora[\s,]*(?:ơi|à|ê|nè)?[\s,]*", "", full_text).strip()
+        # Lấy phần câu hỏi (bỏ "Dora", "Dora ơi", ...)
+        question = re.sub(r"(?i)[dDđĐ]ora[\s,]*(?:ơi|à|ê|nè)?[\s,]*", "", full_text).strip()
 
-    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings, reply_context=reply_context)
+        await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, _dora_strings, reply_context=reply_context)
+    except Exception as e:
+        LOGGER.exception("reply_to_dora: %s", e)
+        try:
+            await m.reply(
+                f"{E_WARN} Dora chưa trả lời được. Thử lại hoặc dùng <code>/ai</code>.",
+                parse_mode=ParseMode.HTML,
+            )
+        except Exception:
+            pass
 
 
 # Chỉ khi có @mention bot (dự phòng khi bật Privacy hoặc muốn gọi bằng @)
@@ -396,7 +481,8 @@ async def reply_to_mention_dora(c, m, strings):
         return
     import re
     text = (m.text or "").strip()
-    await _try_execute_dora_command(m, text)
+    if await _try_execute_dora_command(m, text):
+        return
     reply_context = None
     if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
         reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
