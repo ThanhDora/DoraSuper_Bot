@@ -18,6 +18,7 @@ from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
 from pyrogram.types import ChatMember, ChatPermissions, ChatPrivileges, Message
 
 from database.chat_ban_db import add_chat_ban, remove_chat_ban
+from database.chat_mute_db import add_chat_mute, remove_chat_mute
 from database.warn_db import add_warn, get_warn, remove_warns
 from dorasuper import app, user
 from dorasuper.core.decorator.errors import capture_err
@@ -242,7 +243,7 @@ async def banFunc(client, message, strings):
         mention=mention,
         banner=message.from_user.mention if message.from_user else "Anon",
         **EMOJI_FMT,
-    ) + f" {E_ICON}"
+    ) + f" {E_ICON}\n"
 
     # Xử lý lệnh xcam: Chỉ xóa tin nhắn nếu có reply, vẫn cấm dù không có reply
     if message.command[0] == "xcam":
@@ -277,7 +278,7 @@ async def banFunc(client, message, strings):
         try:
             if len(time_value[:-1]) < 3:
                 await message.chat.ban_member(user_id, until_date=temp_ban)
-                # Không thêm vào chat_ban vì cấm có thời hạn - khi hết hạn user có thể vào lại
+                await add_chat_ban(message.chat.id, user_id, int(temp_ban.timestamp()))
                 await message.reply_text(msg)
             else:
                 await message.reply_text(strings("no_more_99").format(**EMOJI_FMT))
@@ -625,6 +626,7 @@ async def mute(client, message, strings):
                     permissions=ChatPermissions(all_perms=False),
                     until_date=temp_mute,
                 )
+                await add_chat_mute(message.chat.id, user_id, int(temp_mute.timestamp()))
                 await message.reply_text(msg, reply_markup=keyboard)
             else:
                 await message.reply_text(strings("no_more_99").format(**EMOJI_FMT))
@@ -638,6 +640,7 @@ async def mute(client, message, strings):
         await message.chat.restrict_member(
             user_id, permissions=ChatPermissions(all_perms=False)
         )
+        await add_chat_mute(message.chat.id, user_id, 0)  # 0 = vĩnh viễn đến khi bỏ mute
         await message.reply_text(msg, reply_markup=keyboard)
     except Exception as e:
         await message.reply_msg(str(e))
@@ -656,6 +659,7 @@ async def unmute(_, message, strings):
     
     try:
         await message.chat.unban_member(user_id)
+        await remove_chat_mute(message.chat.id, user_id)
         umention = (await app.get_users(user_id)).mention
         await message.reply_msg(strings("unmute_msg").format(umention=umention, **EMOJI_FMT))
     except (PeerIdInvalid, UsernameNotOccupied):
@@ -769,6 +773,7 @@ async def unmute_user(_, cq, strings):
     text += strings("rmmute_msg").format(mention=from_user.mention, **EMOJI_FMT)
     try:
         await cq.message.chat.unban_member(user_id)
+        await remove_chat_mute(chat_id, user_id)
         await cq.message.edit_text(text, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await cq.answer(str(e))

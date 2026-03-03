@@ -1,4 +1,4 @@
-# Gửi vào LOG_CHANNEL chỉ khi user dùng lệnh của bot (tin bắt đầu bằng / hoặc !)
+# Gửi vào LOG_CHANNEL khi user dùng lệnh (/, !) hoặc gửi video/ảnh — User và Chat mỗi cái 1 dòng
 
 import html
 from logging import getLogger
@@ -13,7 +13,7 @@ from dorasuper.vars import LOG_CHANNEL, COMMAND_HANDLER, SUDO
 
 LOGGER = getLogger("DoraSuper")
 __MODULE__ = "LogAdmin"
-__HELP__ = """[Nội bộ] Chỉ khi user gửi lệnh (/, !) thì tin đó mới được gửi vào LOG_CHANNEL."""
+__HELP__ = """[Nội bộ] Gửi lệnh (/, !) hoặc video/ảnh → log vào LOG_CHANNEL (User + Chat mỗi cái 1 dòng)."""
 
 
 def _is_command_message(text: str) -> bool:
@@ -35,7 +35,7 @@ def _is_command_message(text: str) -> bool:
     group=1,
 )
 async def log_user_message_to_admin(_, message):
-    """Chỉ gửi vào LOG_CHANNEL khi user dùng lệnh (ví dụ /ai, /dl, !start)."""
+    """Gửi vào LOG_CHANNEL khi user dùng lệnh hoặc gửi video/ảnh. User và Chat mỗi cái 1 dòng."""
     if not message.from_user or getattr(message.from_user, "is_bot", False):
         return
     if message.from_user.id == getattr(app.me, "id", None):
@@ -43,10 +43,12 @@ async def log_user_message_to_admin(_, message):
     if message.from_user.id in SUDO:
         return
     text = (message.text or message.caption or "").strip()
-    if not _is_command_message(text):
+    is_cmd = _is_command_message(text)
+    is_media = bool(message.photo or message.video)
+    if not is_cmd and not is_media:
         return
     try:
-        # Thông tin người gửi và nơi gửi
+        # Thông tin người gửi và nơi gửi (User và Chat luôn 1 dòng)
         user = message.from_user
         name = (user.first_name or "") + (" " + (user.last_name or "")).strip()
         name = html.escape(name) or "N/A"
@@ -59,10 +61,38 @@ async def log_user_message_to_admin(_, message):
         else:
             chat_info = "Riêng tư (PM)"
 
-        # Gộp User + Chat + nội dung lệnh vào 1 tin nhắn (User và Chat mỗi cái 1 dòng)
-        content = html.escape(text) if text else "(không có nội dung)"
+        # Ảnh/Video trong nhóm: copy media sang LOG_CHANNEL (kèm caption User/Chat)
+        if is_media and message.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+            cap = (
+                f"{E_USER} <b>User:</b> {name} | {username} | <code>{uid}</code>\n"
+                f"{E_MSG} <b>Chat:</b> {chat_info}"
+            )
+            if text:
+                # Caption media giới hạn 1024; giữ an toàn bằng cách cắt ngắn
+                extra = html.escape(text)
+                remaining = 950 - len(cap)
+                if remaining > 20:
+                    extra = extra[:remaining]
+                    cap += f"\n\n<blockquote>{extra}</blockquote>"
+            try:
+                await message.copy(LOG_CHANNEL, caption=cap, parse_mode=ParseMode.HTML)
+            except BadRequest:
+                # Fallback: copy không caption nếu Telegram/pyrogram từ chối caption
+                await message.copy(LOG_CHANNEL)
+            return
+
+        if is_cmd:
+            content = html.escape(text) if text else "(không có nội dung)"
+        else:
+            if message.video:
+                content = "🎬 Video"
+            else:
+                content = "📷 Ảnh"
+            if text:
+                content += "\n" + html.escape(text)
+
         body = (
-            f"{E_USER} <b>User:</b> {name} | {username} | <code>{uid}</code>\n\n"
+            f"{E_USER} <b>User:</b> {name} | {username} | <code>{uid}</code>\n"
             f"{E_MSG} <b>Chat:</b> {chat_info}\n\n"
             f"<blockquote>{content}</blockquote>"
         )

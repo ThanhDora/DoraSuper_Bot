@@ -29,12 +29,14 @@ from psutil import net_io_counters, virtual_memory
 from pyrogram import Client
 from pyrogram import __version__ as pyrover
 from pyrogram import enums, filters
+from pyrogram.enums import ChatMemberStatus as CMS
 from pyrogram.errors import (
     ChatSendPhotosForbidden,
     ChatSendPlainForbidden,
     FloodWait,
     MessageTooLong,
     PeerIdInvalid,
+    UserNotParticipant,
 )
 from pyrogram.raw.types import UpdateBotStopped
 from pyrogram.types import (
@@ -58,16 +60,26 @@ from dorasuper.helper.emoji_fmt import EMOJI_FMT, EMOJI_FMT_BTN
 from dorasuper.helper.localization import use_chat_lang
 from dorasuper.emoji import (
     E_CLOCK,
+    E_CROSS,
     E_ERROR,
+    E_GEAR,
     E_GIFT,
+    E_GROUP,
     E_HEART,
+    E_KEY,
     E_LIST,
     E_LOADING,
+    E_LOCK,
+    E_MSG,
     E_NOTE,
+    E_ROCKET,
+    E_RECYCLE,
     E_STAT,
     E_SUCCESS,
     E_USER,
     E_WARN,
+    E_WRENCH,
+    E_PENDING,
 )
 from dorasuper.vars import AUTO_RESTART, COMMAND_HANDLER, LOG_CHANNEL, SUDO, THUMB_PATH
 
@@ -154,7 +166,7 @@ async def refund_star_payment(client: Client, message: Message):
     try:
         await client.refund_star_payment(message.from_user.id, trx_id)
         await message.reply_msg(
-            f"{E_SUCCESS} {message.from_user.mention}, stars đã được hoàn lại vào tài khoản của bạn."
+            f"{E_SUCCESS} {E_GIFT} {message.from_user.mention}, stars đã được hoàn lại vào tài khoản của bạn."
         )
     except Exception as e:
         await message.reply_msg(f"{E_ERROR} {e}")
@@ -164,7 +176,7 @@ async def refund_star_payment(client: Client, message: Message):
 @use_chat_lang()
 async def log_file(_, ctx: Message, strings):
     """Send log file as document"""
-    msg = await ctx.reply_msg(f"<b>{E_LOADING}Đang đọc logs ...</b>", quote=True)
+    msg = await ctx.reply_msg(f"<b>{E_LOADING} {E_NOTE} Đang đọc logs ...</b>", quote=True)
     
     if len(ctx.command) == 1:
         try:
@@ -222,12 +234,12 @@ async def log_file(_, ctx: Message, strings):
 @use_chat_lang()
 async def delete_logs(_, ctx: Message, strings):
     """Delete log file content"""
-    msg = await ctx.reply_msg(f"<b>{E_LOADING} Đang xử lý xóa log ...</b>", quote=True)
+    msg = await ctx.reply_msg(f"<b>{E_LOADING} {E_NOTE} Đang xử lý xóa log ...</b>", quote=True)
     try:
         # Ghi đè file log bằng file rỗng
         with open("DoraLogs.txt", "w") as file:
             file.write("")
-        await msg.edit_msg(f"{E_SUCCESS} File logs được xóa thành công!")
+        await msg.edit_msg(f"{E_SUCCESS} {E_LIST} File logs được xóa thành công!")
         asyncio.create_task(_auto_del_msg(msg, 8))
     except Exception as e:
         await msg.edit_msg(f"{E_ERROR} Lỗi khi xóa logs: {str(e)}")
@@ -384,7 +396,7 @@ async def server_stats(_, ctx: Message) -> "Message":
 async def ban_globally(self: Client, ctx: Message):
     user_id, reason = await extract_user_and_reason(ctx)
     if not user_id:
-        return await ctx.reply_text(f"{E_ERROR} Tôi không thể tìm thấy người dùng đó.")
+        return await ctx.reply_text(f"{E_ERROR} {E_USER} Tôi không thể tìm thấy người dùng đó.")
     if not reason:
         return await ctx.reply(f"{E_WARN} Vui lòng cung cấp lý do cấm.")
 
@@ -399,17 +411,30 @@ async def ban_globally(self: Client, ctx: Message):
     from_user = ctx.from_user
 
     if user_id in [from_user.id, self.me.id] or user_id in SUDO:
-        return await ctx.reply_text(f"{E_WARN} Tôi không thể cấm người dùng đó.")
+        return await ctx.reply_text(f"{E_WARN} {E_LOCK} Tôi không thể cấm người dùng đó.")
     served_chats = await db.get_all_chats()
     m = await ctx.reply_text(
-        f"{E_LOADING} Đang cấm {user_mention} toàn bộ nhóm... Có thể mất vài phút."
+        f"{E_LOADING} {E_LOCK} Đang cấm {user_mention} toàn bộ nhóm... Có thể mất vài phút."
     )
     await add_gban_user(user_id)
-    number_of_chats = 0
+    total_chats = 0
+    banned_count = 0
+    banned_chat_ids = []  # Chỉ nhóm mà user đang tham gia (MEMBER/RESTRICTED) — đã bị kick mới gửi thông báo
     async for served_chat in served_chats:
+        total_chats += 1
         try:
+            # Chỉ thêm vào danh sách gửi thông báo nếu user đang ở trong nhóm (chưa bị kick/out)
+            user_was_in_chat = False
+            try:
+                mem = await app.get_chat_member(served_chat["id"], user_id)
+                if mem.status in (CMS.MEMBER, CMS.RESTRICTED):
+                    user_was_in_chat = True
+            except (UserNotParticipant, PeerIdInvalid, Exception):
+                pass
             await app.ban_chat_member(served_chat["id"], user_id)
-            number_of_chats += 1
+            banned_count += 1
+            if user_was_in_chat:
+                banned_chat_ids.append(served_chat["id"])
             await asyncio.sleep(1)
         except FloodWait as e:
             await asyncio.sleep(int(e.value))
@@ -418,24 +443,46 @@ async def ban_globally(self: Client, ctx: Message):
     with contextlib.suppress(Exception):
         await app.send_message(
             user_id,
-            f"Xin chào, Bạn đã bị cấm trên toàn cầu bởi {from_user.mention}, Bạn có thể kháng cáo lệnh cấm này bằng cách nói chuyện với anh ấy.",
+            f"{E_LOCK} Xin chào, bạn đã bị cấm trên toàn cầu bởi {from_user.mention}.\n{E_MSG} Bạn có thể kháng cáo bằng cách nói chuyện với người đó.",
+            parse_mode=enums.ParseMode.HTML,
         )
-    await m.edit(f"{E_SUCCESS} Đã cấm {user_mention} toàn cầu!")
-    ban_text = f"""
-__**New Global Ban**__
-**Origin:** {ctx.chat.title}
-**Admin:** {from_user.mention}
-**Banned User:** {user_mention}
-**Reason:** __{reason}__
-**Chats:** `{number_of_chats}`"""
+    # Thông báo chỉ đến những nhóm mà user vừa bị kick (user từng ở trong đó)
+    reason_esc = html.escape(str(reason or "Không nêu lý do"))
+    notify_text = (
+        f"{E_LOCK} <b>Thông báo gban</b>\n"
+        f"{E_USER} {user_mention} đã bị cấm toàn cầu bởi {from_user.mention}.\n"
+        f"{E_NOTE} <b>Lý do:</b> <i>{reason_esc}</i>\n"
+        f"{E_CROSS} Đã được loại khỏi nhóm này."
+    )
+    for chat_id in banned_chat_ids:
+        try:
+            await app.send_message(
+                chat_id,
+                notify_text,
+                parse_mode=enums.ParseMode.HTML,
+            )
+            await asyncio.sleep(0.5)
+        except Exception:
+            pass
+    await m.edit(f"{E_SUCCESS} {E_LOCK} Đã cấm {user_mention} tại {banned_count}/{total_chats} nhóm!")
+    chat_title_esc = html.escape(str(ctx.chat.title or ""))
+    ban_text = (
+        f"{E_LOCK} <b>New Global Ban</b>\n"
+        f"{E_GROUP} <b>Origin:</b> {chat_title_esc}\n"
+        f"{E_USER} <b>Admin:</b> {from_user.mention}\n"
+        f"{E_LOCK} <b>Banned User:</b> {user_mention}\n"
+        f"{E_NOTE} <b>Reason:</b> <i>{reason_esc}</i>\n"
+        f"{E_LIST} <b>Chats:</b> <code>{banned_count}</code> / <code>{total_chats}</code> (đã cấm / tổng nhóm)"
+    )
     try:
         m2 = await app.send_message(
             LOG_CHANNEL,
             text=ban_text,
+            parse_mode=enums.ParseMode.HTML,
             disable_web_page_preview=True,
         )
         await m.edit(
-            f"{E_SUCCESS} Đã cấm {user_mention} toàn cầu!",
+            f"{E_SUCCESS} {E_LOCK} Đã cấm {user_mention} tại {banned_count}/{total_chats} nhóm!",
             reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Xem nhật ký hành động", url=m2.link)]]
             ),
@@ -451,7 +498,7 @@ __**New Global Ban**__
 async def unban_globally(_, ctx: Message):
     user_id = await extract_user(ctx)
     if not user_id:
-        return await ctx.reply_text(f"{E_ERROR} Tôi không thể tìm thấy người dùng đó.")
+        return await ctx.reply_text(f"{E_ERROR} {E_USER} Tôi không thể tìm thấy người dùng đó.")
     try:
         getuser = await app.get_users(user_id)
         user_mention = getuser.mention
@@ -462,10 +509,10 @@ async def unban_globally(_, ctx: Message):
 
     is_gbanned = await is_gbanned_user(user_id)
     if not is_gbanned:
-        await ctx.reply_text(f"{E_WARN} Người này không có trong danh sách cấm toàn cầu.")
+        await ctx.reply_text(f"{E_WARN} {E_LOCK} Người này không có trong danh sách cấm toàn cầu.")
     else:
         await remove_gban_user(user_id)
-        await ctx.reply_text(f"{E_SUCCESS} Đã bỏ lệnh cấm toàn cầu {user_mention}.")
+        await ctx.reply_text(f"{E_SUCCESS} {E_KEY} Đã bỏ lệnh cấm toàn cầu {user_mention}.")
 
 
 @app.on_message(
@@ -492,7 +539,7 @@ async def shell_cmd(self: Client, ctx: Message, strings):
             doc.name = "shell_output.txt"
             await ctx.reply_document(
                 document=doc,
-                caption=f"<code>{ctx.input[: 4096 // 4 - 1]}</code>",
+                caption=f"{E_WRENCH} <code>{ctx.input[: 4096 // 4 - 1]}</code>",
                 file_name=doc.name,
                 reply_markup=InlineKeyboardMarkup(
                     [
@@ -637,13 +684,13 @@ async def cmd_eval(self: Client, ctx: Message, strings) -> Optional[str]:
     # Strip only ONE final newline to compensate for our message formatting
     if out.endswith("\n"):
         out = out[:-1]
-    final_output = f"{prefix}<b>INPUT:</b>\n<pre language='python'>{html.escape(code)}</pre>\n<b>OUTPUT:</b>\n<pre language='python'>{html.escape(out)}</pre>\nThời gian thực hiện: {el_str}"
+    final_output = f"{prefix}{E_GEAR} <b>INPUT:</b>\n<pre language='python'>{html.escape(code)}</pre>\n{E_GEAR} <b>OUTPUT:</b>\n<pre language='python'>{html.escape(out)}</pre>\n{E_CLOCK} Thời gian thực hiện: {el_str}"
     if len(final_output) > 4096:
         with io.BytesIO(str.encode(out)) as out_file:
             out_file.name = "DoraSuperEval.txt"
             await ctx.reply_document(
                 document=out_file,
-                caption=f"<code>{code[: 4096 // 4 - 1]}</code>",
+                caption=f"{E_GEAR} <code>{code[: 4096 // 4 - 1]}</code>",
                 disable_notification=True,
                 thumb=THUMB_PATH,
                 reply_markup=InlineKeyboardMarkup(
@@ -683,7 +730,7 @@ async def cmd_eval(self: Client, ctx: Message, strings) -> Optional[str]:
 @app.on_message(filters.command(["restart"], COMMAND_HANDLER) & filters.user(SUDO))
 @use_chat_lang()
 async def update_restart(_, ctx: Message, strings):
-    msg = await ctx.reply_msg(strings("up_and_rest").format(**EMOJI_FMT))
+    msg = await ctx.reply_msg(f"{E_PENDING}" + strings("up_and_rest").format(**EMOJI_FMT))
     with open("restart.pickle", "wb") as status:
         pickle.dump([ctx.chat.id, msg.id], status)
     os.execvp(sys.executable, [sys.executable, "-m", "dorasuper"])
@@ -692,13 +739,14 @@ async def update_restart(_, ctx: Message, strings):
 # Dừng bot hoàn toàn (chỉ SUDO)
 @app.on_message(filters.command(["stop", "shutdown"], COMMAND_HANDLER) & filters.user(SUDO))
 async def stop_bot(_, ctx: Message):
-    await ctx.reply_msg(f"{E_WARN} Đang dừng bot...")
+    await ctx.reply_msg(f"{E_WARN} {E_GEAR} Đang dừng bot...")
     sys.exit(0)
 
 
 @app.on_poll(filters.chat(-1001777794636), group=-5)
-async def tespoll(self, msg):
-    await ctx.reply(msg)
+async def tespoll(client, msg):
+    # Trả lời tin nhắn poll (ctx không tồn tại trong handler on_poll)
+    await msg.reply_msg(f"Poll: {getattr(msg.poll, 'question', '') or 'N/A'}")
 
 
 @app.on_raw_update(group=-99)

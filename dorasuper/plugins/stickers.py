@@ -28,7 +28,7 @@ from pyrogram.raw.types import (
 )
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from dorasuper import app
-from dorasuper.emoji import E_GROUP, E_LOADING, E_TIP
+from dorasuper.emoji import E_GROUP, E_LOADING, E_TIP, E_UPD
 from dorasuper.helper import fetch, use_chat_lang
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.core.decorator.errors import capture_err
@@ -341,7 +341,7 @@ async def memify(client, message):
         return
 
     # Thông báo đang xử lý
-    processing_msg = await message.reply_msg(f"{E_LOADING} Đang xử lý...", reply_to_message_id=rid)
+    processing_msg = await message.reply_msg(f"{E_UPD} Đang xử lý...{E_LOADING}", reply_to_message_id=rid)
 
     webp = None
     png = None

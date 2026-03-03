@@ -14,7 +14,7 @@ from pyrogram import filters, enums
 from pyrogram.types import Message
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
-from dorasuper.emoji import E_ERROR, E_GROUP, E_LOADING
+from dorasuper.emoji import E_ERROR, E_GROUP, E_LOADING, E_UPD
 from dorasuper.vars import COMMAND_HANDLER
 
 LOGGER = getLogger("DoraSuper")
@@ -326,7 +326,7 @@ async def msg_quotly_cmd(client: app, message: Message):
         except Exception:
             pass
         return
-    processing_msg = await message.reply_msg(f"{E_LOADING} Đang xử lý...", reply_to_message_id=reply_id)
+    processing_msg = await message.reply_msg(f"{E_UPD} Đang xử lý{E_LOADING}", reply_to_message_id=reply_id)
 
     try:
         cmd_list = getattr(message, "command", None) or []

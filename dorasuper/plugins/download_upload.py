@@ -26,7 +26,7 @@ from pySmartDL import SmartDL
 
 from dorasuper import app
 from dorasuper.core.decorator import capture_err, new_task
-from dorasuper.emoji import E_DOWNLOAD, E_ERROR, E_GROUP, E_LINK, E_LOADING, E_SUCCESS, E_TIP, E_WARN
+from dorasuper.emoji import E_DOWNLOAD, E_ERROR, E_GROUP, E_LINK, E_LOADING, E_SUCCESS, E_TIP, E_WARN, E_UPD
 from dorasuper.helper.http import fetch
 from dorasuper.helper.pyro_progress import humanbytes, progress_for_pyrogram
 from dorasuper.vars import (
@@ -114,14 +114,14 @@ async def getdirect_handler(bot, message):
     dc_id = FileId.decode(media.file_id).dc_id
     fileku = await message.reply_to_message.download(
         progress=progress_for_pyrogram,
-        progress_args=(f"{E_LOADING} Đang cố tải về, xin chờ..", m, now, dc_id),
+        progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", m, now, dc_id),
     )
     
     try:
         filename = os.path.basename(fileku) or "file"
 
         if USE_GDRIVE and GDRIVE_CREDENTIALS_PATH and os.path.exists(GDRIVE_CREDENTIALS_PATH):
-            await m.edit(f"{E_LOADING} Đang tải lên Google Drive, xin chờ..")
+            await m.edit(f"{E_UPD} Đang tải lên Google Drive, xin chờ..{E_LOADING}")
             file_url = await asyncio.to_thread(_upload_to_gdrive_sync, fileku, filename)
             output = (
                 f"{E_SUCCESS} Đã tải lên Google Drive.\n\n"
@@ -135,7 +135,7 @@ async def getdirect_handler(bot, message):
             )
             await m.edit(output, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
         else:
-            await m.edit(f"{E_LOADING} Đang tải lên tmpfiles, xin chờ..")
+            await m.edit(f"{E_UPD} Đang tải lên tmpfiles, xin chờ..{E_LOADING}")
             with open(fileku, "rb") as f:
                 file_content = f.read()
             form = aiohttp.FormData()
@@ -223,13 +223,13 @@ async def upload(bot, message):
     if file_size_mb > MAX_FILE_SIZE_MB:
         return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
     
-    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_DOWNLOAD} Đang tải tập tin của bạn xuống máy chủ xử lý...{E_LOADING}")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
         file_name=os.path.join(ASSETS_DIR, generate_random_filename()),
         progress=progress_for_pyrogram,
-        progress_args=("Đang cố tải về, xin chờ..", m, now, dc_id),
+        progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", m, now, dc_id),
     )
 
     original_file_name = media.file_name  # Lưu lại tên tệp gốc
@@ -259,7 +259,7 @@ async def upload(bot, message):
 
     try:
         # Gửi thông báo bắt đầu ký
-        await m.edit("Đang tiến hành ký tệp của bạn, xin chờ...")
+        await m.edit(f"{E_UPD} Đang tiến hành ký tệp của bạn, xin chờ...{E_LOADING}")
 
         # Ký file bằng zsign và lưu vào đường dẫn chỉ định
         command = f"{ZSIGN_PATH} -z 6 -k {P12_PATH} -p TTJB -m {MOBILEPROVISION_PATH} -o {output_file_path} {original_file_path}"
@@ -280,7 +280,7 @@ async def upload(bot, message):
             return
         
         # Gửi thông báo ký thành công
-        await m.edit("Tệp của bạn đã được ký thành công. Đang tải lên máy chủ lưu trữ, xin chờ...")
+        await m.edit(f"{E_UPD} Tệp của bạn đã được ký thành công. Đang tải lên máy chủ lưu trữ, xin chờ...{E_LOADING}")
         
         # Tạo đối tượng FormData để gửi file đã ký
         async with aiohttp.ClientSession() as session:
@@ -361,13 +361,13 @@ async def cloneapp_handler(bot, message):
     if file_size_mb > MAX_FILE_SIZE_MB:
         return await message.reply(f"{E_WARN} Tệp quá lớn. Vui lòng chỉ tải lên các tập tin dưới 1GB.")
     
-    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_DOWNLOAD} Đang tải tập tin của bạn xuống máy chủ xử lý...{E_LOADING}")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
         file_name=os.path.join(ASSETS_DIR, generate_random_filename()),
         progress=progress_for_pyrogram,
-        progress_args=("Đang cố tải về, xin chờ..", m, now, dc_id),
+        progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", m, now, dc_id),
     )
 
     original_file_name = media.file_name  # Lưu lại tên tệp gốc
@@ -391,7 +391,7 @@ async def cloneapp_handler(bot, message):
 
     try:
         # Gửi thông báo bắt đầu ký
-        await m.edit("Đang tiến hành nhân bản tệp của bạn, xin chờ...")
+        await m.edit(f"{E_UPD} Đang tiến hành nhân bản tệp của bạn, xin chờ...{E_LOADING}")
 
         # Ký file bằng và thay đổi bundle id
         command = f"/root/.local/bin/cyan -o {output_file_path} -i {original_file_path} -b com.thuthuatjb.{random_name}"
@@ -412,7 +412,7 @@ async def cloneapp_handler(bot, message):
             return
         
         # Gửi thông báo ký thành công
-        await m.edit("Tệp của bạn đã được nhân bản thành công. Đang gửi lại tệp, xin chờ...")
+        await m.edit(f"{E_UPD} Tệp của bạn đã được nhân bản thành công. Đang gửi lại tệp, xin chờ...{E_LOADING}")
 
         # Gửi tệp đã ký lên Telegram
         signed_file_name = f"{original_file_name.replace('.ipa', '')}_clone_TTJB.ipa"
@@ -466,13 +466,13 @@ async def inject_iap_handler(bot, message):
             return await message.reply(f"{E_ERROR} Tệp {name} không tồn tại: {path}")
 
     # Tải file xuống
-    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_DOWNLOAD} Đang tải tập tin của bạn xuống máy chủ xử lý...{E_LOADING}")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
         file_name=os.path.join(ASSETS_DIR, generate_random_filename()),
         progress=progress_for_pyrogram,
-        progress_args=("Đang cố tải về, xin chờ..", m, now, dc_id),
+        progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", m, now, dc_id),
     )
 
     original_file_name = media.file_name  # Lưu lại tên tệp gốc
@@ -489,7 +489,7 @@ async def inject_iap_handler(bot, message):
 
     try:
         # Tiêm từng dylib vào file IPA
-        await m.edit("Đang tiến hành tiêm tệp của bạn, xin chờ...")
+        await m.edit(f"{E_UPD} Đang tiến hành tiêm tệp của bạn, xin chờ...{E_LOADING}")
         intermediate_file_path = original_file_path  # Bắt đầu với file gốc
 
         for iap_path in [ADBLOCK_PATH, SATELLA_PATH]:
@@ -513,7 +513,7 @@ async def inject_iap_handler(bot, message):
 
         # Đổi tên file cuối cùng
         os.rename(intermediate_file_path, output_file_path)
-        await m.edit("Tệp của bạn đã được tiêm thành công. Đang gửi lại tệp, xin chờ...")
+        await m.edit(f"{E_UPD} Tệp của bạn đã được tiêm thành công. Đang gửi lại tệp, xin chờ...{E_LOADING}")
 
         # Gửi tệp đã ký lên Telegram
         await message.reply_document(
@@ -563,13 +563,13 @@ async def inject_fix_handler(bot, message):
             return await message.reply(f"{E_ERROR} Tệp {name} không tồn tại: {path}")
 
     # Tải file xuống
-    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_DOWNLOAD} Đang tải tập tin của bạn xuống máy chủ xử lý...{E_LOADING}")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
         file_name=os.path.join(ASSETS_DIR, generate_random_filename()),
         progress=progress_for_pyrogram,
-        progress_args=("Đang cố tải về, xin chờ..", m, now, dc_id),
+        progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", m, now, dc_id),
     )
 
     original_file_name = media.file_name  # Lưu lại tên tệp gốc
@@ -586,7 +586,7 @@ async def inject_fix_handler(bot, message):
 
     try:
         # Tiêm từng dylib vào file IPA
-        await m.edit("Đang tiến hành tiêm tệp của bạn, xin chờ...")
+        await m.edit(f"{E_UPD} Đang tiến hành tiêm tệp của bạn, xin chờ...{E_LOADING}")
         intermediate_file_path = original_file_path  # Bắt đầu với file gốc
 
         for fix_path in [FIX_PATH, FIX1_PATH, FIX2_PATH]:
@@ -610,7 +610,7 @@ async def inject_fix_handler(bot, message):
 
         # Đổi tên file cuối cùng
         os.rename(intermediate_file_path, output_file_path)
-        await m.edit("Tệp của bạn đã được tiêm thành công. Đang gửi lại tệp, xin chờ...")
+        await m.edit(f"{E_UPD} Tệp của bạn đã được tiêm thành công. Đang gửi lại tệp, xin chờ...{E_LOADING}")
 
         # Gửi tệp đã ký lên Telegram
         await message.reply_document(
@@ -655,13 +655,13 @@ async def inject_ext_handler(bot, message):
         return await message.reply(f"{E_ERROR} Tệp EXTENSIONFIX không tồn tại: {EXTENSIONFIX_PATH}")
 
     # Tải file xuống
-    m = await message.reply(f"{E_LOADING} Đang tải tập tin của bạn xuống máy chủ xử lý...")
+    m = await message.reply(f"{E_DOWNLOAD} Đang tải tập tin của bạn xuống máy chủ xử lý...{E_LOADING}")
     now = time.time()
     dc_id = FileId.decode(media.file_id).dc_id
     original_file_path = await message.reply_to_message.download(
         file_name=os.path.join(ASSETS_DIR, generate_random_filename()),
         progress=progress_for_pyrogram,
-        progress_args=("Đang cố tải về, xin chờ..", m, now, dc_id),
+        progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", m, now, dc_id),
     )
 
     original_file_name = media.file_name  # Lưu lại tên tệp gốc
@@ -677,7 +677,7 @@ async def inject_ext_handler(bot, message):
 
     try:
         # Chạy lệnh ipapatch
-        await m.edit("Đang tiêm ExtensionFix vào IPA...")
+        await m.edit(f"{E_UPD} Đang tiêm ExtensionFix vào IPA...{E_LOADING}")
         command = [
             'ipapatch',
             '--input', original_file_path,
@@ -697,7 +697,7 @@ async def inject_ext_handler(bot, message):
             error_msg = result.stderr.strip() or "Không xác định được lỗi."
             return await m.edit(f"Đã xảy ra lỗi khi tiêm IPA.\nChi tiết lỗi: {error_msg}")
 
-        await m.edit("Tệp của bạn đã được tiêm thành công. Đang gửi lại tệp, xin chờ...")
+        await m.edit(f"{E_UPD} Tệp của bạn đã được tiêm thành công. Đang gửi lại tệp, xin chờ...{E_LOADING}")
 
         # Gửi tệp đã ký lên Telegram
         await message.reply_document(
@@ -721,7 +721,7 @@ async def inject_ext_handler(bot, message):
 @capture_err
 @new_task
 async def download(client, message):
-    pesan = await message.reply_text(f"{E_LOADING} Đang xử lý...", quote=True)
+    pesan = await message.reply_text(f"{E_UPD} Đang xử lý{E_LOADING}", quote=True)
     if message.reply_to_message is not None:
         # Trường hợp trả lời vào một tệp
         start_t = datetime.now()
@@ -745,7 +745,7 @@ async def download(client, message):
             message=message.reply_to_message,
             file_name=download_path,
             progress=progress_for_pyrogram,
-            progress_args=("Đang cố tải về, xin chờ..", pesan, c_time, dc_id),
+            progress_args=(f"{E_DOWNLOAD} Đang cố tải về, xin chờ..{E_LOADING}", pesan, c_time, dc_id),
         )
         end_t = datetime.now()
         ms = (end_t - start_t).seconds
@@ -796,7 +796,7 @@ async def download(client, message):
             estimated_total_time = downloader.get_eta(human=True)
             try:
                 current_message = (
-                    f"Đang cố tải về...\nURL: <code>{url}</code>\n"
+                    f"{E_DOWNLOAD} Đang cố tải về...{E_LOADING}\nURL: <code>{url}</code>\n"
                     f"Tên tệp tin: <code>{unquote(custom_file_name)}</code>\n"
                     f"Tốc độ: {speed}\n{progress_str}\n"
                     f"{downloaded} of {humanbytes(total_length)}\n"

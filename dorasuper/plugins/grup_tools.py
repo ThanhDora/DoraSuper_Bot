@@ -19,9 +19,11 @@ from pyrogram.errors import (
     RPCError,
     PeerIdInvalid,
 )
-from pyrogram.types import ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import ChatMemberUpdated, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from database.chat_ban_db import is_chat_banned
+from database.chat_ban_db import get_chat_ban_until
+from database.chat_mute_db import get_chat_mute_until
+from database.gban_db import is_gbanned_user
 from database.greetings_db import (
     is_welcome, toggle_welcome, set_custom_welcome, get_custom_welcome,
     is_goodbye, toggle_goodbye, set_custom_goodbye, get_custom_goodbye,
@@ -170,17 +172,51 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
     # Chỉ xử lý khi user thực sự tham gia (MEMBER), tránh trùng khi Telegram gửi update cấm
     if new_status != CMS.MEMBER:
         return
-    # Tự động cấm lại nếu user đã bị cấm trước đó (tránh mời lại vào được)
-    if await is_chat_banned(member.chat.id, user.id):
+    # Tự động kick/ban nếu user bị gban (cấm toàn cầu) — mời lại vẫn bị đá
+    if await is_gbanned_user(user.id):
         try:
             await c.ban_chat_member(member.chat.id, user.id)
             await c.send_message(
                 member.chat.id,
-                f"{E_CROSS} Người dùng <a href='tg://user?id={user.id}'>{user.first_name}</a> đã bị cấm trước đó, không thể tham gia lại.",
+                f"{E_CROSS} Người dùng <a href='tg://user?id={user.id}'>{user.first_name or 'N/A'}</a> đang bị cấm toàn cầu (gban), đã bị loại khỏi nhóm.",
+                parse_mode=enums.ParseMode.HTML,
+            )
+        except Exception as e:
+            LOGGER.info("Không thể kick user gban %s: %s", user.id, e)
+        return
+    # Tự động cấm lại nếu user đang trong thời gian bị cấm (cam vĩnh viễn hoặc tcam) — mời lại vẫn bị ban
+    until_ban_ts = await get_chat_ban_until(member.chat.id, user.id)
+    if until_ban_ts is not None:
+        try:
+            until_date = datetime.fromtimestamp(until_ban_ts) if until_ban_ts > 0 else None
+            await c.ban_chat_member(member.chat.id, user.id, until_date=until_date)
+            await c.send_message(
+                member.chat.id,
+                f"{E_CROSS} Người dùng <a href='tg://user?id={user.id}'>{user.first_name}</a> đang trong thời gian bị cấm, không thể tham gia lại.",
                 parse_mode=enums.ParseMode.HTML,
             )
         except Exception as e:
             LOGGER.info("Không thể cấm lại user %s: %s", user.id, e)
+        return
+
+    # Tự động tắt mic lại nếu user đang trong thời gian bị mute (immom/timmom) — mời lại vẫn bị restrict
+    until_ts = await get_chat_mute_until(member.chat.id, user.id)
+    if until_ts is not None:
+        try:
+            until_date = datetime.fromtimestamp(until_ts) if until_ts > 0 else None
+            await c.restrict_chat_member(
+                member.chat.id,
+                user.id,
+                ChatPermissions(all_perms=False),
+                until_date=until_date,
+            )
+            await c.send_message(
+                member.chat.id,
+                f"{E_NOTE} <a href='tg://user?id={user.id}'>{user.first_name or 'N/A'}</a> đang trong thời gian bị tắt mic, đã áp dụng lại.",
+                parse_mode=enums.ParseMode.HTML,
+            )
+        except Exception as e:
+            LOGGER.info("Không thể restrict lại user mute %s: %s", user.id, e)
         return
 
     # Chào mừng

@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import time
 from logging import getLogger
 
 import aiohttp
@@ -33,6 +34,7 @@ from dorasuper.vars import (
     COBALT_URL,
     YT_DLP_COOKIES_FILE,
     YT_DLP_COOKIES_FROM_BROWSER,
+    DOUYIN_SESSIONID,
     INSTAGRAM_USERNAME,
     INSTAGRAM_PASSWORD,
     INSTAGRAM_SESSION,
@@ -42,8 +44,9 @@ LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "TảiVideo"
 __HELP__ = """
-<blockquote>Gửi link TikTok, Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
+<blockquote>Gửi link TikTok, Douyin, Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
 • TikTok: video + ảnh/album (gallery-dl, TikWM, Cobalt)
+• Douyin (抖音): video (douyin.com, v.douyin.com)
 • Facebook: video và ảnh (fb.com, fb.watch, facebook.com)
 • Instagram: video/Reels (instagram.com)
 
@@ -67,6 +70,10 @@ URL_PATTERNS = {
     ),
     "instagram": re.compile(
         r"(?:https?://)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "douyin": re.compile(
+        r"(?:https?://)?(?:www\.|v\.|m\.)?(?:douyin\.com|iesdouyin\.com)/[^\s]+",
         re.IGNORECASE,
     ),
 }
@@ -177,19 +184,30 @@ def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None
         "noplaylist": True,  # Chỉ lấy đúng 1 mục từ URL (tránh link ảnh FB lại tải bài khác)
         "logger": _YDLLogger(),
     }
-    # Cookie cho Facebook/Instagram (nội dung chỉ cho user đăng nhập)
-    if YT_DLP_COOKIES_FILE:
-        cookiefile_path = (
-            YT_DLP_COOKIES_FILE
-            if os.path.isabs(YT_DLP_COOKIES_FILE)
-            else os.path.join(ROOT_DIR, YT_DLP_COOKIES_FILE)
-        )
-        if os.path.isfile(cookiefile_path):
-            ydl_opts["cookiefile"] = cookiefile_path
-    if YT_DLP_COOKIES_FROM_BROWSER:
-        browser = YT_DLP_COOKIES_FROM_BROWSER.strip().lower()
-        if browser:
-            ydl_opts["cookiesfrombrowser"] = (browser,)
+    # Cookie: Douyin chỉ dùng DOUYIN_SESSIONID; nền tảng khác dùng file hoặc browser
+    is_douyin = "douyin" in url.lower()
+    if is_douyin:
+        if DOUYIN_SESSIONID:
+            cookie_path = os.path.join(out_dir, "douyin_cookies.txt")
+            exp = str(int(time.time()) + 10 * 365 * 24 * 3600)
+            with open(cookie_path, "w") as f:
+                f.write("# Netscape HTTP Cookie File\n")
+                f.write(".douyin.com\tTRUE\t/\tFALSE\t" + exp + "\tsessionid\t" + DOUYIN_SESSIONID + "\n")
+            ydl_opts["cookiefile"] = cookie_path
+        # Douyin không dùng YT_DLP_COOKIES_FILE / YT_DLP_COOKIES_FROM_BROWSER
+    else:
+        if YT_DLP_COOKIES_FROM_BROWSER:
+            browser = YT_DLP_COOKIES_FROM_BROWSER.strip().lower()
+            if browser:
+                ydl_opts["cookiesfrombrowser"] = (browser,)
+        elif YT_DLP_COOKIES_FILE:
+            cookiefile_path = (
+                YT_DLP_COOKIES_FILE
+                if os.path.isabs(YT_DLP_COOKIES_FILE)
+                else os.path.join(ROOT_DIR, YT_DLP_COOKIES_FILE)
+            )
+            if os.path.isfile(cookiefile_path):
+                ydl_opts["cookiefile"] = cookiefile_path
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -229,13 +247,24 @@ def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None
             return None, "Video bị giới hạn theo khu vực.", None
         if "unsupported url" in low or "unsupported" in low and "url" in low:
             return None, "Link TikTok ảnh (photo) chưa được hỗ trợ. Chỉ tải được link video TikTok.", None
-        if "only available for registered users" in low or ("cookies" in low and "authentic" in low):
-            return None, (
-                "Facebook/Instagram (video hoặc ảnh) yêu cầu đăng nhập. Trong config.env thêm:\n"
-                "• YT_DLP_COOKIES_FILE=cookies.txt (hoặc đường dẫn đầy đủ tới file Netscape)\n"
-                "hoặc • YT_DLP_COOKIES_FROM_BROWSER=chrome (firefox, brave, ...)\n"
-                "Sau đó khởi động lại bot."
-            ), None
+        if (
+            "only available for registered users" in low
+            or ("cookies" in low and "authentic" in low)
+            or "fresh cookies" in low
+            or ("cookies" in low and "needed" in low)
+        ):
+            if "douyin" in low or "fresh cookies" in low:
+                msg = (
+                    "Douyin cần sessionid. Trong config.env thêm:\n"
+                    "DOUYIN_SESSIONID=giá_trị_sessionid\n\n"
+                    "Cách lấy: Chrome → F12 → Application → Cookies → https://www.douyin.com → copy ô Value của cookie \"sessionid\". "
+                    "Sessionid hết hạn nhanh, nếu lỗi lại thì vào douyin.com, copy sessionid mới và cập nhật config."
+                )
+            else:
+                msg = (
+                    "Facebook/Instagram cần cookie. config.env: YT_DLP_COOKIES_FROM_BROWSER=chrome hoặc YT_DLP_COOKIES_FILE=... Sau đó khởi động lại bot."
+                )
+            return None, msg, None
         return None, err[:200] if len(err) > 200 else err, None
     except Exception as e:
         return None, _strip_ansi(str(e))[:200], None
@@ -1129,7 +1158,7 @@ async def cmd_download(_, ctx: Message):
 
     if not url:
         return await ctx.reply_msg(
-            f"{E_ERROR} Gửi link hoặc trả lời tin có link.\nVí dụ: <code>/dl https://vm.tiktok.com/xxx</code> hoặc link Facebook/Instagram.",
+            f"{E_ERROR} Gửi link hoặc trả lời tin có link.\nVí dụ: <code>/dl https://vm.tiktok.com/xxx</code> hoặc link Douyin/Facebook/Instagram.",
             parse_mode=enums.ParseMode.HTML,
         )
     await _process_download(ctx, url, platform)
