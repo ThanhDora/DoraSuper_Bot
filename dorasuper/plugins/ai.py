@@ -27,7 +27,10 @@ from dorasuper.emoji import (
 )
 from dorasuper.helper.tools import rentry
 from dorasuper.vars import COMMAND_HANDLER, AI_API_KEY, AI_PROVIDER, ROOT_DIR, SUDO
-from database.ai_chat_log_db import insert_ai_chat_log as db_insert_ai_chat_log
+from database.ai_chat_log_db import (
+    get_recent_chat_history as db_get_recent_chat_history,
+    insert_ai_chat_log as db_insert_ai_chat_log,
+)
 
 LOGGER = getLogger("DoraSuper")
 
@@ -107,11 +110,11 @@ __HELP__ = """
 """
 
 # Cấu hình Grok (xAI) – chỉ dùng khi AI_PROVIDER=grok
-# XAI_BASE_URL = "https://api.x.ai/v1"
-XAI_RESPONSES_URL = "https://api.x.ai/v1/responses"
+XAI_BASE_URL = "https://api.x.ai/v1"
+# XAI_RESPONSES_URL = "https://api.x.ai/v1/responses"
 GROK_MODEL = "grok-4-1-fast-non-reasoning"
 # Tra cứu thời gian thực: dùng Responses API (web_search, x_search). Chat Completions không còn hỗ trợ live search.
-GROK_RESPONSES_TOOLS = [{"type": "web_search"}, {"type": "x_search"}]
+GROK_RESPONSES_TOOLS = None #[{"type": "web_search"}, {"type": "x_search"}]
 grok_client = AsyncOpenAI(api_key=AI_API_KEY, base_url=XAI_BASE_URL) if (AI_API_KEY and AI_PROVIDER == "grok") else None
 
 # Placeholder cho AI: [TÊN] → emoji từ dorasuper/emoji.py (tất cả E_* dạng chuỗi)
@@ -170,22 +173,29 @@ _ACTION_PHRASES = [
 ]
 
 
+# Ký tự vô hình có thể khiến "nháy mắt" không khớp khi replace
+_INVISIBLE_CHARS = re.compile(r"[\u200b\u200c\u200d\u200e\u200f\ufeff\ufffe\uffff]+")
+
+
 def _normalize_ai_answer(text: str) -> str:
     """Sửa lỗi format AI: thay cố định các cụm hành động bằng emoji (kể cả khi thiếu * hoặc dính chữ)."""
     if not text:
         return text
-    for phrase, emoji in _ACTION_PHRASES:
+    text = unicodedata.normalize("NFC", text)
+    text = _INVISIBLE_CHARS.sub("", text)
+    # Xử lý cụm dài trước (ôm chặt trước ôm) để tránh thay nhầm
+    phrases_sorted = sorted(_ACTION_PHRASES, key=lambda x: -len(x[0].strip()))
+    for phrase, emoji in phrases_sorted:
+        p = phrase.strip()
+        p_esc = re.escape(p)
         # Các pattern lỗi: ?phrase*, !phrase*, *phrase (thiếu * cuối), phrase* (thiếu * đầu)
-        text = re.sub(r"\?" + re.escape(phrase) + r"\*?", "? " + emoji + " ", text)
-        text = re.sub(r"!" + re.escape(phrase) + r"\*?", "! " + emoji + " ", text)
-        text = re.sub(r"\*" + re.escape(phrase) + r"\*?", emoji + " ", text)
-        text = re.sub(r"(?<!\*)" + re.escape(phrase) + r"\*", " " + emoji + " ", text)
-        # Thay cố định mọi chỗ còn lại (kể cả dính chữ: nháy mắtAnh → emoji Anh)
-        text = text.replace(phrase, emoji + " ")
-    # Gộp khoảng trắng thừa, bỏ dấu * còn sót (vd: "* emoji" sau khi thay)
+        text = re.sub(r"\?" + p_esc + r"\*?", "? " + emoji + " ", text)
+        text = re.sub(r"!" + p_esc + r"\*?", "! " + emoji + " ", text)
+        text = re.sub(r"\*" + p_esc + r"\*?", emoji + " ", text)
+        text = re.sub(r"(?<!\*)" + p_esc + r"\*", " " + emoji + " ", text)
+        # Thay mọi chỗ còn lại (kể cả dính chữ: nháy mắtvỗ tay → emoji emoji)
+        text = text.replace(p, emoji + " ")
     text = re.sub(r" +", " ", text)
-    text = re.sub(r"\* +", " ", text)
-    text = re.sub(r" +\*", " ", text)
     text = re.sub(r" +", " ", text).strip()
     return text
 
@@ -296,6 +306,16 @@ _UNICODE_EMOJI_TO_CUSTOM = {
 
 # Regex: thẻ <emoji id="...">nội dung</emoji> với nội dung không chứa < (một cấp, không lồng)
 _RE_EMOJI_TAG = re.compile(r'<emoji\s+id="\d+"[^>]*>[^<]*</emoji>')
+
+
+def _normalize_emoji_tag(tag: str) -> str:
+    """Chuẩn hóa thẻ emoji: gộp nhiều variation selector (U+FE0F) thành một, tránh lỗi hiển thị ❤️️."""
+    match = re.match(r'(<emoji\s+id="\d+"[^>]*>)([^<]*)(</emoji>)', tag)
+    if not match:
+        return tag
+    prefix, inner, suffix = match.group(1), match.group(2), match.group(3)
+    inner = re.sub(r"\uFE0F+", "\uFE0F", inner).strip()
+    return f"{prefix}{inner}{suffix}"
 
 
 def _flatten_nested_emoji(text: str) -> str:
@@ -416,10 +436,10 @@ def _escape_answer_for_html(text: str) -> str:
     """Escape nội dung để gửi ParseMode.HTML: giữ link clickable, giữ thẻ <emoji id="...">, escape phần còn lại."""
     if not text:
         return text
-    # 1) Giữ thẻ <emoji id="...">...</emoji> — thay placeholder trước khi escape
+    # 1) Giữ thẻ <emoji id="...">...</emoji> — chuẩn hóa (gộp ️ trùng) rồi thay placeholder
     emoji_tags: list[str] = []
     def save_emoji(m):
-        emoji_tags.append(m.group(0))
+        emoji_tags.append(_normalize_emoji_tag(m.group(0)))
         return _EMOJI_PLACEHOLDER_TEMPLATE.format(len(emoji_tags) - 1)
     text = _RE_EMOJI_TAG.sub(save_emoji, text)
     # 2) URL → placeholder, escape, rồi thay lại thành <a href="...">Link N</a>
@@ -631,15 +651,34 @@ async def _ask_grok_responses_api(
         return None
 
 
-async def ask_gemini(prompt: str, system: str | None = None, user_id: int | None = None) -> str:
-    """Gửi câu hỏi tới Grok (xAI) và nhận phản hồi. Nếu user_id có giá trị thì gửi kèm lịch sử gần nhất để AI nhớ ngữ cảnh."""
+async def ask_gemini(
+    prompt: str,
+    system: str | None = None,
+    user_id: int | None = None,
+    user_name: str | None = None,
+) -> str:
+    """Gửi câu hỏi tới Grok (xAI) và nhận phản hồi. Có user_id thì gửi kèm lịch sử (từ memory hoặc DB) để AI nhớ ngữ cảnh và nhận biết từng người."""
     if not grok_client:
         return f"{E_CROSS} AI chưa được cấu hình. Vui lòng thêm AI_API_KEY (xAI) vào config."
 
-    # Dùng ngày hiện tại (datetime) để AI biết ngày tháng chuẩn
+    # System prompt: thêm thông tin người đang chat để AI nhận biết và xưng hô đúng
     system_content = system if system is not None else _get_system_prompt_with_date()
+    if user_id is not None and user_name:
+        system_content += f"\n\nNgười đang trò chuyện: {user_name}. Hãy nhớ và xưng hô phù hợp khi trả lời."
     messages = [{"role": "system", "content": system_content}]
+
+    # Nạp lịch sử: ưu tiên memory, nếu trống thì lấy từ DB (log đã lưu theo user_id)
     if user_id is not None:
+        if not _user_chat_history.get(user_id):
+            loaded = await db_get_recent_chat_history(user_id, limit=_CHAT_HISTORY_MAX_TURNS)
+            if loaded:
+                async with _history_lock:
+                    if user_id not in _user_chat_history:
+                        _user_chat_history[user_id] = (
+                            deque(loaded, maxlen=_CHAT_HISTORY_MAX_TURNS)
+                            if user_id not in SUDO
+                            else deque(loaded)
+                        )
         async with _history_lock:
             history = _user_chat_history.get(user_id)
             if history:
@@ -728,38 +767,54 @@ async def ai_chat(client: Client, message: Message):
     # Hiển thị trạng thái đang xử lý
     wait_msg = await message.reply(f"{E_PENDING} Hmmmmm{E_TYMMY}! Đợi em chút xíu nha{E_LOADING}", quote=True, parse_mode=ParseMode.HTML)
 
-    # Gọi Grok API (có gửi lịch sử theo user_id để bot nhớ chủ đề khi nhắc tiếp)
+    # Gọi Grok API (có lịch sử theo user_id từ memory/DB để AI nhớ chủ đề và nhận biết người chat)
     user_name = message.from_user.first_name if message.from_user else "Người dùng"
     user_id = message.from_user.id if message.from_user else None
-    prompt = f"[ID: {user_id} | {user_name}]: {question}" if user_id is not None else f"[{user_name}]: {question}"
-    answer = await ask_gemini(prompt, user_id=user_id)
+    prompt = f"[{user_name}]: {question}"
+    # Nếu đang reply vào tin của người khác (không phải bot) → AI biết để trả lời "ai" là người đó
+    replied_to_user = None
+    if message.reply_to_message and message.reply_to_message.from_user:
+        ru = message.reply_to_message.from_user
+        if ru.id != getattr(getattr(app, "me", None), "id", None):
+            replied_to_user = ru
+            prompt += f"\n(Đang reply vào tin của: {ru.first_name}. Khi được hỏi 'ai' / 'là ai' thì trả lời đó là người này – {ru.first_name}.)"
+    answer = await ask_gemini(prompt, user_id=user_id, user_name=user_name)
 
-    # Chuẩn hóa lỗi AI: ?nháy mắt* → ? [emoji]
-    answer = _normalize_ai_answer(answer)
-    # Chuyển **tên** (Markdown) thành <b>tên</b>; trong mọi *...* thay cắn môi/nháy mắt/mỉm cười bằng emoji
+    # Chuẩn hóa Unicode + bỏ ký tự vô hình (tránh lỗi "nháy mắtvỗ tay" không thay được)
+    answer = unicodedata.normalize("NFC", answer)
+    answer = _INVISIBLE_CHARS.sub("", answer)
     safe_name = html.escape(user_name)
     answer = re.sub(r"\*\*" + re.escape(user_name) + r"\*\*", f"<b>{safe_name}</b>", answer)
     answer = re.sub(r"\*\*DoraSuper\*\*", "<b>DoraSuper</b>", answer)
 
+    # Thay *hành động* bằng emoji TRƯỚC (tránh _normalize_ai_answer xóa * rồi còn sót chữ)
     def _actions_to_emoji(m):
-        inner = m.group(1).strip()
+        inner = unicodedata.normalize("NFC", m.group(1).strip())
         for phrase, emoji in _ACTION_PHRASES:
-            if inner == phrase.strip():
+            if inner == phrase.strip() or inner == unicodedata.normalize("NFC", phrase.strip()):
                 return emoji + " "
-        return m.group(0)  # giữ *tên* để sau escape chuyển thành <b>tên</b>
-    answer = re.sub(r"\*([^*]+)\*", _actions_to_emoji, answer)
+        return m.group(0)
+    # Hỗ trợ cả * và ＊ (fullwidth) để bắt đúng pattern
+    answer = re.sub(r"[\*\uFF0A]([^*\uFF0A]+)[\*\uFF0A]", _actions_to_emoji, answer)
+    # Sau đó mới sửa lỗi format (?phrase*, *phrase thiếu *, phrase dính chữ)
+    answer = _normalize_ai_answer(answer)
     answer = _collapse_whitespace(answer)
     # Escape HTML, giữ link (URL) thành thẻ <a> để không lỗi khi AI trả về có link
     answer_safe = _escape_answer_for_html(answer)
-    # Chuyển mọi **tên riêng** và *tên* (Markdown) thành <b>...</b> để in đậm đúng
+    # Chuyển mọi **tên** và *tên* (cả ＊ fullwidth) thành <b>...</b>
     answer_safe = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", answer_safe)
-    answer_safe = re.sub(r"\*([^*]+)\*", r"<b>\1</b>", answer_safe)
+    answer_safe = re.sub(r"[\*\uFF0A]([^*\uFF0A]+)[\*\uFF0A]", r"<b>\1</b>", answer_safe)
     # Gỡ dạng escaped của <b>user_name</b> rồi in đậm mọi chỗ có tên user (tránh double bold)
     answer_safe = answer_safe.replace("&lt;b&gt;" + safe_name + "&lt;/b&gt;", safe_name)
     answer_safe = answer_safe.replace(safe_name, f"<b>{safe_name}</b>")
+    # In đậm tên người được reply (khi hỏi "ai" thì AI trả lời đúng người đó)
+    if replied_to_user:
+        safe_replied = html.escape(replied_to_user.first_name)
+        answer_safe = answer_safe.replace("&lt;b&gt;" + safe_replied + "&lt;/b&gt;", safe_replied)
+        answer_safe = answer_safe.replace(safe_replied, f"<b>{safe_replied}</b>")
 
-    # Format kết quả
-    result = f"{E_BOT} <b>DoraSuper AI</b>\nHỏi bởi: <b>{safe_name}</b>\n<blockquote>{answer_safe}</blockquote>"
+    # Format kết quả – blockquote expandable để thu gọn, bấm mở rộng
+    result = f"{E_BOT} <b>DoraSuper AI</b>\nHỏi bởi: <b>{safe_name}</b>\n<blockquote expandable>{answer_safe}</blockquote>"
 
     # Lưu log đối thoại để huấn luyện AI (không chặn gửi tin)
     asyncio.create_task(
@@ -822,7 +877,7 @@ async def ai_summarize(client: Client, message: Message):
         f"{text}"
     )
     answer = await ask_gemini(summary_prompt)
-    result = f"{E_NOTE} <b>Tóm tắt bởi AI</b>\n<blockquote>{answer}</blockquote>"
+    result = f"{E_NOTE} <b>Tóm tắt bởi AI</b>\n<blockquote expandable>{answer}</blockquote>"
 
     asyncio.create_task(
         _append_chat_log(
@@ -868,7 +923,7 @@ async def ai_rewrite(client: Client, message: Message):
         f"{text}"
     )
     answer = await ask_gemini(rewrite_prompt)
-    result = f"{E_LOADING} <b>Văn bản đã viết lại</b>\n<blockquote>{answer}</blockquote>"
+    result = f"{E_LOADING} <b>Văn bản đã viết lại</b>\n<blockquote expandable>{answer}</blockquote>"
 
     asyncio.create_task(
         _append_chat_log(

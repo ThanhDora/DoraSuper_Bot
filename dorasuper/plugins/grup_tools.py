@@ -635,13 +635,13 @@ async def tag_by_id(client, message):
         LOGGER.error(f"Lỗi khi xử lý lệnh tagid: {e}")
         await message.reply(f"{E_ERROR} Đã xảy ra lỗi: {str(e)}")
 
-@app.on_message(filters.command(["dsadmin"], COMMAND_HANDLER))
+@app.on_message(filters.command(["dsadmin"], COMMAND_HANDLER), group=-1)
 @capture_err
 async def adminlist(_, message):
     if message.chat.type == enums.ChatType.PRIVATE:
         return await message.reply(f"{E_ERROR} Lệnh này chỉ dành cho nhóm.")
     try:
-        msg = await message.reply_msg(
+        msg = await message.reply(
             f"{E_LOADING} Đang lấy danh sách quản trị viên trong {message.chat.title}...",
             parse_mode=enums.ParseMode.HTML,
         )

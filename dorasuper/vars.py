@@ -107,11 +107,9 @@ GDRIVE_FOLDER_ID = environ.get("GDRIVE_FOLDER_ID", "")  # ID thư mục Drive (�
 TMPFILES_UPLOAD_FIELD = environ.get("TMPFILES_UPLOAD_FIELD", "file").strip() or "file"
 # Cobalt API (TikTok video/ảnh): để trống = dùng yt-dlp + scrape. Ví dụ: https://api.cobalt.tools
 COBALT_URL = (environ.get("COBALT_URL", "") or "").strip().rstrip("/")
-# yt-dlp cookie (Instagram/Facebook/Douyin): file cookies.txt hoặc trình duyệt để lấy cookie đăng nhập
+# yt-dlp cookie (Instagram/Facebook): file cookies.txt hoặc trình duyệt để lấy cookie đăng nhập
 YT_DLP_COOKIES_FILE = (environ.get("YT_DLP_COOKIES_FILE", "") or "").strip()
 YT_DLP_COOKIES_FROM_BROWSER = (environ.get("YT_DLP_COOKIES_FROM_BROWSER", "") or "").strip()
-# Douyin: chỉ cần sessionid (lấy từ DevTools → Application → Cookies → douyin.com → sessionid)
-DOUYIN_SESSIONID = (environ.get("DOUYIN_SESSIONID", "") or "").strip()
 # Instagram (instagrapi): đăng nhập để tải ảnh/bài post. Để trống = không dùng instagrapi.
 INSTAGRAM_USERNAME = (environ.get("INSTAGRAM_USERNAME", "") or "").strip()
 INSTAGRAM_PASSWORD = (environ.get("INSTAGRAM_PASSWORD", "") or "").strip()

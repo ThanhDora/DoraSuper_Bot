@@ -34,7 +34,6 @@ from dorasuper.vars import (
     COBALT_URL,
     YT_DLP_COOKIES_FILE,
     YT_DLP_COOKIES_FROM_BROWSER,
-    DOUYIN_SESSIONID,
     INSTAGRAM_USERNAME,
     INSTAGRAM_PASSWORD,
     INSTAGRAM_SESSION,
@@ -44,9 +43,9 @@ LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "TảiVideo"
 __HELP__ = """
-<blockquote>Gửi link TikTok, Douyin, Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
+<blockquote>Gửi link TikTok, X (Twitter), Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
 • TikTok: video + ảnh/album (gallery-dl, TikWM, Cobalt)
-• Douyin (抖音): video (douyin.com, v.douyin.com)
+• X (Twitter): video/ảnh (x.com, twitter.com)
 • Facebook: video và ảnh (fb.com, fb.watch, facebook.com)
 • Instagram: video/Reels (instagram.com)
 
@@ -72,8 +71,8 @@ URL_PATTERNS = {
         r"(?:https?://)?(?:www\.|m\.)?(?:instagram\.com|instagr\.am)/[^\s]+",
         re.IGNORECASE,
     ),
-    "douyin": re.compile(
-        r"(?:https?://)?(?:www\.|v\.|m\.)?(?:douyin\.com|iesdouyin\.com)/[^\s]+",
+    "x": re.compile(
+        r"(?:https?://)?(?:www\.|mobile\.)?(?:twitter\.com|x\.com)/[^\s]+",
         re.IGNORECASE,
     ),
 }
@@ -184,30 +183,19 @@ def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None
         "noplaylist": True,  # Chỉ lấy đúng 1 mục từ URL (tránh link ảnh FB lại tải bài khác)
         "logger": _YDLLogger(),
     }
-    # Cookie: Douyin chỉ dùng DOUYIN_SESSIONID; nền tảng khác dùng file hoặc browser
-    is_douyin = "douyin" in url.lower()
-    if is_douyin:
-        if DOUYIN_SESSIONID:
-            cookie_path = os.path.join(out_dir, "douyin_cookies.txt")
-            exp = str(int(time.time()) + 10 * 365 * 24 * 3600)
-            with open(cookie_path, "w") as f:
-                f.write("# Netscape HTTP Cookie File\n")
-                f.write(".douyin.com\tTRUE\t/\tFALSE\t" + exp + "\tsessionid\t" + DOUYIN_SESSIONID + "\n")
-            ydl_opts["cookiefile"] = cookie_path
-        # Douyin không dùng YT_DLP_COOKIES_FILE / YT_DLP_COOKIES_FROM_BROWSER
-    else:
-        if YT_DLP_COOKIES_FROM_BROWSER:
-            browser = YT_DLP_COOKIES_FROM_BROWSER.strip().lower()
-            if browser:
-                ydl_opts["cookiesfrombrowser"] = (browser,)
-        elif YT_DLP_COOKIES_FILE:
-            cookiefile_path = (
-                YT_DLP_COOKIES_FILE
-                if os.path.isabs(YT_DLP_COOKIES_FILE)
-                else os.path.join(ROOT_DIR, YT_DLP_COOKIES_FILE)
-            )
-            if os.path.isfile(cookiefile_path):
-                ydl_opts["cookiefile"] = cookiefile_path
+    # Cookie: file hoặc browser (Facebook, Instagram, ...)
+    if YT_DLP_COOKIES_FROM_BROWSER:
+        browser = YT_DLP_COOKIES_FROM_BROWSER.strip().lower()
+        if browser:
+            ydl_opts["cookiesfrombrowser"] = (browser,)
+    elif YT_DLP_COOKIES_FILE:
+        cookiefile_path = (
+            YT_DLP_COOKIES_FILE
+            if os.path.isabs(YT_DLP_COOKIES_FILE)
+            else os.path.join(ROOT_DIR, YT_DLP_COOKIES_FILE)
+        )
+        if os.path.isfile(cookiefile_path):
+            ydl_opts["cookiefile"] = cookiefile_path
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -253,17 +241,9 @@ def _download_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None
             or "fresh cookies" in low
             or ("cookies" in low and "needed" in low)
         ):
-            if "douyin" in low or "fresh cookies" in low:
-                msg = (
-                    "Douyin cần sessionid. Trong config.env thêm:\n"
-                    "DOUYIN_SESSIONID=giá_trị_sessionid\n\n"
-                    "Cách lấy: Chrome → F12 → Application → Cookies → https://www.douyin.com → copy ô Value của cookie \"sessionid\". "
-                    "Sessionid hết hạn nhanh, nếu lỗi lại thì vào douyin.com, copy sessionid mới và cập nhật config."
-                )
-            else:
-                msg = (
-                    "Facebook/Instagram cần cookie. config.env: YT_DLP_COOKIES_FROM_BROWSER=chrome hoặc YT_DLP_COOKIES_FILE=... Sau đó khởi động lại bot."
-                )
+            msg = (
+                "Facebook/Instagram cần cookie. config.env: YT_DLP_COOKIES_FROM_BROWSER=chrome hoặc YT_DLP_COOKIES_FILE=... Sau đó khởi động lại bot."
+            )
             return None, msg, None
         return None, err[:200] if len(err) > 200 else err, None
     except Exception as e:
@@ -295,12 +275,20 @@ def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: 
     """Tạo caption: tiêu đề, tên tài khoản, số tim, số view, link (blockquote)."""
     lines = []
     if info:
-        # Tiêu đề (TikTok / YouTube / ...)
-        title = (info.get("title") or "").strip()
+        # Tiêu đề — X (Twitter) dùng "description" cho nội dung tweet
+        title = (info.get("title") or info.get("description") or "").strip()
+        if platform == "x" and not title:
+            title = (info.get("fulltitle") or "").strip()
         if title:
             lines.append(f"<b>Tiêu đề:</b> {html.escape(title[:300])}")
-        # Tên tài khoản
+        # Tên tài khoản — X thường dùng uploader_id (screen name)
         uploader = (info.get("uploader") or info.get("creator") or "").strip()
+        if platform == "x" and not uploader and info.get("uploader_id"):
+            uploader = ("@" + str(info.get("uploader_id")).strip()).strip()
+        if not uploader and platform == "x":
+            uploader = (info.get("uploader_id") or "").strip()
+            if uploader and not uploader.startswith("@"):
+                uploader = "@" + uploader
         if uploader:
             lines.append(f"<b>Tên tài khoản:</b> {html.escape(uploader)}")
         # User (có thể copy)
@@ -315,15 +303,31 @@ def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: 
         views = info.get("view_count") or info.get("play_count")
         if views is not None:
             lines.append(f"<b>Số view:</b> {E_VIEW} {_fmt_count(views)}")
-    # Link TikTok — chỉ hiển thị đến @user (bỏ /video/...)
+    # Link: rút gọn hiển thị theo nền tảng
     link = (info or {}).get("webpage_url") or (info or {}).get("url", "")
     if link:
-        at_pos = link.find("@")
-        if at_pos != -1:
-            slash_after = link.find("/", at_pos)
-            link_display = link[:slash_after] if slash_after != -1 else link
-        else:
-            link_display = link
+        link_display = link
+        if platform == "tiktok" or "@" in link:
+            at_pos = link.find("@")
+            if at_pos != -1:
+                slash_after = link.find("/", at_pos)
+                link_display = link[:slash_after] if slash_after != -1 else link
+        elif platform == "x" and ("x.com" in link or "twitter.com" in link):
+            # x.com/user/status/123 → x.com/@user
+            try:
+                parts = link.replace("twitter.com", "x.com").split("/")
+                if "x.com" in parts and len(parts) > 2:
+                    link_display = "x.com/" + parts[parts.index("x.com") + 1]
+            except Exception:
+                pass
+        elif platform == "instagram" and "instagram.com" in link:
+            # Giữ dạng ngắn: instagram.com/p/XXX hoặc instagram.com/reel/XXX
+            for sep in ("/p/", "/reel/", "/tv/"):
+                if sep in link:
+                    i = link.find(sep)
+                    end = link.find("/", i + len(sep) + 1)
+                    link_display = link[:end] if end != -1 else link
+                    break
         lines.append(f'<b>Link:</b> <a href="{html.escape(link)}">{html.escape(link_display)}</a>')
     if shared_by:
         lines.append(f"{E_USER} <b>Chia sẻ bởi:</b> {shared_by}")
@@ -405,15 +409,41 @@ def _extract_photo_urls_from_html(html_text: str) -> list[str]:
     return urls[:MAX_ALBUM_PHOTOS] if urls else []
 
 
-def _download_instagram_instagrapi_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
-    """Tải ảnh/video bài post Instagram bằng instagrapi (cần đăng nhập). Trả về (danh sách path, None) hoặc (None, lỗi)."""
+def _instagram_media_to_info(media: object, url: str) -> dict:
+    """Chuyển Media instagrapi sang dict dùng cho _build_caption (title, uploader, like_count, webpage_url)."""
+    info = {}
+    if url:
+        info["webpage_url"] = url
+    try:
+        cap = getattr(media, "caption", None) or (media.dict().get("caption") if hasattr(media, "dict") else None)
+        if cap and isinstance(cap, str) and cap.strip():
+            info["title"] = cap.strip()[:500]
+        user = getattr(media, "user", None)
+        if user is not None:
+            uname = getattr(user, "username", None) or (user.get("username") if isinstance(user, dict) else None)
+            if uname:
+                info["uploader"] = str(uname)
+        elif hasattr(media, "dict"):
+            u = media.dict().get("user") or {}
+            if isinstance(u, dict) and u.get("username"):
+                info["uploader"] = str(u["username"])
+        lk = getattr(media, "like_count", None) or (media.dict().get("like_count") if hasattr(media, "dict") else None)
+        if lk is not None:
+            info["like_count"] = int(lk)
+    except Exception:
+        pass
+    return info
+
+
+def _download_instagram_instagrapi_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None, dict | None]:
+    """Tải ảnh/video bài post Instagram bằng instagrapi (cần đăng nhập). Trả về (paths, None, info) hoặc (None, lỗi, None)."""
     if not INSTAGRAM_USERNAME or not (INSTAGRAM_PASSWORD or INSTAGRAM_SESSION):
-        return None, "Chưa cấu hình INSTAGRAM_USERNAME và INSTAGRAM_PASSWORD (hoặc INSTAGRAM_SESSION) trong config.env."
+        return None, "Chưa cấu hình INSTAGRAM_USERNAME và INSTAGRAM_PASSWORD (hoặc INSTAGRAM_SESSION) trong config.env.", None
     u = (url or "").strip()
     if not u.startswith("http"):
         u = "https://" + u
     if "instagram.com" not in u.lower():
-        return None, "URL không phải Instagram."
+        return None, "URL không phải Instagram.", None
     try:
         from instagrapi import Client
 
@@ -424,16 +454,14 @@ def _download_instagram_instagrapi_sync(url: str, out_dir: str) -> tuple[list[st
             cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
         out_path = Path(os.path.abspath(out_dir))
         media_pk = cl.media_pk_from_url(u)
-        info = cl.media_info(media_pk)
-        media_type = getattr(info, "media_type", None) or (info.dict().get("media_type") if hasattr(info, "dict") else None)
+        media_info = cl.media_info(media_pk)
+        media_type = getattr(media_info, "media_type", None) or (media_info.dict().get("media_type") if hasattr(media_info, "dict") else None)
         paths: list[str] = []
         if media_type == 1:
-            # Photo
             p = cl.photo_download(media_pk, folder=out_path)
             if p and os.path.isfile(p):
                 paths.append(str(p))
         elif media_type == 8:
-            # Album / carousel
             downloaded = cl.album_download(media_pk, folder=out_path)
             if isinstance(downloaded, list):
                 for x in downloaded:
@@ -442,7 +470,6 @@ def _download_instagram_instagrapi_sync(url: str, out_dir: str) -> tuple[list[st
             elif downloaded and os.path.isfile(downloaded):
                 paths.append(str(downloaded))
         else:
-            # Video / reel / igtv
             try:
                 p = cl.video_download(media_pk, folder=out_path)
                 if p and os.path.isfile(p):
@@ -455,15 +482,16 @@ def _download_instagram_instagrapi_sync(url: str, out_dir: str) -> tuple[list[st
                 except Exception:
                     pass
         if not paths:
-            return None, "instagrapi không tải được file."
-        return paths[:MAX_ALBUM_PHOTOS], None
+            return None, "instagrapi không tải được file.", None
+        info_dict = _instagram_media_to_info(media_info, u)
+        return paths[:MAX_ALBUM_PHOTOS], None, info_dict
     except ImportError:
-        return None, "Chưa cài instagrapi (pip install instagrapi)."
+        return None, "Chưa cài instagrapi (pip install instagrapi).", None
     except Exception as e:
         msg = _strip_ansi(str(e))[:200]
         if "login" in msg.lower() or "challenge" in msg.lower():
             msg = "Đăng nhập Instagram thất bại hoặc cần xác minh. Thử đổi mật khẩu hoặc dùng sessionid."
-        return None, msg
+        return None, msg, None
 
 
 def _download_images_gallery_dl_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
@@ -499,6 +527,107 @@ def _download_images_gallery_dl_sync(url: str, out_dir: str) -> tuple[list[str] 
         return None, "gallery-dl quá thời gian."
     except Exception as e:
         return None, _strip_ansi(str(e))[:150]
+
+
+def _download_x_gallery_dl_sync(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
+    """Tải ảnh/video từ X (Twitter) bằng gallery-dl. Trả về (danh sách path, None) hoặc (None, lỗi)."""
+    gdl = shutil.which("gallery-dl")
+    if not gdl:
+        return None, "Chưa cài gallery-dl (pip install gallery-dl)."
+    u = (url or "").strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        out_dir = os.path.abspath(out_dir)
+        proc = subprocess.run(
+            [gdl, "-d", out_dir, "--no-mtime", u],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if proc.returncode != 0:
+            err = (proc.stderr or proc.stdout or "")[:200]
+            return None, err.strip() or f"gallery-dl exit {proc.returncode}"
+        collected: list[str] = []
+        for root, _, files in os.walk(out_dir):
+            for f in files:
+                ext = os.path.splitext(f)[1].lower()
+                if ext in _IMAGE_EXTS or ext in _VIDEO_EXTS:
+                    collected.append(os.path.join(root, f))
+        collected.sort()
+        if not collected:
+            return None, "gallery-dl không tải được media."
+        # Ảnh tối đa MAX_ALBUM_PHOTOS; video giữ 1; nếu có cả hai thì ưu tiên gom đủ
+        return collected, None
+    except subprocess.TimeoutExpired:
+        return None, "gallery-dl quá thời gian."
+    except Exception as e:
+        return None, _strip_ansi(str(e))[:150]
+
+
+def _extract_x_metadata_sync(url: str) -> dict:
+    """Lấy metadata tweet X (title, uploader, webpage_url) bằng yt-dlp extract_info(download=False). Trả về {} nếu lỗi."""
+    u = (url or "").strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        ydl_opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "extract_flat": False,
+            "logger": _YDLLogger(),
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(u, download=False)
+        if not info:
+            return {}
+        title = (info.get("title") or info.get("description") or info.get("fulltitle") or "").strip()
+        uploader = (info.get("uploader") or info.get("creator") or "").strip()
+        if not uploader and info.get("uploader_id"):
+            uploader = "@" + str(info.get("uploader_id")).strip()
+        return {
+            "title": title or None,
+            "uploader": uploader or None,
+            "like_count": info.get("like_count"),
+            "view_count": info.get("view_count"),
+            "webpage_url": info.get("webpage_url") or info.get("url") or u,
+        }
+    except Exception:
+        return {}
+
+
+def _fetch_x_metadata_from_html_sync(url: str) -> dict:
+    """Lấy metadata X từ HTML (og:title, og:description) khi yt-dlp thất bại (tweet chỉ ảnh). Trả về {} nếu lỗi."""
+    u = (url or "").strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+    try:
+        import urllib.request
+        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+        info = {"webpage_url": u}
+        for prop, key in (("og:title", "title"), ("og:description", "description")):
+            for pattern in (
+                rf'<meta[^>]+property=["\']{re.escape(prop)}["\'][^>]+content=["\']([^"\']+)["\']',
+                rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(prop)}["\']',
+            ):
+                m = re.search(pattern, html, re.I)
+                if m:
+                    val = m.group(1).strip()
+                    if val:
+                        info[key] = val[:500]
+                    break
+        # og:title trên X thường là "Name (@handle) / X" hoặc tweet text
+        if info.get("title") and "(" in info["title"] and ")" in info["title"]:
+            match = re.search(r"\(@([^)]+)\)", info["title"])
+            if match:
+                info["uploader"] = "@" + match.group(1)
+        if not info.get("title") and info.get("description"):
+            info["title"] = info["description"]
+        return info
+    except Exception:
+        return {}
 
 
 async def _download_tiktok_photo(url: str, out_dir: str) -> tuple[list[str] | None, str | None]:
@@ -1018,11 +1147,31 @@ async def _process_download(ctx: Message, url: str, platform: str):
             paths_tikwm, info_tikwm, err_tikwm = await _download_tiktok_via_tikwm(url, out_dir)
             if paths_tikwm and not err_tikwm:
                 paths, err, info = paths_tikwm, None, info_tikwm or info
+        # X (Twitter): tweet chỉ ảnh thì yt-dlp báo "No video could be found" — fallback gallery-dl
+        if (err or not paths) and platform == "x":
+            try:
+                for f in os.listdir(out_dir):
+                    p = os.path.join(out_dir, f)
+                    if os.path.isfile(p):
+                        os.remove(p)
+            except OSError:
+                pass
+            paths_gd, err_gd = await asyncio.to_thread(_download_x_gallery_dl_sync, url, out_dir)
+            if paths_gd:
+                info_x = await asyncio.to_thread(_extract_x_metadata_sync, url)
+                if not info_x or (not info_x.get("title") and not info_x.get("uploader")):
+                    info_x = await asyncio.to_thread(_fetch_x_metadata_from_html_sync, url)
+                info = info_x or {}
+                if not info.get("webpage_url"):
+                    info["webpage_url"] = url if (url or "").strip().startswith("http") else "https://" + (url or "").strip()
+                paths, err = paths_gd, None
+            elif err:
+                err = f"X: {err[:150]}"
         # Instagram: thử instagrapi (đăng nhập) rồi gallery-dl
         if (err or not paths) and platform == "instagram":
-            paths_ig, err_ig = await asyncio.to_thread(_download_instagram_instagrapi_sync, url, out_dir)
+            paths_ig, err_ig, info_ig = await asyncio.to_thread(_download_instagram_instagrapi_sync, url, out_dir)
             if paths_ig:
-                paths, err, info = paths_ig, None, {}
+                paths, err, info = paths_ig, None, (info_ig or {})
             else:
                 paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
                 if paths_gd:
@@ -1222,7 +1371,7 @@ async def cmd_download(_, ctx: Message):
 
     if not url:
         return await ctx.reply_msg(
-            f"{E_ERROR} Gửi link hoặc trả lời tin có link.\nVí dụ: <code>/dl https://vm.tiktok.com/xxx</code> hoặc link Douyin/Facebook/Instagram.",
+            f"{E_ERROR} Gửi link hoặc trả lời tin có link.\nVí dụ: <code>/dl https://vm.tiktok.com/xxx</code> hoặc link X/Facebook/Instagram.",
             parse_mode=enums.ParseMode.HTML,
         )
     await _process_download(ctx, url, platform)

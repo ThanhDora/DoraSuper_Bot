@@ -26,6 +26,29 @@ async def insert_ai_chat_log(
     await ai_chat_logs.insert_one(doc)
 
 
+async def get_recent_chat_history(
+    user_id: int,
+    limit: int = 10,
+) -> list[tuple[str, str]]:
+    """Lấy lịch sử trò chuyện gần nhất của user (theo user_id), thứ tự cũ → mới (để gửi vào API theo thời gian).
+    Trả về list [(user_content, assistant_content), ...]. Dùng để AI nhớ ngữ cảnh và nhận biết từng người."""
+    try:
+        cursor = (
+            ai_chat_logs.find({"user_id": user_id})
+            .sort("timestamp", 1)
+            .limit(limit)
+        )
+        out = []
+        async for doc in cursor:
+            u = (doc.get("user") or "").strip()
+            a = (doc.get("assistant") or "").strip()
+            if u or a:
+                out.append((u, a))
+        return out
+    except Exception:
+        return []
+
+
 async def clear_ai_chat_logs() -> int:
     """Xóa toàn bộ bản ghi trong collection ai_chat_logs. Trả về số document đã xóa."""
     result = await ai_chat_logs.delete_many({})

@@ -454,7 +454,7 @@ async def _try_execute_dora_command(message, text: str) -> bool:
     return False
 
 
-async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, strings, reply_context=None):
+async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, strings, reply_context=None, replied_to_user=None):
     """Gửi phản hồi AI hoặc câu random khi gọi Dora (dùng chung cho handler Dora và handler @mention)."""
     import re
     if len(question) > 3:
@@ -472,8 +472,10 @@ async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, st
             prompt = f"[{user_name}]: {question.strip()}"
             if reply_context and reply_context.strip():
                 prompt += f"\n(Ngữ cảnh reply: {reply_context[:500].strip()})"
+            if replied_to_user:
+                prompt += f"\n(Tin được reply là của: {replied_to_user.first_name}. Khi hỏi 'ai đây' / 'là ai' thì trả lời đó là người này – {replied_to_user.first_name}.)"
             user_id = from_user.id if from_user else None
-            answer = await ask_gemini(prompt, user_id=user_id)
+            answer = await ask_gemini(prompt, user_id=user_id, user_name=user_name)
             if not (answer and str(answer).strip()):
                 await wait_msg.edit(f"{E_WARN} Dora chưa trả lời được. Thử lại hoặc dùng <code>/ai</code>.", parse_mode=ParseMode.HTML)
                 return
@@ -493,7 +495,11 @@ async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, st
             answer_safe = answer_safe.replace("&lt;b&gt;" + safe_name + "&lt;/b&gt;", "\x00KEEP\x00")
             answer_safe = answer_safe.replace(safe_name, f"<b>{safe_name}</b>")
             answer_safe = answer_safe.replace("\x00KEEP\x00", "<b>" + safe_name + "</b>")
-            result = f"{E_BOT} <b>DoraSuper</b>{E_VUAM}\n<blockquote>{answer_safe}</blockquote>"
+            if replied_to_user:
+                safe_replied = html.escape(replied_to_user.first_name)
+                answer_safe = answer_safe.replace("&lt;b&gt;" + safe_replied + "&lt;/b&gt;", safe_replied)
+                answer_safe = answer_safe.replace(safe_replied, f"<b>{safe_replied}</b>")
+            result = f"{E_BOT} <b>DoraSuper</b>{E_VUAM}\n<blockquote expandable>{answer_safe}</blockquote>"
             try:
                 await wait_msg.edit(result, parse_mode=ParseMode.HTML)
             except MessageTooLong:
@@ -560,9 +566,11 @@ async def cmd_dora(c, m, strings):
         )
         return
     reply_context = None
+    replied_to_user = None
     if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
         reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
-    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings, reply_context=reply_context)
+        replied_to_user = m.reply_to_message.from_user
+    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings, reply_context=reply_context, replied_to_user=replied_to_user)
 
 
 # Reply vào tin AI của bot → trả lời tiếp không cần gõ "Dora" nữa (ưu tiên group 0)
@@ -656,13 +664,15 @@ async def reply_to_dora(c, m):
         if not has_dora_in_msg and not is_reply_to_dora_msg:
             return
         reply_context = None
+        replied_to_user = None
         if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
             reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
+            replied_to_user = m.reply_to_message.from_user
         if has_dora_in_msg:
             question = re.sub(r"(?i)[dDđĐ]ora[\s,]*(?:ơi|à|ê|nè)?[\s,]*", "", full_text).strip() or full_text
         else:
             question = full_text.strip()
-        await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, _dora_strings, reply_context=reply_context)
+        await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, _dora_strings, reply_context=reply_context, replied_to_user=replied_to_user)
     except Exception as e:
         LOGGER.exception("reply_to_dora: %s", e)
         try:
@@ -687,8 +697,10 @@ async def reply_to_mention_dora(c, m, strings):
     if not _has_dora_text(text):
         return
     reply_context = None
+    replied_to_user = None
     if m.reply_to_message and m.reply_to_message.from_user and m.reply_to_message.from_user.id != getattr(app.me, "id", None):
         reply_context = (m.reply_to_message.text or m.reply_to_message.caption or "").strip()
+        replied_to_user = m.reply_to_message.from_user
     question = re.sub(r"@" + re.escape(BOT_USERNAME or "") + r"\s*", "", text, flags=re.I).strip()
     question = re.sub(r"(?i)[dDđĐ]ora[\s,]*(?:ơi|à|ê|nè)?[\s,]*", "", question).strip() or question
-    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings, reply_context=reply_context)
+    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, strings, reply_context=reply_context, replied_to_user=replied_to_user)

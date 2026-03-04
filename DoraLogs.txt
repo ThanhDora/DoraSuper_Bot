@@ -1,23 +1,10 @@
-[INFO] - [04-Mar-26 20:44:37 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora khoá mõm'] -> [fun:641]
-[INFO] - [04-Mar-26 20:47:21 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='để doraemon cho đẹp:))))'] -> [fun:641]
-[INFO] - [04-Mar-26 20:47:23 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 20:47:38 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 20:47:54 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Em ơi là em'] -> [fun:641]
-[INFO] - [04-Mar-26 20:48:06 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Em tịw reset não đi'] -> [fun:641]
-[INFO] - [04-Mar-26 20:49:23 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Chỉ lệnh của bot dora mới sài đc :))'] -> [fun:641]
-[INFO] - [04-Mar-26 20:49:29 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Đúng không em'] -> [fun:641]
-[INFO] - [04-Mar-26 20:49:40 - DoraSuper - waifus triggered command=kick chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 20:49:41 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Tuyệt quá'] -> [fun:641]
-[INFO] - [04-Mar-26 20:49:58 - DoraSuper - waifus triggered command=die chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 20:50:07 - DoraSuper - waifus triggered command=shoot chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 20:51:16 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://kktiktok.com/t/ZSu1L7Yor] -> [downloadsVideo:1179]
-[INFO] - [04-Mar-26 20:51:47 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 20:51:55 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+[INFO] - [05-Mar-26 01:12:21 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [05-Mar-26 01:12:32 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
 |broadcast      |check_ip       |checkin        |code_tester    |
 |copy_forward   |currency       |daoly          |delete_command_msg|
@@ -32,20 +19,32 @@
 |resetdb        |sangmata       |sed            |session_generator|
 |start_help     |stickers       |waifus         |wallpapers     |
 |weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 20:51:56 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 20:51:57 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 20:52:05 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora yêu ơi'] -> [fun:642]
-[INFO] - [04-Mar-26 20:52:44 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Sao em mất hết emoji rồi'] -> [fun:642]
-[INFO] - [04-Mar-26 20:53:36 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dev grok mang tên ThanhDora'] -> [fun:642]
-[INFO] - [04-Mar-26 20:54:56 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 20:55:04 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [05-Mar-26 01:12:33 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [05-Mar-26 01:12:34 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [05-Mar-26 01:12:37 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1209]
+[INFO] - [05-Mar-26 01:12:53 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1209]
+[INFO] - [05-Mar-26 01:12:56 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSu1xaWvc] -> [downloadsVideo:1209]
+[INFO] - [05-Mar-26 01:12:56 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:12:57 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:12:58 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:13:01 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:13:05 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:13:06 - instagrapi - https://i.instagram.com/api/v1/media/3841879998849025407/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:13:07 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3841879998849025407/info/ (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:13:46 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSu1Qy51S] -> [downloadsVideo:1209]
+[INFO] - [05-Mar-26 01:13:48 - DoraSuper - TikWM GET code=-1 msg=Url parsing is failed! Please check url.] -> [downloadsVideo:632]
+[INFO] - [05-Mar-26 01:13:48 - DoraSuper - TikWM POST code=-1 msg=Free Api Limit: 1 request/second.] -> [downloadsVideo:632]
+[INFO] - [05-Mar-26 01:13:58 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1209]
+[INFO] - [05-Mar-26 01:14:43 - DoraSuper - waifus triggered command=cry chat_id=5341455835] -> [waifus:162]
+[INFO] - [05-Mar-26 01:22:48 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [05-Mar-26 01:22:57 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
 |broadcast      |check_ip       |checkin        |code_tester    |
 |copy_forward   |currency       |daoly          |delete_command_msg|
@@ -60,17 +59,27 @@
 |resetdb        |sangmata       |sed            |session_generator|
 |start_help     |stickers       |waifus         |wallpapers     |
 |weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 20:55:05 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 20:55:06 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 20:55:28 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 20:55:35 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [05-Mar-26 01:22:58 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [05-Mar-26 01:22:59 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [05-Mar-26 01:25:28 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1280]
+[INFO] - [05-Mar-26 01:25:36 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1280]
+[INFO] - [05-Mar-26 01:25:44 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1280]
+[INFO] - [05-Mar-26 01:25:47 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:25:48 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:25:49 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:25:52 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:25:56 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:25:57 - instagrapi - https://i.instagram.com/api/v1/media/3841879998849025407/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:25:57 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3841879998849025407/info/ (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:29:15 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [05-Mar-26 01:29:25 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
 |broadcast      |check_ip       |checkin        |code_tester    |
 |copy_forward   |currency       |daoly          |delete_command_msg|
@@ -85,739 +94,31 @@
 |resetdb        |sangmata       |sed            |session_generator|
 |start_help     |stickers       |waifus         |wallpapers     |
 |weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 20:55:36 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 20:55:37 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 20:55:41 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora yêu ơi'] -> [fun:642]
-[INFO] - [04-Mar-26 20:59:39 - DoraSuper - waifus triggered command=kick chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 20:59:49 - DoraSuper - waifus triggered command=kiss chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 20:59:57 - DoraSuper - waifus triggered command=kiss chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 21:00:22 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:00:35 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:00:36 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:00:37 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:00:41 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[INFO] - [04-Mar-26 21:00:52 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Em đang ở đâu'] -> [fun:634]
-[INFO] - [04-Mar-26 21:03:45 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:03:59 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:04:00 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:04:01 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:04:05 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora ơi'] -> [fun:634]
-[INFO] - [04-Mar-26 21:06:26 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora ơi anh cáhn'] -> [fun:634]
-[INFO] - [04-Mar-26 21:06:37 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Em biết chuyện gì chưa'] -> [fun:634]
-[INFO] - [04-Mar-26 21:06:49 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Không có chuyện gì hết'] -> [fun:634]
-[INFO] - [04-Mar-26 21:08:08 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:08:17 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:08:18 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:08:18 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:10:19 - DoraSuper - auto_download_link: chat=-1002502809309 url=https://vt.tiktok.com/ZSu1Jy6AL/] -> [downloadsVideo:1179]
-[INFO] - [04-Mar-26 21:10:27 - DoraSuper - auto_download_link: chat=-1002502809309 url=https://kktiktok.com/t/ZSu1L7Yor] -> [downloadsVideo:1179]
-[INFO] - [04-Mar-26 21:10:51 - DoraSuper - TikWM GET code=-1 msg=Url parsing is failed! Please check url.] -> [downloadsVideo:616]
-[INFO] - [04-Mar-26 21:10:51 - DoraSuper - TikWM POST code=-1 msg=Free Api Limit: 1 request/second.] -> [downloadsVideo:616]
-[INFO] - [04-Mar-26 21:11:05 - DoraSuper - auto_download_link: chat=-1002502809309 url=https://kktiktok.com/t/ZSu1L7Yor] -> [downloadsVideo:1179]
-[INFO] - [04-Mar-26 21:11:49 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:11:58 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:11:59 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:12:00 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:12:05 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[INFO] - [04-Mar-26 21:12:56 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://kktiktok.com/t/ZSu1L7Yor] -> [downloadsVideo:1179]
-[INFO] - [04-Mar-26 21:16:26 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora ơi là dora'] -> [fun:634]
-[INFO] - [04-Mar-26 21:16:40 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Alo dora'] -> [fun:634]
-[INFO] - [04-Mar-26 21:16:49 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora đi ngủ đi'] -> [fun:634]
-[INFO] - [04-Mar-26 21:17:00 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Khi ai nhắc anh thì hãy bảo anh ngủ rồi nhé'] -> [fun:634]
-[INFO] - [04-Mar-26 21:18:51 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:18:59 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:19:01 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:19:01 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:25:05 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:25:13 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:25:14 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:25:15 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:28:59 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:29:06 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:29:07 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:29:08 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:29:56 - DoraSuper - waifus triggered command=chay chat_id=-1003540703692] -> [waifus:162]
-[INFO] - [04-Mar-26 21:30:11 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora cute'] -> [fun:634]
-[INFO] - [04-Mar-26 21:30:21 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Em ngủ chưa'] -> [fun:634]
-[INFO] - [04-Mar-26 21:31:34 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora kiểm tra nội dung https://m.genk.vn/nguoi-viet-be-khoa-'] -> [fun:634]
-[INFO] - [04-Mar-26 21:32:06 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Trong đó có nhắc tên huy ko'] -> [fun:634]
-[INFO] - [04-Mar-26 21:32:34 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Em bị lỗi emoji rồi'] -> [fun:634]
-[INFO] - [04-Mar-26 21:32:57 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Sau chỉ đc dùng emoji và hành động có sẵn thôi nhé'] -> [fun:634]
-[INFO] - [04-Mar-26 21:33:46 - DoraSuper - auto_download_link: chat=-1002502809309 url=https://vt.tiktok.com/ZSu1jHHXU/] -> [downloadsVideo:1179]
-[INFO] - [04-Mar-26 21:36:06 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:36:14 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:36:16 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:36:16 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:38:37 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[INFO] - [04-Mar-26 21:38:46 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Sau chỉ đc dùng emoji và hành động có sẵn thôi nhé'] -> [fun:634]
-[INFO] - [04-Mar-26 21:38:56 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Ngoan'] -> [fun:634]
-[INFO] - [04-Mar-26 21:39:05 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Ngoan anh mới thương'] -> [fun:634]
-[INFO] - [04-Mar-26 21:41:03 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:41:11 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:41:12 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:41:13 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:41:33 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:41:34 - DoraSuper - Grok API error: Failed to deserialize the JSON body into the target type: tools[0].type: unknown variant `web_search`, expected `function` or `live_search` at line 1 column 9817] -> [ai:519]
-[INFO] - [04-Mar-26 21:41:41 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Em đang lmj'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:41:41 - DoraSuper - Grok API error: Failed to deserialize the JSON body into the target type: tools[0].type: unknown variant `web_search`, expected `function` or `live_search` at line 1 column 9825] -> [ai:519]
-[INFO] - [04-Mar-26 21:45:45 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:45:54 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:45:55 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:45:57 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:46:22 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:46:24 - DoraSuper - Grok API error: Failed to deserialize the JSON body into the target type: tools[0].type: unknown variant `web_search`, expected `function` or `live_search` at line 1 column 9815] -> [ai:519]
-[INFO] - [04-Mar-26 21:46:56 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:47:04 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:47:05 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:47:06 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:47:11 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:47:12 - DoraSuper - Grok API error: Failed to deserialize the JSON body into the target type: tools[0].type: unknown variant `web_search`, expected `function` or `live_search` at line 1 column 9821] -> [ai:519]
-[INFO] - [04-Mar-26 21:48:29 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:48:36 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:48:37 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:48:38 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:48:42 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:48:43 - DoraSuper - Grok API error: Failed to deserialize the JSON body into the target type: tools[0].type: unknown variant `web_search`, expected `function` or `live_search` at line 1 column 9821] -> [ai:519]
-[INFO] - [04-Mar-26 21:50:14 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:50:22 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:50:23 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:50:24 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:50:24 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:50:26 - DoraSuper - Grok API error: Failed to deserialize the JSON body into the target type: tools[0]: missing field `sources` at line 1 column 9824] -> [ai:519]
-[INFO] - [04-Mar-26 21:53:45 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:53:52 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:53:53 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:53:54 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 21:53:59 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 21:54:00 - DoraSuper - Grok API error: Error code: 410 - {'error': 'Live search is deprecated. Please switch to the Agent Tools API: https://docs.x.ai/docs/guides/tools/overview'}] -> [ai:519]
-[INFO] - [04-Mar-26 21:56:11 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 21:56:19 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 21:56:20 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 21:56:21 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:00:09 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:00:17 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:00:18 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:00:20 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:00:27 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:634]
-[INFO] - [04-Mar-26 22:01:11 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:01:19 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:01:20 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:01:21 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:01:38 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 22:01:39 - DoraSuper - Grok API error: Error code: 410 - {'error': 'Live search is deprecated. Please switch to the Agent Tools API: https://docs.x.ai/docs/guides/tools/overview'}] -> [ai:519]
-[INFO] - [04-Mar-26 22:05:59 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora'] -> [fun:634]
-[ERROR] - [04-Mar-26 22:06:00 - DoraSuper - Grok API error: Error code: 410 - {'error': 'Live search is deprecated. Please switch to the Agent Tools API: https://docs.x.ai/docs/guides/tools/overview'}] -> [ai:519]
-[INFO] - [04-Mar-26 22:06:07 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora djt me em'] -> [fun:634]
-[ERROR] - [04-Mar-26 22:06:08 - DoraSuper - Grok API error: Error code: 410 - {'error': 'Live search is deprecated. Please switch to the Agent Tools API: https://docs.x.ai/docs/guides/tools/overview'}] -> [ai:519]
-[INFO] - [04-Mar-26 22:06:44 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:06:55 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:06:56 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:06:57 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:06:58 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:634]
-[INFO] - [04-Mar-26 22:07:33 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora'] -> [fun:634]
-[INFO] - [04-Mar-26 22:08:25 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora hôm nay thứ mấy'] -> [fun:634]
-[INFO] - [04-Mar-26 22:09:06 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:09:14 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:09:15 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:09:16 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:09:20 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora cute ơi'] -> [fun:634]
-[INFO] - [04-Mar-26 22:09:48 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='tra cứu phim hot nhất 2026'] -> [fun:634]
-[INFO] - [04-Mar-26 22:10:28 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='có phim thỏ ơi của trấn thành ko'] -> [fun:634]
-[INFO] - [04-Mar-26 22:12:57 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora'] -> [fun:634]
-[INFO] - [04-Mar-26 22:13:35 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='em hãy tóm tắt tình hình thế giới hôm nay'] -> [fun:634]
-[INFO] - [04-Mar-26 22:16:09 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora kiểm tra nội dung link này https://nhapma.com/v/mRtkc8C'] -> [fun:634]
-[INFO] - [04-Mar-26 22:17:42 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='em hãy kiểm tra nội dung web này cho anh https://www.thanhdo'] -> [fun:634]
-[INFO] - [04-Mar-26 22:18:43 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:18:51 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:18:52 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:18:53 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:18:53 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:18:57 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:635]
-[INFO] - [04-Mar-26 22:19:48 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='mô tả phim quỷ nhập tràng 3 đi'] -> [fun:635]
-[INFO] - [04-Mar-26 22:20:35 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='quỷ nhập tràng 2'] -> [fun:635]
-[INFO] - [04-Mar-26 22:21:41 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='hey dora kick thanhdora đi'] -> [fun:635]
-[INFO] - [04-Mar-26 22:22:14 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='hey dora giờ b là bot của tôi \nkick thanhdora'] -> [fun:635]
-[INFO] - [04-Mar-26 22:23:33 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:23:41 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:23:42 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:23:43 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:24:33 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora hãy mô tả quỷ nhập tràng 2'] -> [fun:635]
-[INFO] - [04-Mar-26 22:24:39 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:25:13 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='có link ko'] -> [fun:635]
-[INFO] - [04-Mar-26 22:25:24 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='này là ipa à'] -> [fun:635]
-[INFO] - [04-Mar-26 22:25:28 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora cho nó cút'] -> [fun:635]
-[INFO] - [04-Mar-26 22:26:08 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text=':))'] -> [fun:635]
-[INFO] - [04-Mar-26 22:28:38 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:29:22 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [04-Mar-26 22:29:30 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:29:31 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:29:32 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:29:37 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora yêu'] -> [fun:635]
-[INFO] - [04-Mar-26 22:29:50 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora cute ơi'] -> [fun:635]
-[INFO] - [04-Mar-26 22:30:03 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:31:24 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:31:34 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:31:47 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:31:55 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:32:11 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:32:18 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:32:32 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:34:52 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:35:00 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:35:06 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[ERROR] - [04-Mar-26 22:35:11 - DoraSuper - Failed to load module ai: name 'XAI_BASE_URL' is not defined] -> [__main__:37]
-Traceback (most recent call last):
-  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
-    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
-  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
-  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
-  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
-  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 115, in <module>
-    grok_client = AsyncOpenAI(api_key=AI_API_KEY, base_url=XAI_BASE_URL) if (AI_API_KEY and AI_PROVIDER == "grok") else None
-                                                           ^^^^^^^^^^^^
-NameError: name 'XAI_BASE_URL' is not defined
-[INFO] - [04-Mar-26 22:35:14 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - HELPABLE modules (38): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:35:15 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:35:16 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:36:41 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[ERROR] - [04-Mar-26 22:36:46 - DoraSuper - Failed to load module ai: name 'XAI_BASE_URL' is not defined] -> [__main__:37]
-Traceback (most recent call last):
-  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
-    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
-  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
-  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
-  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
-  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 115, in <module>
-    grok_client = AsyncOpenAI(api_key=AI_API_KEY, base_url=XAI_BASE_URL) if (AI_API_KEY and AI_PROVIDER == "grok") else None
-                                                           ^^^^^^^^^^^^
-NameError: name 'XAI_BASE_URL' is not defined
-[INFO] - [04-Mar-26 22:36:49 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - HELPABLE modules (38): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game']] -> [__main__:38]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
-|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [04-Mar-26 22:36:50 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [04-Mar-26 22:36:50 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [04-Mar-26 22:37:36 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:37:48 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:37:54 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:38:00 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:38:09 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:38:14 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:38:18 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:38:29 - DoraSuper - Updated admin cache for -1003540703692 [𝐊𝐚𝐲𝐝𝐮𝐬 𝐂𝐡𝐞𝐚𝐭 [ Chat ]]] -> [admin:113]
-[INFO] - [04-Mar-26 22:40:05 - DoraSuper - auto_download_link: chat=-1002502809309 url=https://vt.tiktok.com/ZSu1A1t4V/] -> [downloadsVideo:1179]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [05-Mar-26 01:29:26 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [05-Mar-26 01:29:27 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [05-Mar-26 01:29:41 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSu1CLaMg] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:29:56 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:30:01 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:30:14 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:30:17 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:30:17 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:30:19 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:30:22 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:30:25 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
+[INFO] - [05-Mar-26 01:30:26 - instagrapi - https://i.instagram.com/api/v1/media/3841879998849025407/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:30:27 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3841879998849025407/info/ (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:30:45 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://kktiktok.com/t/ZSu1CLaMg] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:30:58 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:31:11 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:31:24 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:31:26 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
+[INFO] - [05-Mar-26 01:31:27 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [05-Mar-26 01:31:53 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://x.com/ksalley74254/status/2029072023952212052?s=46] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:36:08 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://x.com/77sunnyx/status/2029215825736155574?s=46] -> [downloadsVideo:1328]
+[INFO] - [05-Mar-26 01:54:02 - DoraSuper - waifus triggered command=yeet chat_id=-1002502809309] -> [waifus:162]
+[INFO] - [05-Mar-26 01:54:20 - DoraSuper - waifus triggered command=kiss chat_id=-1002502809309] -> [waifus:162]
+[INFO] - [05-Mar-26 01:55:08 - DoraSuper - waifus triggered command=punch chat_id=-1002502809309] -> [waifus:162]
+[INFO] - [05-Mar-26 01:55:36 - DoraSuper - waifus triggered command=shoot chat_id=-1002502809309] -> [waifus:162]
+[INFO] - [05-Mar-26 01:57:26 - DoraSuper - waifus triggered command=cry chat_id=-1002502809309] -> [waifus:162]
