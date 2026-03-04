@@ -1,3 +1,4 @@
+import os
 import re
 import time
 import logging
@@ -55,6 +56,26 @@ async def active_afk(_, ctx: Message, strings):
                     )
                     if str(reasonafk) == "None"
                     else await ctx.reply_animation(
+                        data,
+                        caption=strings("on_afk_msg_with_r").format(
+                            usr=ctx.from_user.mention,
+                            id=ctx.from_user.id,
+                            tm=seenago,
+                            reas=reasonafk,
+                            **EMOJI_FMT,
+                        ),
+                    )
+                )
+            elif afktype == "video":
+                send = (
+                    await ctx.reply_video(
+                        data,
+                        caption=strings("on_afk_msg_no_r").format(
+                            usr=ctx.from_user.mention, id=ctx.from_user.id, tm=seenago, **EMOJI_FMT
+                        ),
+                    )
+                    if str(reasonafk) == "None"
+                    else await ctx.reply_video(
                         data,
                         caption=strings("on_afk_msg_with_r").format(
                             usr=ctx.from_user.mention,
@@ -131,6 +152,23 @@ async def active_afk(_, ctx: Message, strings):
             "data": _data,
             "reason": None,
         }
+    elif len(ctx.command) == 1 and ctx.reply_to_message.video:
+        _data = ctx.reply_to_message.video.file_id
+        details = {
+            "type": "video",
+            "time": time.time(),
+            "data": _data,
+            "reason": None,
+        }
+    elif len(ctx.command) > 1 and ctx.reply_to_message.video:
+        _data = ctx.reply_to_message.video.file_id
+        _reason = (ctx.text.split(None, 1)[1].strip())[:100]
+        details = {
+            "type": "video",
+            "time": time.time(),
+            "data": _data,
+            "reason": _reason,
+        }
     elif len(ctx.command) > 1 and ctx.reply_to_message.animation:
         _data = ctx.reply_to_message.animation.file_id
         _reason = (ctx.text.split(None, 1)[1].strip())[:100]
@@ -141,7 +179,8 @@ async def active_afk(_, ctx: Message, strings):
             "reason": _reason,
         }
     elif len(ctx.command) == 1 and ctx.reply_to_message.photo:
-        await app.download_media(ctx.reply_to_message, file_name=f"{user_id}.jpg")
+        os.makedirs("downloads", exist_ok=True)
+        await app.download_media(ctx.reply_to_message, file_name=f"downloads/{user_id}.jpg")
         details = {
             "type": "photo",
             "time": time.time(),
@@ -149,7 +188,8 @@ async def active_afk(_, ctx: Message, strings):
             "reason": None,
         }
     elif len(ctx.command) > 1 and ctx.reply_to_message.photo:
-        await app.download_media(ctx.reply_to_message, file_name=f"{user_id}.jpg")
+        os.makedirs("downloads", exist_ok=True)
+        await app.download_media(ctx.reply_to_message, file_name=f"downloads/{user_id}.jpg")
         _reason = ctx.text.split(None, 1)[1].strip()
         details = {
             "type": "photo",
@@ -166,7 +206,8 @@ async def active_afk(_, ctx: Message, strings):
                 "reason": None,
             }
         else:
-            await app.download_media(ctx.reply_to_message, file_name=f"{user_id}.jpg")
+            os.makedirs("downloads", exist_ok=True)
+            await app.download_media(ctx.reply_to_message, file_name=f"downloads/{user_id}.jpg")
             details = {
                 "type": "photo",
                 "time": time.time(),
@@ -183,7 +224,8 @@ async def active_afk(_, ctx: Message, strings):
                 "reason": _reason,
             }
         else:
-            await app.download_media(ctx.reply_to_message, file_name=f"{user_id}.jpg")
+            os.makedirs("downloads", exist_ok=True)
+            await app.download_media(ctx.reply_to_message, file_name=f"downloads/{user_id}.jpg")
             details = {
                 "type": "photo",
                 "time": time.time(),
@@ -228,34 +270,58 @@ async def afk_state(_, ctx: Message, strings):
         await ctx.reply_msg(strings("afkdel_help").format(cmd=ctx.command[0], **EMOJI_FMT), del_in=6)
 
 
-# Detect user that AFK based on Yukki Repo
+# Khi đang AFK, gửi bất kỳ tin nào trong private → tắt AFK
+@app.on_message(filters.private & ~filters.bot & ~filters.via_bot, group=0)
+@use_chat_lang()
+async def afk_private_watcher(_, ctx: Message, strings):
+    if not ctx.from_user:
+        return
+    userid = ctx.from_user.id
+    verifier, _ = await is_afk(userid)
+    if verifier:
+        await remove_afk(userid)
+        try:
+            await ctx.reply_msg(
+                strings("is_online").format(
+                    usr=ctx.from_user.mention, id=userid, **EMOJI_FMT
+                ),
+                disable_web_page_preview=True,
+            )
+        except Exception:
+            pass
+
+
+# Khi bạn đang AFK, gõ bất kỳ tin nhắn nào (text, ảnh, sticker, ...) trong nhóm hoặc private → tắt AFK.
+# Chỉ bỏ qua khi tin nhắn đúng là lệnh /afk (để dùng khi bật AFK).
 @app.on_message(
     filters.group & ~filters.bot & ~filters.via_bot,
-    group=1,
+    group=0,
 )
 @use_chat_lang()
 async def afk_watcher_func(self: Client, ctx: Message, strings):
-    if ctx.sender_chat:
+    if ctx.sender_chat or not ctx.from_user:
         return
     userid = ctx.from_user.id
     user_name = ctx.from_user.mention
-    if ctx.entities:
+    message_text = (ctx.text or ctx.caption) or ""
+    # Chỉ bỏ qua nếu đúng là lệnh /afk (hoặc !afk, /afk@bot)
+    if ctx.entities and message_text:
         possible = ["/afk", f"/afk@{self.me.username}", "!afk"]
-        message_text = ctx.text or ctx.caption
         for entity in ctx.entities:
             try:
-                if (
-                    entity.type == enums.MessageEntityType.BOT_COMMAND
-                    and (message_text[0 : 0 + entity.length]).lower() in possible
-                ):
-                    return
-            except UnicodeDecodeError:  # Some weird character make error
-                return
+                if entity.type == enums.MessageEntityType.BOT_COMMAND:
+                    start = getattr(entity, "offset", 0)
+                    end = start + getattr(entity, "length", 0)
+                    if end <= len(message_text) and message_text[start:end].lower().strip() in possible:
+                        return
+            except (UnicodeDecodeError, IndexError):
+                pass
 
     msg = ""
+    send = None
     replied_user_id = 0
 
-    # Self AFK
+    # Bạn đang AFK mà gửi tin (bất kỳ) → tắt AFK và báo "đã trực tuyến"
     verifier, reasondb = await is_afk(userid)
     if verifier:
         await remove_afk(userid)
@@ -288,6 +354,21 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                             usr=user_name, id=userid, tm=seenago, reas=reasonafk, **EMOJI_FMT
                         ),
                     )
+            if afktype == "video":
+                if str(reasonafk) == "None":
+                    send = await ctx.reply_video(
+                        data,
+                        caption=strings("on_afk_msg_no_r").format(
+                            usr=user_name, id=userid, tm=seenago, **EMOJI_FMT
+                        ),
+                    )
+                else:
+                    send = await ctx.reply_video(
+                        data,
+                        caption=strings("on_afk_msg_with_r").format(
+                            usr=user_name, id=userid, tm=seenago, reas=reasonafk, **EMOJI_FMT
+                        ),
+                    )
             if afktype == "photo":
                 if str(reasonafk) == "None":
                     send = await ctx.reply_photo(
@@ -303,7 +384,7 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                             usr=user_name, id=userid, tm=seenago, reas=reasonafk, **EMOJI_FMT
                         ),
                     )
-        except:
+        except Exception:
             msg += strings("is_online").format(usr=user_name, id=userid, **EMOJI_FMT)
 
     # Replied to a User which is AFK
@@ -353,6 +434,28 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                                     **EMOJI_FMT,
                                 ),
                             )
+                    if afktype == "video":
+                        if str(reasonafk) == "None":
+                            send = await ctx.reply_video(
+                                data,
+                                caption=strings("is_afk_msg_no_r").format(
+                                    usr=replied_first_name,
+                                    id=replied_user_id,
+                                    tm=seenago,
+                                    **EMOJI_FMT,
+                                ),
+                            )
+                        else:
+                            send = await ctx.reply_video(
+                                data,
+                                caption=strings("is_afk_msg_with_r").format(
+                                    usr=replied_first_name,
+                                    id=replied_user_id,
+                                    tm=seenago,
+                                    reas=reasonafk,
+                                    **EMOJI_FMT,
+                                ),
+                            )
                     if afktype == "photo":
                         if str(reasonafk) == "None":
                             send = await ctx.reply_photo(
@@ -382,21 +485,24 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
         except:
             pass
 
-    # If username or mentioned user is AFK
-    if ctx.entities:
-        entity = ctx.entities
-        j = 0
-        for _ in range(len(entity)):
-            if (entity[j].type) == enums.MessageEntityType.MENTION:
-                found = re.findall("@([_0-9a-zA-Z]+)", ctx.text)
+    # Khi user khác tag/mention bạn (bạn đang AFK) → bot báo "đang AFK"
+    if ctx.entities and message_text:
+        entity_list = ctx.entities
+        for j in range(len(entity_list)):
+            ent = entity_list[j]
+            if ent.type == enums.MessageEntityType.MENTION:
                 try:
-                    get_user = found[j]
-                    user = await app.get_users(get_user)
-                    if user.id == replied_user_id:
-                        j += 1
+                    start = getattr(ent, "offset", 0)
+                    end = start + getattr(ent, "length", 0)
+                    if end > len(message_text):
                         continue
-                except:
-                    j += 1
+                    mention_text = message_text[start:end].lstrip("@")
+                    if not mention_text:
+                        continue
+                    user = await app.get_users(mention_text)
+                    if user.id == replied_user_id:
+                        continue
+                except Exception:
                     continue
                 verifier, reasondb = await is_afk(user.id)
                 if verifier:
@@ -437,6 +543,25 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                                         **EMOJI_FMT,
                                     ),
                                 )
+                        if afktype == "video":
+                            if str(reasonafk) == "None":
+                                send = await ctx.reply_video(
+                                    data,
+                                    caption=strings("is_afk_msg_no_r").format(
+                                        usr=user.first_name[:25], id=user.id, tm=seenago, **EMOJI_FMT
+                                    ),
+                                )
+                            else:
+                                send = await ctx.reply_video(
+                                    data,
+                                    caption=strings("is_afk_msg_with_r").format(
+                                        usr=user.first_name[:25],
+                                        id=user.id,
+                                        tm=seenago,
+                                        reas=reasonafk,
+                                        **EMOJI_FMT,
+                                    ),
+                                )
                         if afktype == "photo":
                             if str(reasonafk) == "None":
                                 send = await ctx.reply_photo(
@@ -456,19 +581,17 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                                         **EMOJI_FMT,
                                     ),
                                 )
-                    except:
+                    except Exception:
                         msg += strings("is_afk").format(
-                            usr=user.first_name[:25], id=user.id, **EMOJI_FMT
+                            usr=(user.first_name or "User")[:25], id=user.id, **EMOJI_FMT
                         )
-            elif (entity[j].type) == enums.MessageEntityType.TEXT_MENTION:
+            elif ent.type == enums.MessageEntityType.TEXT_MENTION:
                 try:
-                    user_id = entity[j].user.id
+                    user_id = ent.user.id
                     if user_id == replied_user_id:
-                        j += 1
                         continue
-                    first_name = entity[j].user.first_name
-                except:
-                    j += 1
+                    first_name = (ent.user.first_name or "User")[:25]
+                except Exception:
                     continue
                 verifier, reasondb = await is_afk(user_id)
                 if verifier:
@@ -509,6 +632,25 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                                         **EMOJI_FMT,
                                     ),
                                 )
+                        if afktype == "video":
+                            if str(reasonafk) == "None":
+                                send = await ctx.reply_video(
+                                    data,
+                                    caption=strings("is_afk_msg_no_r").format(
+                                        usr=first_name[:25], id=user_id, tm=seenago, **EMOJI_FMT
+                                    ),
+                                )
+                            else:
+                                send = await ctx.reply_video(
+                                    data,
+                                    caption=strings("is_afk_msg_with_r").format(
+                                        usr=first_name[:25],
+                                        id=user_id,
+                                        tm=seenago,
+                                        reas=reasonafk,
+                                        **EMOJI_FMT,
+                                    ),
+                                )
                         if afktype == "photo":
                             if str(reasonafk) == "None":
                                 send = await ctx.reply_photo(
@@ -528,15 +670,15 @@ async def afk_watcher_func(self: Client, ctx: Message, strings):
                                         **EMOJI_FMT,
                                     ),
                                 )
-                    except:
-                        msg += strings("is_afk").format(usr=first_name[:25], id=user_id, **EMOJI_FMT)
-            j += 1
+                    except Exception:
+                        msg += strings("is_afk").format(usr=first_name, id=user_id, **EMOJI_FMT)
     if msg != "":
         try:
             send = await ctx.reply_text(msg, disable_web_page_preview=True)
-        except:
+        except Exception:
             pass
-    try:
-        await put_cleanmode(ctx.chat.id, send.id)
-    except:
-        pass
+    if send is not None:
+        try:
+            await put_cleanmode(ctx.chat.id, send.id)
+        except Exception:
+            pass

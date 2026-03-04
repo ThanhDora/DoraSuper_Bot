@@ -654,7 +654,13 @@ async def _download_tiktok_via_tikwm(url: str, out_dir: str) -> tuple[list[str] 
     else:
         author = str(author)
     title = (data.get("title") or "TikTok").strip()[:200]
-    meta = {"uploader": author, "title": title, "webpage_url": url}
+    meta = {
+        "uploader": author,
+        "title": title,
+        "webpage_url": url,
+        "like_count": data.get("digg_count") or data.get("like_count"),
+        "view_count": data.get("play_count") or data.get("view_count"),
+    }
 
     if video_url:
         try:
@@ -733,13 +739,23 @@ async def _send_result_to_log_channel(ctx: Message, platform: str, caption: str,
     cap = prefix + (caption or "")
     try:
         if len(images) > 1:
-            media_list = [
-                InputMediaPhoto(media=images[0], caption=cap, parse_mode=enums.ParseMode.HTML),
-                *[InputMediaPhoto(media=img) for img in images[1:]],
-            ]
-            await app.send_media_group(LOG_CHANNEL, media=media_list)
+            jpeg_list: list[bytes] = []
+            for p in images[:MAX_ALBUM_PHOTOS]:
+                b = await asyncio.to_thread(_image_to_jpeg_sync, p)
+                if b and len(b) <= MAX_FILE_SIZE:
+                    jpeg_list.append(b)
+            if jpeg_list:
+                media_list = [
+                    InputMediaPhoto(media=io.BytesIO(jpeg_list[0]), caption=cap, parse_mode=enums.ParseMode.HTML),
+                    *[InputMediaPhoto(media=io.BytesIO(b)) for b in jpeg_list[1:]],
+                ]
+                await app.send_media_group(LOG_CHANNEL, media=media_list)
         elif len(images) == 1:
-            await app.send_photo(LOG_CHANNEL, photo=images[0], caption=cap, parse_mode=enums.ParseMode.HTML)
+            jpeg_bytes = await asyncio.to_thread(_image_to_jpeg_sync, images[0])
+            if jpeg_bytes and len(jpeg_bytes) <= MAX_FILE_SIZE:
+                await app.send_photo(LOG_CHANNEL, photo=io.BytesIO(jpeg_bytes), caption=cap, parse_mode=enums.ParseMode.HTML)
+            else:
+                await app.send_photo(LOG_CHANNEL, photo=images[0], caption=cap, parse_mode=enums.ParseMode.HTML)
         elif videos:
             await app.send_video(LOG_CHANNEL, video=videos[0], caption=cap, parse_mode=enums.ParseMode.HTML)
         elif other:
@@ -884,13 +900,15 @@ async def _process_download(ctx: Message, url: str, platform: str):
         out_dir = tempfile.mkdtemp(prefix="tiktok_photo_", dir=str(dl_root))
         try:
             paths, err = None, None
+            photo_meta = None  # metadata cho caption (giống video: title, author, like, view)
             paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
             if paths_gd:
                 paths = paths_gd
             if not paths:
-                paths_tikwm, _, err_tikwm = await _download_tiktok_via_tikwm(url, out_dir)
+                paths_tikwm, meta_tikwm, err_tikwm = await _download_tiktok_via_tikwm(url, out_dir)
                 if paths_tikwm:
                     paths = paths_tikwm
+                    photo_meta = meta_tikwm
             if not paths:
                 paths, err = await _download_tiktok_photo(final_url, out_dir)
             if err:
@@ -911,8 +929,21 @@ async def _process_download(ctx: Message, url: str, platform: str):
             shared_by = ""
             if ctx.from_user:
                 shared_by = ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user.username else ctx.from_user.first_name or "")
-            fake_info = {"webpage_url": final_url} if final_url else None
-            caption = _build_caption(fake_info, os.path.getsize(paths[0]), "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
+            # Caption đầy đủ như video: tiêu đề, tài khoản, số tim, số view, link
+            if not photo_meta:
+                data_tikwm = await _fetch_tikwm_tiktok(url)
+                if data_tikwm:
+                    author = data_tikwm.get("author") or {}
+                    uploader = author.get("unique_id") or author.get("nickname") or "TikTok" if isinstance(author, dict) else str(author)
+                    photo_meta = {
+                        "title": (data_tikwm.get("title") or "").strip()[:200],
+                        "uploader": uploader,
+                        "webpage_url": url,
+                        "like_count": data_tikwm.get("digg_count") or data_tikwm.get("like_count"),
+                        "view_count": data_tikwm.get("play_count") or data_tikwm.get("view_count"),
+                    }
+            info = photo_meta if photo_meta else ({"webpage_url": final_url} if final_url else None)
+            caption = _build_caption(info, os.path.getsize(paths[0]), "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
             # Chuyển sang JPEG trước khi gửi để tránh Telegram IMAGE_PROCESS_FAILED
             jpeg_list: list[bytes] = []
             for p in paths[:MAX_ALBUM_PHOTOS]:  # Telegram tối đa 10 ảnh/album
@@ -1024,21 +1055,54 @@ async def _process_download(ctx: Message, url: str, platform: str):
         first_size = os.path.getsize(paths[0]) if paths else 0
         caption = _build_caption(info, first_size, platform, shared_by) or f"{E_SUCCESS} Tải từ {platform.title()}"
 
-        # Nhiều ảnh → gửi album (media group, tối đa 10 ảnh)
+        # Nhiều ảnh → gửi album (media group, tối đa 10 ảnh). Chuyển sang JPEG tránh PHOTO_EXT_INVALID (WebP/PNG).
         if len(images) > 1:
             images = images[:MAX_ALBUM_PHOTOS]
-            media_list = [
-                InputMediaPhoto(media=images[0], caption=caption, parse_mode=enums.ParseMode.HTML),
-                *[InputMediaPhoto(media=img) for img in images[1:]],
-            ]
-            await app.send_media_group(
-                chat_id=ctx.chat.id,
-                media=media_list,
-                reply_to_message_id=ctx.id,
-            )
-        # Một ảnh
+            jpeg_list: list[bytes] = []
+            for p in images:
+                b = await asyncio.to_thread(_image_to_jpeg_sync, p)
+                if b and len(b) <= MAX_FILE_SIZE:
+                    jpeg_list.append(b)
+                elif os.path.isfile(p) and os.path.getsize(p) > 0:
+                    try:
+                        with open(p, "rb") as f:
+                            raw = f.read()
+                        b = await asyncio.to_thread(_image_bytes_to_jpeg_sync, raw)
+                        if b and len(b) <= MAX_FILE_SIZE:
+                            jpeg_list.append(b)
+                    except Exception:
+                        pass
+            if not jpeg_list and images:
+                one = await asyncio.to_thread(_image_to_jpeg_sync, images[0])
+                if one and len(one) <= MAX_FILE_SIZE:
+                    jpeg_list.append(one)
+            if jpeg_list:
+                media_list = [
+                    InputMediaPhoto(media=io.BytesIO(jpeg_list[0]), caption=caption, parse_mode=enums.ParseMode.HTML),
+                    *[InputMediaPhoto(media=io.BytesIO(b)) for b in jpeg_list[1:]],
+                ]
+                await app.send_media_group(
+                    chat_id=ctx.chat.id,
+                    media=media_list,
+                    reply_to_message_id=ctx.id,
+                )
+            else:
+                # Fallback: gửi ảnh đầu dưới dạng document nếu convert thất bại
+                await ctx.reply_document(document=images[0], caption=caption, parse_mode=enums.ParseMode.HTML)
+        # Một ảnh — chuyển sang JPEG tránh PHOTO_EXT_INVALID
         elif len(images) == 1:
-            await ctx.reply_photo(photo=images[0], caption=caption, parse_mode=enums.ParseMode.HTML)
+            p = images[0]
+            jpeg_bytes = await asyncio.to_thread(_image_to_jpeg_sync, p)
+            if not jpeg_bytes and os.path.isfile(p) and os.path.getsize(p) > 0:
+                try:
+                    with open(p, "rb") as f:
+                        jpeg_bytes = await asyncio.to_thread(_image_bytes_to_jpeg_sync, f.read())
+                except Exception:
+                    pass
+            if jpeg_bytes and len(jpeg_bytes) <= MAX_FILE_SIZE:
+                await ctx.reply_photo(photo=io.BytesIO(jpeg_bytes), caption=caption, parse_mode=enums.ParseMode.HTML)
+            else:
+                await ctx.reply_photo(photo=p, caption=caption, parse_mode=enums.ParseMode.HTML)
         # Một video (ưu tiên nếu có cả video và ảnh)
         elif videos:
             await ctx.reply_video(video=videos[0], caption=caption, parse_mode=enums.ParseMode.HTML)

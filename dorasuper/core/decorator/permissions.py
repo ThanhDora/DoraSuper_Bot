@@ -239,6 +239,9 @@ def require_admin(
                 return
             if msg.chat.type == enums.ChatType.CHANNEL:
                 return await func(client, message, *args, **kwargs)
+            # SUDO dùng được mọi lệnh nhóm kể cả khi không phải admin nhóm
+            if message.from_user and message.from_user.id in (SUDO or []):
+                return await func(client, message, *args, **kwargs)
             has_perms = await check_perms(
                 message, permissions, complain_missing_perms, strings
             )

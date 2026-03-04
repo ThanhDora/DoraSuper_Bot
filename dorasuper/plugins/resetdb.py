@@ -5,6 +5,7 @@ from pyrogram import enums, filters
 from pyrogram.types import Message
 
 from database import dbname
+from database.ai_chat_log_db import clear_ai_chat_logs
 from dorasuper import app
 from dorasuper.emoji import E_ERROR, E_LOADING, E_SUCCESS
 from dorasuper.vars import COMMAND_HANDLER, SUDO
@@ -13,6 +14,7 @@ LOGGER = getLogger("DoraSuper")
 
 # Danh sách collection đã dùng trong project (để drop khi reset)
 COLLECTION_NAMES = [
+    "afk",
     "users",
     "ai_chat_logs",
     "cleanmode",
@@ -61,3 +63,25 @@ async def reset_database(_: app, message: Message):
     except Exception as e:
         LOGGER.exception("resetdb error")
         await status.edit_msg(f"{E_ERROR} Lỗi khi reset database:\n<code>{e}</code>", parse_mode=enums.ParseMode.HTML)
+
+
+@app.on_message(filters.command("resetdb_ai", COMMAND_HANDLER) & filters.user(SUDO))
+async def reset_database_ai(_: app, message: Message):
+    """Chỉ reset dữ liệu AI: log đối thoại (MongoDB) + lịch sử hội thoại trong memory."""
+    status = await message.reply_msg(f"{E_LOADING} Đang reset database AI...", parse_mode=enums.ParseMode.HTML)
+    try:
+        from dorasuper.plugins.ai import clear_ai_chat_history
+
+        deleted = await clear_ai_chat_logs()
+        await clear_ai_chat_history()
+        await status.edit_msg(
+            f"{E_SUCCESS} <b>Đã reset database AI.</b>\n\n"
+            f"• Đã xóa <b>{deleted}</b> bản ghi log đối thoại (ai_chat_logs).\n"
+            f"• Đã xóa lịch sử hội thoại trong memory.",
+            parse_mode=enums.ParseMode.HTML,
+        )
+    except Exception as e:
+        LOGGER.exception("resetdb_ai error")
+        await status.edit_msg(
+            f"{E_ERROR} Lỗi khi reset database AI:\n<code>{e}</code>", parse_mode=enums.ParseMode.HTML
+        )

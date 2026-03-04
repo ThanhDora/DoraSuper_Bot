@@ -126,19 +126,30 @@ async def getid_cmd(_, ctx: Message):
                         py_lines.append(f"# {var}: {eid}")
                 out = "\n".join(py_lines)
             else:
-                out = f"Emoji ID (chạm để copy):\n\n{ids_line}"
+                out = ids_line
             await _send_safe(ctx.chat.id, out, ctx.id)
         except Exception as e:
             LOGGER.warning("getid_emoji: %s", e)
             await _send_safe(ctx.chat.id, "⚠️ Lỗi khi lấy emoji ID. Thử reply tin có sticker hoặc tin có emoji trong nội dung.", ctx.id)
         return
 
-    # Không reply + /getid → gửi Chat ID + User ID của bạn
-    target = ctx.from_user
+    # /getid: reply tin người khác → xem ID người đó; không reply → xem ID của bạn
+    target = None
+    if ctx.reply_to_message:
+        reply = ctx.reply_to_message
+        if reply.from_user:
+            target = reply.from_user
+        elif getattr(reply, "sender_chat", None):
+            target = reply.sender_chat  # kênh ẩn danh / nhóm liên kết
+    if target is None:
+        target = ctx.from_user
     if not target:
         await ctx.reply_msg(f"{E_WARN} Không lấy được thông tin.", parse_mode=enums.ParseMode.HTML)
         return
-    name = f"{(target.first_name or '')} {(target.last_name or '')}".strip() or "—"
+    name = f"{(getattr(target, 'first_name', None) or '')} {(getattr(target, 'last_name', None) or '')}".strip()
+    if not name and getattr(target, "title", None):
+        name = target.title
+    name = name or "—"
     text = (
         f"{E_USER} <b>User:</b> {name}\n"
         f"{E_ID} <b>User ID:</b> <code>{target.id}</code>\n"

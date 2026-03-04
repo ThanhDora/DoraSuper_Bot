@@ -69,8 +69,8 @@ __HELP__ = """
 /xsut - Xóa tin nhắn được trả lời và đuổi người gửi  
 /xoanhieu [n + trả lời tin nhắn] - Xóa "n" số lượng tin nhắn từ tin nhắn được trả lời hoặc xóa tất cả tin nhắn từ tin nhắn được trả lời đến mới nhất.
 /xoa - Xóa tin nhắn được trả lời  
-/thangcap - Thăng chức một thành viên  
-/fullthangcap - Thăng chức một thành viên với tất cả quyền hạn  
+/thangcap [tên admin] - Thăng chức (reply user). Gõ thêm tên để đổi tên admin, VD: /thangcap Mod  
+/fullthangcap [tên admin] - Thăng chức đủ quyền, có thể kèm tên admin  
 /hacap - Giáng chức một thành viên  
 /ghim - Ghim một tin nhắn
 /boghim - Bỏ ghim một tin nhắn
@@ -463,6 +463,10 @@ async def promoteFunc(client, message, strings):
         return await message.reply_msg(f"{E_WARN} Tôi không phải là quản trị viên trong cuộc trò chuyện này.")
     if not bot.can_promote_members:
         return await message.reply_msg(strings("no_promote_perm").format(**EMOJI_FMT))
+    # Tên admin tùy chọn: /thangcap Mod hoặc /fullthangcap Trùm (chỉ áp dụng trong siêu nhóm)
+    title = (" ".join(message.command[1:]).strip() if len(message.command) > 1 else "") or None
+    if title and len(title) > 16:
+        title = title[:16]
     try:
         if message.command[0][0] == "f":
             await message.chat.promote_member(
@@ -478,9 +482,15 @@ async def promoteFunc(client, message, strings):
                     can_manage_video_chats=bot.can_manage_video_chats,
                 ),
             )
-            return await message.reply_text(
-                strings("full_promote").format(umention=umention, **EMOJI_FMT)
-            )
+            if title and message.chat.type == enums.ChatType.SUPERGROUP:
+                try:
+                    await client.set_administrator_title(message.chat.id, user_id, title)
+                except Exception:
+                    pass
+            msg = strings("full_promote").format(umention=umention, **EMOJI_FMT)
+            if title:
+                msg += f" {E_STAR} Tên admin: <b>{html.escape(title)}</b>"
+            return await message.reply_text(msg, parse_mode=enums.ParseMode.HTML)
 
         await message.chat.promote_member(
             user_id=user_id,
@@ -495,13 +505,29 @@ async def promoteFunc(client, message, strings):
                 can_manage_video_chats=bot.can_manage_video_chats,
             ),
         )
-        await message.reply_msg(strings("normal_promote").format(umention=umention, **EMOJI_FMT))
+        if title and message.chat.type == enums.ChatType.SUPERGROUP:
+            try:
+                await client.set_administrator_title(message.chat.id, user_id, title)
+            except Exception:
+                pass
+        msg = strings("normal_promote").format(umention=umention, **EMOJI_FMT)
+        if title:
+            msg += f" {E_STAR} Tên admin: <b>{html.escape(title)}</b>"
+        await message.reply_msg(msg, parse_mode=enums.ParseMode.HTML)
     except ChatAdminRequired:
         await message.reply_msg(
             f"{E_GEAR} Bot cần quyền **Thăng cấp thành viên** trong nhóm. Vui lòng cấp quyền trong Cài đặt nhóm → Quản trị viên."
         )
     except Exception as err:
-        await message.reply_msg(str(err))
+        err_lower = str(err).lower()
+        if "bot_channels_na" in err_lower or "edit admin" in err_lower or "can't edit admin" in err_lower:
+            await message.reply_msg(
+                f"{E_WARN} Bot không thể thay đổi quyền quản trị trong nhóm/kênh này. "
+                "Theo quy định Telegram, chỉ tài khoản người dùng mới thăng/hạ cấp được. "
+                "Vui lòng thăng cấp thành viên trực tiếp: Cài đặt nhóm → Quản trị viên → Thêm quản trị viên."
+            )
+        else:
+            await message.reply_msg(str(err))
 
 
 # Demote Member
@@ -541,9 +567,17 @@ async def demote(client, message, strings):
         except DocumentInvalid:
             await message.reply_text(txt, parse_mode=enums.ParseMode.HTML)
     except ChatAdminRequired:
-        await message.reply_text(f"{E_GEAR} Xin hãy cho phép hạ cấp thành viên..")
+        await message.reply_text(f"{E_GEAR} Xin hãy cho phép hạ cấp thành viên.")
     except Exception as e:
-        await message.reply_msg(str(e))
+        err_lower = str(e).lower()
+        if "bot_channels_na" in err_lower or "edit admin" in err_lower or "can't edit admin" in err_lower:
+            await message.reply_msg(
+                f"{E_WARN} Bot không thể hạ cấp quản trị trong nhóm/kênh này. "
+                "Theo quy định Telegram, chỉ tài khoản người dùng mới thay đổi quyền admin được. "
+                "Vui lòng hạ cấp thành viên trực tiếp: Cài đặt nhóm → Quản trị viên → Chỉnh sửa quyền."
+            )
+        else:
+            await message.reply_msg(str(e))
 
 
 # Pin Messages

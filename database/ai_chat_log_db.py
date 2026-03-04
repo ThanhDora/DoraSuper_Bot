@@ -24,3 +24,9 @@ async def insert_ai_chat_log(
         "assistant": (assistant_content or "").strip()[:10000],
     }
     await ai_chat_logs.insert_one(doc)
+
+
+async def clear_ai_chat_logs() -> int:
+    """Xóa toàn bộ bản ghi trong collection ai_chat_logs. Trả về số document đã xóa."""
+    result = await ai_chat_logs.delete_many({})
+    return result.deleted_count

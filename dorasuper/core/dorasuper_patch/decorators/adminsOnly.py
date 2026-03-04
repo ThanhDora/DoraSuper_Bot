@@ -6,6 +6,7 @@ from cachetools import TTLCache
 from pyrogram.methods import Decorators
 
 from dorasuper.emoji import E_ADMIN, E_CLOCK, E_GROUP, E_LOCK, E_TIP, E_WARN
+from dorasuper.vars import SUDO
 from ..utils import check_rights, handle_error, is_admin
 
 ANON = TTLCache(maxsize=250, ttl=30)
@@ -70,6 +71,19 @@ async def anonymous_admin_verification(
             f"{E_WARN} Tôi phải là quản trị viên để thực hiện nhiệm vụ này, nếu không tôi sẽ rời khỏi nhóm này.",
             parse_mode=pyrogram.enums.ParseMode.HTML,
         )
+    # SUDO dùng được mọi lệnh nhóm kể cả khi không phải admin nhóm
+    if CallbackQuery.from_user and CallbackQuery.from_user.id in (SUDO or []):
+        try:
+            await CallbackQuery.message.delete()
+            await cb[1](self, cb[0])
+        except pyrogram.errors.exceptions.forbidden_403.ChatAdminRequired:
+            return await CallbackQuery.message.edit_text(
+                f"{E_WARN} Tôi phải là quản trị viên để thực hiện nhiệm vụ này, nếu không tôi sẽ rời khỏi nhóm này.",
+                parse_mode=pyrogram.enums.ParseMode.HTML,
+            )
+        except BaseException as e:
+            return await handle_error(e, CallbackQuery)
+        return
     if member.status not in (
         pyrogram.enums.ChatMemberStatus.OWNER,
         pyrogram.enums.ChatMemberStatus.ADMINISTRATOR,
@@ -161,6 +175,15 @@ def adminsOnly(
                     permission,
                 )
                 return await anonymous_admin(message)
+            # SUDO dùng được mọi lệnh nhóm kể cả khi không phải admin nhóm
+            if message.from_user and getattr(message.from_user, "id", None) in (SUDO or []):
+                try:
+                    await func(client, message)
+                except pyrogram.errors.exceptions.forbidden_403.ChatWriteForbidden:
+                    await client.leave_chat(message.chat.id)
+                except BaseException as exception:
+                    await handle_error(exception, message)
+                return
             if not await is_admin(
                 message.chat.id,
                 message.from_user.id,

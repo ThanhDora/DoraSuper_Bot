@@ -171,24 +171,37 @@ async def rm_delacc(_, message):
         await sent_message.delete()
 
 @app.on_message(
-    filters.incoming & ~filters.private & filters.command(["trangthai"], COMMAND_HANDLER)
+    filters.group & filters.command(["trangthai"], COMMAND_HANDLER),
+    group=-1,
 )
 @app.adminsOnly("can_restrict_members")
 async def instatus(client, message):
-    bstat = await app.get_chat_member(message.chat.id, client.me.id)
-    if bstat.status.value != "administrator":
-        return await message.reply_msg(
-            f"{E_ERROR} **Vui lòng cấp cho tôi tất cả quyền quản trị viên cơ bản để chạy lệnh này.**"
-        )
-    start_time = time.perf_counter()
-    user = await app.get_chat_member(message.chat.id, message.from_user.id)
-    count = await app.get_chat_members_count(message.chat.id)
-    if user.status in (
-        enums.ChatMemberStatus.ADMINISTRATOR,
-        enums.ChatMemberStatus.OWNER,
-    ):
+    try:
+        if not message.from_user:
+            return await message.reply_msg(
+                f"{E_ERROR} Lệnh này chỉ dùng bởi thành viên (không hỗ trợ kênh).",
+                parse_mode=enums.ParseMode.HTML,
+            )
+        bstat = await app.get_chat_member(message.chat.id, client.me.id)
+        if getattr(getattr(bstat, "status", None), "value", None) != "administrator":
+            return await message.reply_msg(
+                f"{E_ERROR} **Vui lòng cấp cho tôi tất cả quyền quản trị viên cơ bản để chạy lệnh này.**",
+                parse_mode=enums.ParseMode.HTML,
+            )
+        cm = await app.get_chat_member(message.chat.id, message.from_user.id)
+        member_status = getattr(getattr(cm, "status", None), "value", None)
+        if member_status not in ("administrator", "owner"):
+            sent_message = await message.reply_text(
+                f"{E_ERROR} **Bạn phải là quản trị viên hoặc chủ sở hữu nhóm để thực hiện hành động này.**",
+                parse_mode=enums.ParseMode.HTML,
+            )
+            await sleep(5)
+            await sent_message.delete()
+            return
+        count = await app.get_chat_members_count(message.chat.id)
         sent_message = await message.reply_text(
-            f"{E_LOADING} **Hiện đang thu thập thông tin người dùng...**"
+            f"{E_LOADING} **Hiện đang thu thập thông tin người dùng...**",
+            parse_mode=enums.ParseMode.HTML,
         )
         recently = 0
         within_week = 0
@@ -210,27 +223,27 @@ async def instatus(client, message):
         ):
             restricted += 1
         async for member in app.get_chat_members(message.chat.id):
-            user = member.user
-            if user.is_deleted:
+            u = member.user
+            if getattr(u, "is_deleted", False):
                 deleted_acc += 1
-            elif user.is_bot:
+            elif getattr(u, "is_bot", False):
                 bot += 1
-            elif user.is_premium:
+            elif getattr(u, "is_premium", False):
                 premium_acc += 1
-            elif not user.username:
+            elif not getattr(u, "username", None):
                 no_username += 1
-            elif user.status.value == "recently":
-                recently += 1
-            elif user.status.value == "last_week":
-                within_week += 1
-            elif user.status.value == "last_month":
-                within_month += 1
-            elif user.status.value == "long_ago":
-                long_time_ago += 1
             else:
-                uncached += 1
-        end_time = time.perf_counter()
-        timelog = "{:.2f}".format(end_time - start_time)
+                status_val = getattr(getattr(u, "status", None), "value", None)
+                if status_val == "recently":
+                    recently += 1
+                elif status_val == "last_week":
+                    within_week += 1
+                elif status_val == "last_month":
+                    within_month += 1
+                elif status_val == "long_ago":
+                    long_time_ago += 1
+                else:
+                    uncached += 1
         await sent_message.edit_msg(
             (
                 f"<b>{E_MENU} {message.chat.title}\n{E_GROUP} {count} Thành viên\n——————\n"
@@ -245,14 +258,16 @@ async def instatus(client, message):
                 f"{E_DORA4} Tài khoản không tồn tại (<code>/cam_ghosts</code>): {deleted_acc}\n"
                 f"{E_ANDROID} Bot: {bot}\n"
                 f"{E_DORA3} Người dùng Premium: {premium_acc}\n"
-                f"{E_DORA1} Chưa được cache: {uncached}\n\n"
-                f"{E_CLOCK} Thực hiện trong {timelog} ms"
+                f"{E_DORA1} Chưa được cache: {uncached}\n"
             ),
             parse_mode=enums.ParseMode.HTML,
         )
-    else:
-        sent_message = await message.reply_text(
-            f"{E_ERROR} **Bạn phải là quản trị viên hoặc chủ sở hữu nhóm để thực hiện hành động này.**"
-        )
-        await sleep(5)
-        await sent_message.delete()
+    except Exception as e:
+        LOGGER.exception("instatus /trangthai: %s", e)
+        try:
+            await message.reply_msg(
+                f"{E_ERROR} Lỗi khi xử lý /trangthai. Thử lại sau hoặc kiểm tra quyền bot.",
+                parse_mode=enums.ParseMode.HTML,
+            )
+        except Exception:
+            pass

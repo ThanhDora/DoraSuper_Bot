@@ -11,6 +11,7 @@ from pyrogram.types import (
 )
 
 from dorasuper import BOT_NAME, BOT_USERNAME, HELPABLE, app
+from dorasuper.core.decorator.errors import capture_err
 from dorasuper.helper import bot_sys_stats, paginate_modules
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.localization import use_chat_lang
@@ -53,7 +54,8 @@ keyboard = InlineKeyboardMarkup(
 )
 
 
-@app.on_message(filters.command("start", COMMAND_HANDLER))
+@app.on_message(filters.command("start", COMMAND_HANDLER), group=-1)
+@capture_err
 @use_chat_lang()
 async def start(self, ctx: Message, strings):
     if ctx.chat.type.value != "private":
@@ -138,7 +140,8 @@ async def stats_callbacc(_, cb: CallbackQuery):
     await app.answer_callback_query(cb.id, text, show_alert=True)
 
 
-@app.on_message(filters.command("help", COMMAND_HANDLER))
+@app.on_message(filters.command("help", COMMAND_HANDLER), group=-1)
+@capture_err
 @use_chat_lang()
 async def help_command(_, ctx: Message, strings):
     if ctx.chat.type.value != "private":

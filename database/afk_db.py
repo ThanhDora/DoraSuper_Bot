@@ -1,6 +1,7 @@
 from database import dbname
 
-usersdb = dbname["users"]
+# Collection riêng cho AFK, tránh xung đột với bất kỳ code nào dùng "users"
+afkdb = dbname["afk"]
 cleandb = dbname["cleanmode"]
 cleanmode = {}
 
@@ -32,24 +33,24 @@ async def cleanmode_off(chat_id: int):
 
 
 async def is_afk(user_id: int) -> bool:
-    user = await usersdb.find_one({"user_id": user_id})
+    user = await afkdb.find_one({"user_id": user_id})
     if user and "reason" in user:
         return (True, user["reason"])
     return (False, {})
 
 
 async def add_afk(user_id: int, mode):
-    await usersdb.update_one(
+    await afkdb.update_one(
         {"user_id": user_id}, {"$set": {"reason": mode}}, upsert=True
     )
 
 
 async def remove_afk(user_id: int):
-    user = await usersdb.find_one({"user_id": user_id})
-    if user:
-        return await usersdb.delete_one({"user_id": user_id})
+    """Xóa trạng thái AFK của user. Dùng delete_many để chắc chắn xóa hết nếu có trùng."""
+    result = await afkdb.delete_many({"user_id": user_id})
+    return result
 
 
 async def get_afk_users() -> list:
-    users = usersdb.find({"user_id": {"$gt": 0}})
+    users = afkdb.find({"user_id": {"$gt": 0}})
     return list(await users.to_list(length=1000000000)) if users else []
