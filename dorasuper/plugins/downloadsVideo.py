@@ -271,17 +271,29 @@ def _fmt_count(n: int | float, decimal: bool = False) -> str:
     return f"{n:,}"
 
 
+def _clean_facebook_title(title: str, uploader: str) -> tuple[str, str | None, str | None]:
+    """Tách title Facebook dạng '2.6K reactions · 10 comments | Nội dung | Anh Kha' → (nội dung, reaction_str, comment_str)."""
+    if not title or "reactions" not in title.lower() or "comments" not in title.lower():
+        return title, None, None
+    m = re.match(
+        r"^([\d.,]+\s*[KkMmBb]?)\s*reactions\s*·\s*([\d.,]+\s*[KkMmBb]?)\s*comments\s*\|\s*(.*)$",
+        title.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return title, None, None
+    reaction_str, comment_str, rest = m.group(1).strip(), m.group(2).strip(), m.group(3).strip()
+    if uploader and rest.endswith(" | " + uploader):
+        rest = rest[: -len(" | " + uploader)].strip()
+    elif uploader and rest.endswith("| " + uploader):
+        rest = rest[: -len("| " + uploader)].strip()
+    return rest or title, reaction_str, comment_str
+
+
 def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: str) -> str:
-    """Tạo caption: tiêu đề, tên tài khoản, số tim, số view, link (blockquote)."""
+    """Tạo caption: tiêu đề, tên tài khoản, số tim, số view, reaction, bình luận, link (blockquote)."""
     lines = []
     if info:
-        # Tiêu đề — X (Twitter) dùng "description" cho nội dung tweet
-        title = (info.get("title") or info.get("description") or "").strip()
-        if platform == "x" and not title:
-            title = (info.get("fulltitle") or "").strip()
-        if title:
-            lines.append(f"<b>Tiêu đề:</b> {html.escape(title[:300])}")
-        # Tên tài khoản — X thường dùng uploader_id (screen name)
         uploader = (info.get("uploader") or info.get("creator") or "").strip()
         if platform == "x" and not uploader and info.get("uploader_id"):
             uploader = ("@" + str(info.get("uploader_id")).strip()).strip()
@@ -289,20 +301,40 @@ def _build_caption(info: dict | None, file_size: int, platform: str, shared_by: 
             uploader = (info.get("uploader_id") or "").strip()
             if uploader and not uploader.startswith("@"):
                 uploader = "@" + uploader
+
+        title = (info.get("title") or info.get("description") or "").strip()
+        if platform == "x" and not title:
+            title = (info.get("fulltitle") or "").strip()
+        fb_reaction_str, fb_comment_str = None, None
+        if platform == "facebook" and title:
+            title, fb_reaction_str, fb_comment_str = _clean_facebook_title(title, uploader)
+        if title:
+            lines.append(f"<b>Tiêu đề:</b> {html.escape(title[:300])}")
         if uploader:
             lines.append(f"<b>Tên tài khoản:</b> {html.escape(uploader)}")
-        # User (có thể copy)
-        # uid = (info.get("uploader_id") or "").strip()
-        # if uid:
-        #     lines.append(f"<b>User:</b> <code>@{uid}</code>")
-        # Số tim (1 số thập phân)
         likes = info.get("like_count") or info.get("play_count")
         if likes is not None:
-            lines.append(f"<b>Số tim:</b> {E_HEART} {_fmt_count(likes, decimal=True)}")
-        # Số view
+            lines.append(f"<b>Tim:</b> {E_HEART} {_fmt_count(likes, decimal=True)}")
         views = info.get("view_count") or info.get("play_count")
         if views is not None:
-            lines.append(f"<b>Số view:</b> {E_VIEW} {_fmt_count(views)}")
+            lines.append(f"<b>View:</b> {E_VIEW} {_fmt_count(views)}")
+        if platform == "facebook":
+            if fb_reaction_str is not None:
+                lines.append(f"<b>Reaction:</b> {E_HEART} {html.escape(fb_reaction_str)}")
+            elif info.get("reaction_count") is not None:
+                lines.append(f"<b>Reaction:</b> {E_HEART} {_fmt_count(info['reaction_count'], decimal=True)}")
+            if fb_comment_str is not None:
+                lines.append(f"<b>Comment:</b> {E_MSG} {html.escape(fb_comment_str)}")
+            elif info.get("comment_count") is not None:
+                lines.append(f"<b>Comment:</b> {E_MSG} {_fmt_count(info['comment_count'])}")
+        else:
+            comments = info.get("comment_count")
+            if comments is not None:
+                lines.append(f"<b>Comment:</b> {E_MSG} {_fmt_count(comments)}")
+        # Số lượt share (TikTok share_count, X repost_count/retweet_count)
+        share_count = info.get("share_count") or info.get("repost_count") or info.get("retweet_count")
+        if share_count is not None:
+            lines.append(f"<b>Share:</b> {E_LINK} {_fmt_count(share_count, decimal=True)}")
     # Link: rút gọn hiển thị theo nền tảng
     link = (info or {}).get("webpage_url") or (info or {}).get("url", "")
     if link:
@@ -590,6 +622,7 @@ def _extract_x_metadata_sync(url: str) -> dict:
             "uploader": uploader or None,
             "like_count": info.get("like_count"),
             "view_count": info.get("view_count"),
+            "repost_count": info.get("repost_count") or info.get("retweet_count"),
             "webpage_url": info.get("webpage_url") or info.get("url") or u,
         }
     except Exception:
@@ -789,6 +822,7 @@ async def _download_tiktok_via_tikwm(url: str, out_dir: str) -> tuple[list[str] 
         "webpage_url": url,
         "like_count": data.get("digg_count") or data.get("like_count"),
         "view_count": data.get("play_count") or data.get("view_count"),
+        "share_count": data.get("share_count"),
     }
 
     if video_url:
@@ -1070,6 +1104,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
                         "webpage_url": url,
                         "like_count": data_tikwm.get("digg_count") or data_tikwm.get("like_count"),
                         "view_count": data_tikwm.get("play_count") or data_tikwm.get("view_count"),
+                        "share_count": data_tikwm.get("share_count"),
                     }
             info = photo_meta if photo_meta else ({"webpage_url": final_url} if final_url else None)
             caption = _build_caption(info, os.path.getsize(paths[0]), "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"

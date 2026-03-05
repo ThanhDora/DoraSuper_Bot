@@ -155,7 +155,7 @@ async def coin_flip_callback(client, callback_query: CallbackQuery):
             gif_message = await callback_query.message.reply_animation(animation=GIF_PATH)
         except (ValueError, OSError):
             pass
-
+    
     # Hiệu ứng chờ trong 3 giây
     await asyncio.sleep(3)
 
@@ -164,7 +164,7 @@ async def coin_flip_callback(client, callback_query: CallbackQuery):
 
     # Xóa GIF sau khi đã chờ xong (nếu đã gửi)
     if gif_message:
-        await gif_message.delete()
+    await gif_message.delete()
 
     await callback_query.edit_message_text(f"{E_PARTY} Kết quả sau khi tung đồng xu: <b>{result}</b>", reply_markup=None, parse_mode=ParseMode.HTML)
 

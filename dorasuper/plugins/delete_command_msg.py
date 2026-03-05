@@ -22,6 +22,8 @@ NO_DELETE_COMMANDS = {
     "broadcast",  # reply để broadcast
     "summarize", "tomtat", "rewrite", "vietlai",  # ai reply
     "love", "hate",  # love — bot gửi ảnh reply, không xóa tin lệnh trước
+    "disablechat", "enablechat", "banuser", "unbanuser",  # dev/blacklist — SUDO
+    "dsden", "xemdsden", "dstrang",  # blacklist_chat — danh sách đen từ
 }
 
 

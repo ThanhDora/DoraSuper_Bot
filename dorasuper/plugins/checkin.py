@@ -8,11 +8,11 @@ from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from pilmoji import Pilmoji
 from pyrogram import enums, filters
-from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
+from pyrogram.errors.exceptions.bad_request_400 import BadRequest, DocumentInvalid
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, MessageEntity
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
-from dorasuper.emoji import E_BELL, E_CHECK, E_GREEN, E_PIN_LOC, E_RECYCLE, E_SPARKLE, E_STAT, E_TROPHY, E_USER, E_WAIT, E_LOADING
+from dorasuper.emoji import E_BELL, E_CHECK, E_GREEN, E_ID, E_ONE, E_PIN_LOC, E_RECYCLE, E_SPARKLE, E_STAT, E_THREE, E_TROPHY, E_TWO, E_USER, E_WAIT, E_LOADING
 from dorasuper.vars import COMMAND_HANDLER
 from database.checkin_db import (
     can_use_command, update_user_command_usage, is_checkin_enabled,
@@ -169,8 +169,15 @@ async def _edit_caption_html(msg: Message, html_caption: str, **kwargs):
     text, entities = _html_to_entities(html_caption)
     try:
         return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
-    except DocumentInvalid:
-        return await msg.edit_caption(caption=text, caption_entities=_strip_custom_emoji_entities(entities), **kwargs)
+    except (DocumentInvalid, BadRequest):
+        try:
+            return await msg.edit_caption(
+                caption=text,
+                caption_entities=_strip_custom_emoji_entities(entities),
+                **kwargs,
+            )
+        except Exception:
+            return await msg.edit_caption(caption=text, **kwargs)
 
 VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 DEFAULT_PIC = "assets/profilepic.png"
@@ -251,7 +258,7 @@ def _make_card(name, uid, total, last_time, avatar_img, group_name):
     buf.name = "checkin.jpg"
     return buf
 
-@app.on_message(filters.command("checkin", COMMAND_HANDLER))
+@app.on_message(filters.command("checkin", COMMAND_HANDLER), group=-1)
 @capture_err
 async def checkin_cmd(_, ctx: Message):
     if not ctx.chat or not await is_checkin_enabled(ctx.chat.id): return
@@ -276,7 +283,7 @@ async def checkin_cmd(_, ctx: Message):
 
     status = f"{E_GREEN} Chờ điểm danh" if can_use else f"{E_CHECK} Đã xong hôm nay"
     chat_title = html.escape(str(ctx.chat.title or "Chat"))
-    caption = f"{E_USER} Thành viên: {_mention_html(target.id, _display_name(target))}\n{E_PIN_LOC} Tại: <b>{chat_title}</b>\n{E_STAT} Trạng thái: {status}"
+    caption = f"{E_USER} Thành viên: {_mention_html(target.id, _display_name(target))}\n{E_ID} ID: <code>{target.id}</code>\n{E_PIN_LOC} Tại: <b>{chat_title}</b>\n{E_STAT} Trạng thái: {status}"
 
     await wait_msg.delete()
     m = await _reply_photo_html(
@@ -329,11 +336,11 @@ async def rank_cb(_, cb: CallbackQuery):
         res += "<i>Chưa có dữ liệu</i>"
     else:
         for i, it in enumerate(top, 1):
-            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
+            medal = E_ONE if i == 1 else E_TWO if i == 2 else E_THREE if i == 3 else f"{i}."
             res += f"{medal} {_mention_html(it['_id'], it.get('user_name') or 'User')} — <code>{it['count']}</code> lượt\n"
     await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
 
-@app.on_message(filters.command("checkin_rank", COMMAND_HANDLER))
+@app.on_message(filters.command("checkin_rank", COMMAND_HANDLER), group=-1)
 @capture_err
 async def rank_cmd(_, ctx: Message):
     now = datetime.now(VN_TZ)
@@ -349,7 +356,7 @@ async def rank_cmd(_, ctx: Message):
     m = await _reply_html(ctx, reply_text, reply_markup=_checkin_keyboard())
     _schedule_delete(m)
 
-@app.on_cmd(["checkin_set", "checkin_reset"], self_admin=True, group_only=True)
+@app.on_cmd(["checkin_set", "checkin_reset"], self_admin=True, group_only=True, group=-1)
 @app.adminsOnly("can_change_info")
 async def admin_ctrl(_, ctx: Message):
     cmd = (ctx.command or [""])[0].lower()

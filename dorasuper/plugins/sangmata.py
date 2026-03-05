@@ -1,3 +1,5 @@
+import asyncio
+import re
 from logging import getLogger
 
 from pyrogram import enums, filters
@@ -19,6 +21,31 @@ from dorasuper.vars import COMMAND_HANDLER
 from dorasuper.emoji import E_SEARCH, E_USER, E_RIGHT_ARROW
 
 LOGGER = getLogger("DoraSuper")
+
+
+def _emoji_to_unicode(text: str) -> str:
+    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
+    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+
+
+async def _reply_safe(message: Message, text: str, del_in: int | None = None, **kwargs):
+    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode. Tự xử lý del_in."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    del_in = kwargs.pop("del_in", del_in)
+    try:
+        sent = await message.reply_text(text, **kwargs)
+    except Exception:
+        sent = await message.reply_text(_emoji_to_unicode(text), **kwargs)
+    if del_in and sent:
+        async def _del():
+            await asyncio.sleep(del_in)
+            try:
+                await sent.delete()
+            except Exception:
+                pass
+        asyncio.create_task(_del())
+    return sent
+
 
 __MODULE__ = "KiểmTraĐổiTên"
 __HELP__ = """
@@ -93,37 +120,42 @@ async def cek_mataa(_, ctx: Message, strings):
             ctx.from_user.last_name,
         )
     if msg != "":
-        await ctx.reply_msg(msg, quote=False, parse_mode=enums.ParseMode.HTML)
+        await _reply_safe(ctx, msg, quote=False)
 
 
 @app.on_message(
     filters.group
     & filters.command("sangmata_set", COMMAND_HANDLER)
     & ~filters.bot
-    & ~filters.via_bot
+    & ~filters.via_bot,
+    group=-1,
 )
 @adminsOnly("can_change_info")
 @use_chat_lang()
 async def set_mataa(_, ctx: Message, strings):
     if len(ctx.command) == 1:
-        return await ctx.reply_msg(
+        return await _reply_safe(
+            ctx,
             strings("set_sangmata_help").format(cmd=ctx.command[0], **EMOJI_FMT),
             del_in=6,
-            parse_mode=enums.ParseMode.HTML,
         )
     if ctx.command[1] == "on":
         cekset = await is_sangmata_on(ctx.chat.id)
         if cekset:
-            await ctx.reply_msg(strings("sangmata_already_on").format(**EMOJI_FMT), parse_mode=enums.ParseMode.HTML)
+            await _reply_safe(ctx, strings("sangmata_already_on").format(**EMOJI_FMT))
         else:
             await sangmata_on(ctx.chat.id)
-            await ctx.reply_msg(strings("sangmata_enabled").format(**EMOJI_FMT), parse_mode=enums.ParseMode.HTML)
+            await _reply_safe(ctx, strings("sangmata_enabled").format(**EMOJI_FMT))
     elif ctx.command[1] == "off":
         cekset = await is_sangmata_on(ctx.chat.id)
         if not cekset:
-            await ctx.reply_msg(strings("sangmata_already_off").format(**EMOJI_FMT), parse_mode=enums.ParseMode.HTML)
+            await _reply_safe(ctx, strings("sangmata_already_off").format(**EMOJI_FMT))
         else:
             await sangmata_off(ctx.chat.id)
-            await ctx.reply_msg(strings("sangmata_disabled").format(**EMOJI_FMT), parse_mode=enums.ParseMode.HTML)
+            await _reply_safe(ctx, strings("sangmata_disabled").format(**EMOJI_FMT))
     else:
-        await ctx.reply_msg(strings("wrong_param").format(**EMOJI_FMT), del_in=6, parse_mode=enums.ParseMode.HTML)
+        await _reply_safe(
+            ctx,
+            strings("wrong_param").format(**EMOJI_FMT),
+            del_in=6,
+        )

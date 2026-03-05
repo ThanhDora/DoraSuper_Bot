@@ -538,8 +538,6 @@ Bây giờ bắt đầu cuộc trò chuyện. Em là DoraSuper người thật, 
 - Khi cần tra cứu thông tin mới nhất, em dùng công cụ web_search hoặc x_keyword_search; KHÔNG in ra thẻ <function_calls>, <invoke>, <parameters> hay mã XML/JSON – chỉ trả lời bằng câu chữ bình thường.
 - Emoji (BẮT BUỘC – chỉ dùng đúng danh sách có sẵn, KHÔNG tự tạo thêm): Các [TÊN] emoji được phép dùng (từ dorasuper/emoji.py, không có cái nào khác): {EMOJI_LIST}. Mỗi tin nhắn BẮT BUỘC có ít nhất 10–15 emoji trở lên, rải đều trong tin, chỉ dùng các [TÊN] trên. Cấm tuyệt đối: gõ Unicode (❤️ 😘), in thẻ <emoji id="...">, hoặc bịa ra [TÊN] không có trong danh sách. Giới hạn ~4000 ký tự.
 - Hành động: Dùng các cụm sau (viết trong dấu *), sẽ hiển thị thành emoji: *mỉm cười*, *nháy mắt*, *cắn môi*, *vỗ tay*, *reo lên*, *ôm*, *khóc*, *suy nghĩ*, *chờ*, *cười*, *cười lớn*, *uống cà phê*, *tặng quà*, *thả tim*, *giận*, *hờn*, *chạy*, *hát*, *xấu hổ*, *ngượng*, *lấp lánh*, *tặng hoa*, *nắm tay*, *giơ tay*... Em nên dùng nhiều hành động *...* trong mỗi tin để câu trả lời sống động.
-- {DATE_PLACEHOLDER}
-- Em LUÔN dùng đúng thứ, ngày, tháng, năm hiện tại cho mọi câu trả lời về ngày tháng, lịch, thời tiết, tin tức. Không nói năm cũ sai so với ngày hiện tại.
 - Khi người dùng nhờ Dora khoá mõm / đá / cấm / bỏ mute / bỏ cấm (đã thực hiện xong), em trả lời xác nhận ngắn theo phong cách của em: (1) khoá mõm → "Đã khoá mõm rồi anh. [LOCK]"; (2) đá → "Đã xử lý xong. [SUCCESS]"; (3) cấm → "Đã cấm rồi anh."; (4) bỏ mute / bỏ khoá mõm → "Đã bỏ khoá mõm rồi anh." hoặc "Đã bỏ mute rồi. [HEART]", KHÔNG dùng "mở mõm"; (5) bỏ cấm → "Đã bỏ cấm rồi anh. [HEART]".
 - Khi có ai tag hoặc nhắc đến ThanhDora (anh/chủ nhân), em trả lời ngắn: VD "Chủ nhân đang bận, để em ghi nhận và báo lại. [WAIT]", "Chủ nhân chưa rảnh, anh/các bạn nhắn em ghi nhận giúp. [NOTE]"; không tiết lộ chi tiết.
 - Mỗi tin nhắn người dùng có dạng [ID: số | Tên]: nội dung. Số ID là Telegram user ID của người hỏi; em dựa vào ID và tên để trả lời chính xác, cá nhân hóa (ví dụ nhớ ngữ cảnh theo từng người)."""
@@ -561,7 +559,7 @@ def _get_system_prompt_with_date() -> str:
             f"Current date: {date_en}. Hôm nay là {date_vi}. ",
         )
         .replace("{EMOJI_LIST}", AI_EMOJI_ALLOWED_LIST_STR)
-    )
+)
 
 MAX_RETRIES = 2
 
@@ -830,12 +828,12 @@ async def ai_chat(client: Client, message: Message):
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)
     except MessageTooLong:
         try:
-            url = await rentry(answer)
-            await wait_msg.edit(
+        url = await rentry(answer)
+        await wait_msg.edit(
                 f"{E_BOT} <b>Câu trả lời quá dài, đã dán vào Rentry:</b>\n{url}",
                 parse_mode=ParseMode.HTML,
-            )
-        except Exception:
+        )
+    except Exception:
             await wait_msg.edit(f"{E_WARN} Câu trả lời quá dài, em không gửi được. Oppa thử hỏi ngắn hơn nha~", parse_mode=ParseMode.HTML)
     except Exception as e:
         LOGGER.warning("ai_chat edit failed: %s", e)
@@ -843,7 +841,7 @@ async def ai_chat(client: Client, message: Message):
             await wait_msg.edit(result, parse_mode=ParseMode.DISABLED)
         except MessageTooLong:
             try:
-                url = await rentry(answer)
+            url = await rentry(answer)
                 await wait_msg.edit(f"{E_BOT} Câu trả lời quá dài, đã dán vào Rentry:\n{url}", parse_mode=ParseMode.DISABLED)
             except Exception:
                 await wait_msg.edit(f"{E_WARN} Em lỗi format tin nhắn rồi, oppa thử lại nha~", parse_mode=ParseMode.DISABLED)

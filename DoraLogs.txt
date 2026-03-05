@@ -1,124 +1,821 @@
-[INFO] - [05-Mar-26 01:12:21 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [05-Mar-26 01:12:32 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+[INFO] - [06-Mar-26 00:42:55 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 00:43:03 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [05-Mar-26 01:12:33 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [05-Mar-26 01:12:34 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [05-Mar-26 01:12:37 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1209]
-[INFO] - [05-Mar-26 01:12:53 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1209]
-[INFO] - [05-Mar-26 01:12:56 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSu1xaWvc] -> [downloadsVideo:1209]
-[INFO] - [05-Mar-26 01:12:56 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:12:57 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:12:58 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:13:01 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:13:05 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:13:06 - instagrapi - https://i.instagram.com/api/v1/media/3841879998849025407/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:13:07 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3841879998849025407/info/ (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:13:46 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSu1Qy51S] -> [downloadsVideo:1209]
-[INFO] - [05-Mar-26 01:13:48 - DoraSuper - TikWM GET code=-1 msg=Url parsing is failed! Please check url.] -> [downloadsVideo:632]
-[INFO] - [05-Mar-26 01:13:48 - DoraSuper - TikWM POST code=-1 msg=Free Api Limit: 1 request/second.] -> [downloadsVideo:632]
-[INFO] - [05-Mar-26 01:13:58 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1209]
-[INFO] - [05-Mar-26 01:14:43 - DoraSuper - waifus triggered command=cry chat_id=5341455835] -> [waifus:162]
-[INFO] - [05-Mar-26 01:22:48 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [05-Mar-26 01:22:57 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 00:43:04 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 00:43:04 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 00:46:52 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 00:47:00 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [05-Mar-26 01:22:58 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [05-Mar-26 01:22:59 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [05-Mar-26 01:25:28 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1280]
-[INFO] - [05-Mar-26 01:25:36 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1280]
-[INFO] - [05-Mar-26 01:25:44 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1280]
-[INFO] - [05-Mar-26 01:25:47 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:25:48 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:25:49 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:25:52 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:25:56 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:25:57 - instagrapi - https://i.instagram.com/api/v1/media/3841879998849025407/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:25:57 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3841879998849025407/info/ (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:29:15 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [05-Mar-26 01:29:25 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - HELPABLE modules (39): ['adminnhóm', 'afk', 'bộlọc', 'chếđộnghỉ', 'chụpweb', 'côngcụdán', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtraip', 'kiểmtrađổitên', 'ktsốđt', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'thửcode', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - +===============================================================+] -> [__main__:49]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 00:47:01 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 00:47:02 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[ERROR] - [06-Mar-26 00:48:01 - pyrogram.dispatcher - Unhandled exception: argument of type 'NoneType' is not a container or iterable] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/message_handler.py", line 154, in resolve_future_or_callback
+    await self.original_callback(client, message, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/locks.py", line 190, in url_detector
+    if user.id in mods or user.id in SUDO:
+       ^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not a container or iterable
+[INFO] - [06-Mar-26 00:49:18 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='Dora'] -> [fun:643]
+[WARNING] - [06-Mar-26 00:49:18 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 00:49:43 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 00:49:50 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
-|broadcast      |check_ip       |checkin        |code_tester    |
-|copy_forward   |currency       |daoly          |delete_command_msg|
-|dev            |download_upload|downloadsVideo |fake_human     |
-|filters        |fun            |fungame        |funny_rate     |
-|gemini_ai      |genss          |getid_emoji    |goldprice      |
-|grup_tools     |imdb_search    |inkick_user    |inline_search  |
-|json           |karma          |lang_setting   |locks          |
-|love           |mediainfo      |misc_tools     |movie_view     |
-|nightmodev2    |notes          |nulis          |ocr            |
-|paste          |phone_check    |ping           |quotly         |
-|resetdb        |sangmata       |sed            |session_generator|
-|start_help     |stickers       |waifus         |wallpapers     |
-|weather        |webss          ] -> [__main__:52]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
-[INFO] - [05-Mar-26 01:29:26 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
-[INFO] - [05-Mar-26 01:29:27 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [05-Mar-26 01:29:41 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSu1CLaMg] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:29:56 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:30:01 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:30:14 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:30:17 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:30:17 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:30:19 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:30:22 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:30:25 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DVRGYD5EwV_%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [05-Mar-26 01:30:26 - instagrapi - https://i.instagram.com/api/v1/media/3841879998849025407/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:30:27 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3841879998849025407/info/ (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:30:45 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://kktiktok.com/t/ZSu1CLaMg] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:30:58 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://www.tiktok.com/@haazje.02/photo/7612932328427392263?] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:31:11 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://x.com/vesperday/status/2028968072896495684?s=46] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:31:24 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://www.instagram.com/p/DVRGYD5EwV_/?igsh=MW50YmlnMmZkaD] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:31:26 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
-[INFO] - [05-Mar-26 01:31:27 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [05-Mar-26 01:31:53 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://x.com/ksalley74254/status/2029072023952212052?s=46] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:36:08 - DoraSuper - auto_download_link: chat=-1003836954872 url=https://x.com/77sunnyx/status/2029215825736155574?s=46] -> [downloadsVideo:1328]
-[INFO] - [05-Mar-26 01:54:02 - DoraSuper - waifus triggered command=yeet chat_id=-1002502809309] -> [waifus:162]
-[INFO] - [05-Mar-26 01:54:20 - DoraSuper - waifus triggered command=kiss chat_id=-1002502809309] -> [waifus:162]
-[INFO] - [05-Mar-26 01:55:08 - DoraSuper - waifus triggered command=punch chat_id=-1002502809309] -> [waifus:162]
-[INFO] - [05-Mar-26 01:55:36 - DoraSuper - waifus triggered command=shoot chat_id=-1002502809309] -> [waifus:162]
-[INFO] - [05-Mar-26 01:57:26 - DoraSuper - waifus triggered command=cry chat_id=-1002502809309] -> [waifus:162]
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 00:49:51 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 00:49:52 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 00:53:19 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora khoá mõm'] -> [fun:643]
+[WARNING] - [06-Mar-26 00:53:21 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 00:55:10 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Và tại sao lại xảy ra sự chậm trễ quan trọng?'] -> [fun:643]
+[WARNING] - [06-Mar-26 00:55:10 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 00:58:00 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 00:58:08 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 00:58:09 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 00:58:09 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:04:20 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 01:04:25 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 01:04:27 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - HELPABLE modules (33): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:04:28 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:04:29 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:07:48 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 01:07:54 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 01:07:55 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - HELPABLE modules (33): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:07:56 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:07:57 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:11:24 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 01:11:29 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 01:11:31 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - HELPABLE modules (33): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:11:32 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:11:33 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:12:17 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 01:12:24 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:12:25 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:12:26 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[WARNING] - [06-Mar-26 01:15:05 - DoraSuper - Message has no chat: {
+    "_": "Message",
+    "id": 416,
+    "empty": true
+}] -> [quotly:103]
+[INFO] - [06-Mar-26 01:15:20 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='Dora'] -> [fun:643]
+[WARNING] - [06-Mar-26 01:15:21 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 01:15:24 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='em có'] -> [fun:643]
+[WARNING] - [06-Mar-26 01:15:24 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 01:15:45 - DoraSuper - waifus triggered command=kiss chat_id=-1003836954872] -> [waifus:162]
+[INFO] - [06-Mar-26 01:17:40 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://www.tiktok.com/@daovabuoi/video/7611720995107507477?] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 01:18:40 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 01:18:47 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:18:48 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:18:49 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:20:24 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 01:20:32 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:20:33 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:20:34 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:22:57 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 01:23:05 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:23:06 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:23:07 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:27:39 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 01:27:47 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:27:48 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:27:48 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[ERROR] - [06-Mar-26 01:29:33 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:29:38 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:29:39 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:29:47 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:29:56 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:30:00 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:31:04 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[ERROR] - [06-Mar-26 01:31:05 - pyrogram.dispatcher - Unhandled exception: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]] -> [dispatcher:403]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 370, in _process_packet
+    await self._execute_callback(handler, parsed_update)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/dispatcher.py", line 407, in _execute_callback
+    await handler.callback(self.client, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/handlers/callback_query_handler.py", line 207, in resolve_future_or_callback
+    await self.original_callback(client, query, *args)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 334, in rank_cb
+    await _edit_caption_html(cb.message, res, reply_markup=_checkin_keyboard())
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 171, in _edit_caption_html
+    return await msg.edit_caption(caption=text, caption_entities=entities, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/types/messages_and_media/message.py", line 4427, in edit_caption
+    return await self._client.edit_message_caption(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_caption.py", line 80, in edit_message_caption
+    return await self.edit_message_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/messages/edit_message_text.py", line 109, in edit_message_text
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/thanhdora/DoraTeam_iBot/venv/lib/python3.14/site-packages/pyrogram/errors/rpc_error.py", line 82, in raise_it
+    raise getattr(
+    ...<5 lines>...
+      is_signed=is_signed)
+pyrogram.errors.exceptions.bad_request_400.BadRequest: Telegram says: [400 Bad Request] (caused by "messages.EditMessage") Pyrogram 2.3.58 thinks: [400 ENTITY_TEXT_INVALID]
+[INFO] - [06-Mar-26 01:32:34 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 01:32:42 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:32:43 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:32:44 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:34:46 - DoraSuper - waifus triggered command=angry chat_id=5341455835] -> [waifus:162]
+[INFO] - [06-Mar-26 01:35:09 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 01:35:13 - DoraSuper - Failed to load module ai: expected an indented block after 'try' statement on line 830 (ai.py, line 831)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 831
+    url = await rentry(answer)
+    ^^^
+IndentationError: expected an indented block after 'try' statement on line 830
+[ERROR] - [06-Mar-26 01:35:13 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 01:35:15 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:35:16 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:35:17 - apscheduler.scheduler - Scheduler started] -> [base:181]

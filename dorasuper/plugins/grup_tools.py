@@ -52,6 +52,21 @@ from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_NOTE
 
 LOGGER = getLogger("DoraSuper")
 
+
+def _emoji_to_unicode(text: str) -> str:
+    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
+    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+
+
+async def _reply_safe(message: Message, text: str, **kwargs):
+    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await message.reply_text(text, **kwargs)
+    except Exception:
+        return await message.reply_text(_emoji_to_unicode(text), **kwargs)
+
+
 def extract_links(text: str) -> list:
     # Regex cải tiến để bắt các URL
     url_pattern = r'(?:(?:https?://|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})(?:[^\s<>"]+)?)'
@@ -316,17 +331,18 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
         except Exception as e:
             LOGGER.info(e)
             
-# Lệnh bật/tắt chào mừng
-@app.on_cmd(["chaomung"], self_admin=True, group_only=True)
+# Lệnh bật/tắt chào mừng — group=-1 chạy trước, tránh handler khác ảnh hưởng
+@app.on_cmd(["chaomung"], self_admin=True, group_only=True, group=-1)
 @app.adminsOnly("can_change_info")
 async def welcome_toggle_handler(client, message):
     is_enabled = await toggle_welcome(message.chat.id)
-    await message.reply_msg(
-        f"{E_HEART} Tin nhắn chào mừng hiện đã {'bật' if is_enabled else 'tắt'}."
+    await _reply_safe(
+        message,
+        f"{E_HEART} Tin nhắn chào mừng hiện đã {'bật' if is_enabled else 'tắt'}.",
     )
 
 # Lệnh thiết lập tin nhắn chào mừng tùy chỉnh
-@app.on_cmd(["tinchaomung"], self_admin=True, group_only=True)
+@app.on_cmd(["tinchaomung"], self_admin=True, group_only=True, group=-1)
 @app.adminsOnly("can_change_info")
 async def custom_welcome_handler(c: Client, m: Message):
     suggestion_text = (
@@ -374,16 +390,17 @@ async def custom_welcome_handler(c: Client, m: Message):
     )
 
 # Lệnh bật/tắt tin nhắn tạm biệt
-@app.on_cmd(["tambiet"], self_admin=True, group_only=True)
+@app.on_cmd(["tambiet"], self_admin=True, group_only=True, group=-1)
 @app.adminsOnly("can_change_info")
 async def goodbye_toggle_handler(client, message):
     is_enabled = await toggle_goodbye(message.chat.id)
-    await message.reply_msg(
-        f"{E_HEART} Tin nhắn tạm biệt hiện đã {'bật' if is_enabled else 'tắt'}."
+    await _reply_safe(
+        message,
+        f"{E_HEART} Tin nhắn tạm biệt hiện đã {'bật' if is_enabled else 'tắt'}.",
     )
 
 # Lệnh thiết lập tin nhắn tạm biệt tùy chỉnh
-@app.on_cmd(["tintambiet"], self_admin=True, group_only=True)
+@app.on_cmd(["tintambiet"], self_admin=True, group_only=True, group=-1)
 @app.adminsOnly("can_change_info")
 async def custom_goodbye_handler(c: Client, m: Message):
     suggestion_text = (
@@ -432,12 +449,13 @@ async def custom_goodbye_handler(c: Client, m: Message):
     )
 
 # Lệnh bật/tắt cấm tự động khi rời nhóm
-@app.on_cmd(["camthoat"], self_admin=True, group_only=True)
+@app.on_cmd(["camthoat"], self_admin=True, group_only=True, group=-1)
 @app.adminsOnly("can_restrict_members")
 async def ban_on_leave_toggle_handler(client, message):
     is_enabled = await toggle_ban_on_leave(message.chat.id)
-    await message.reply_msg(
-        f"{E_SUCCESS} Chức năng cấm khi người dùng tự ý rời nhóm hiện đã {'bật' if is_enabled else 'tắt'}."
+    await _reply_safe(
+        message,
+        f"{E_SUCCESS} Chức năng cấm khi người dùng tự ý rời nhóm hiện đã {'bật' if is_enabled else 'tắt'}.",
     )
 
 @app.on_cmd(["baolienket"], self_admin=True, group_only=True)

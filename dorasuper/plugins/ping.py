@@ -1,3 +1,4 @@
+import re
 import platform
 import time
 import logging
@@ -19,45 +20,65 @@ LOGGER = getLogger("DoraSuper")
 
 PING_LOCK = Lock()
 
-@app.on_message(filters.command(["ping"], COMMAND_HANDLER))
+
+def _emoji_to_unicode(text: str) -> str:
+    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
+    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+
+
+async def _reply_safe(ctx: Message, text: str, **kwargs):
+    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await ctx.reply_text(text, **kwargs)
+    except Exception:
+        return await ctx.reply_text(_emoji_to_unicode(text), **kwargs)
+
+
+async def _edit_safe(msg: Message, text: str, **kwargs):
+    """Sửa tin: thử emoji động trước, lỗi thì sửa bằng Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await msg.edit_text(text, **kwargs)
+    except Exception:
+        return await msg.edit_text(_emoji_to_unicode(text), **kwargs)
+
+
+@app.on_message(filters.command(["ping"], COMMAND_HANDLER), group=-1)
 async def ping(_, ctx: Message):
     currentTime = get_readable_time(time.time() - botStartTime)
     start_t = time.time()
-    
-    # Define contact button
+
     contact_button = InlineKeyboardMarkup(
         [[InlineKeyboardButton("Liên hệ tác giả", url="t.me/dabeecao")]]
     )
-    
-    rm = await ctx.reply_msg(
-        f"{E_ROCKET} Pong!!...",
-        reply_markup=contact_button
-    )
-        
+
+    rm = await _reply_safe(ctx, f"{E_ROCKET} Pong!!...", reply_markup=contact_button)
+    if not rm:
+        return
+
     end_t = time.time()
     time_taken_s = round(end_t - start_t, 3)
-    
-    # Update message with ping results
-    await rm.edit_msg(
+
+    body = (
         f"{E_ROCKET} <b>DoraSuper {dorasuper_version}</b> bởi @dabeecao dựa trên Pyrogram {pyrover}.\n\n"
         f"{E_CLOCK} <b>Thời gian phản hồi:</b> <code>{time_taken_s} ms</code>\n"
         f"{E_CLOCK} <b>Uptime:</b> <code>{currentTime}</code>\n\n"
-        f"{E_MSG} Mọi thắc mắc và hợp tác vui lòng liên hệ tác giả. Ủng hộ: /donate",
-        reply_markup=contact_button
+        f"{E_MSG} Mọi thắc mắc và hợp tác vui lòng liên hệ tác giả. Ủng hộ: /donate"
     )
+    await _edit_safe(rm, body, reply_markup=contact_button)
 
-@app.on_message(filters.command(["ping_dc"], COMMAND_HANDLER))
+
+@app.on_message(filters.command(["ping_dc"], COMMAND_HANDLER), group=-1)
 async def ping_handler(_, ctx: Message):
-    # Define contact button
     contact_button = InlineKeyboardMarkup(
         [[InlineKeyboardButton("Liên hệ tác giả", url="t.me/dabeecao")]]
     )
-    
-    m = await ctx.reply_msg(
-        f"{E_CLOCK} Pinging datacenters...",
-        reply_markup=contact_button
-    )
-        
+
+    m = await _reply_safe(ctx, f"{E_CLOCK} Pinging datacenters...", reply_markup=contact_button)
+    if not m:
+        return
+
     async with PING_LOCK:
         ips = {
             "dc1": "149.154.175.53",
@@ -79,12 +100,7 @@ async def ping_handler(_, ctx: Message):
                 resp_time = findall(r"time=.+m?s", shell.stdout, MULTILINE)[0].replace(
                     "time=", ""
                 )
-
                 text += f"    <b>{dc.upper()}:</b> {resp_time} {E_CHECK}\n"
             except Exception:
                 text += f"    <b>{dc.upper()}:</b> {E_CROSS}\n"
-        await m.edit_msg(
-            text,
-            reply_markup=contact_button,
-            parse_mode=enums.ParseMode.HTML,
-        )
+        await _edit_safe(m, text, reply_markup=contact_button)

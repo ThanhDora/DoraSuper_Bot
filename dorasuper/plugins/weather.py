@@ -1,3 +1,4 @@
+import re
 import aiohttp
 from logging import getLogger
 
@@ -21,6 +22,30 @@ from dorasuper.emoji import (
 from dorasuper.vars import COMMAND_HANDLER
 
 LOGGER = getLogger("DoraSuper")
+
+
+def _emoji_to_unicode(text: str) -> str:
+    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
+    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+
+
+async def _reply_safe(message, text: str, **kwargs):
+    """Gửi tin: thử emoji động trước, lỗi thì gửi bản Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await message.reply_text(text, **kwargs)
+    except Exception:
+        return await message.reply_text(_emoji_to_unicode(text), **kwargs)
+
+
+async def _edit_safe(msg, text: str, **kwargs):
+    """Sửa tin: thử emoji động trước, lỗi thì sửa bản Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await msg.edit_text(text, **kwargs)
+    except Exception:
+        return await msg.edit_text(_emoji_to_unicode(text), **kwargs)
+
 
 # Open-Meteo: miễn phí, không cần API key
 # https://open-meteo.com/
@@ -125,12 +150,13 @@ def format_weather_message(loc_name: str, data: dict) -> str:
     return msg
 
 
-@app.on_message(filters.command("thoitiet", COMMAND_HANDLER))
+# group=-1: chạy trước handler mặc định (group=0), tránh plugin khác ảnh hưởng
+@app.on_message(filters.command("thoitiet", COMMAND_HANDLER), group=-1)
 async def weather_command(client, message):
     parts = message.text.split(maxsplit=1)
     city = parts[1].strip() if len(parts) > 1 else None
 
-    status_msg = await message.reply(f"{E_WAIT} Đang phân tích thời tiết...", parse_mode=enums.ParseMode.HTML)
+    status_msg = await _reply_safe(message, f"{E_WAIT} Đang phân tích thời tiết...")
 
     if not city:
         cities = ["Hà Nội", "Thành phố Hồ Chí Minh"]
@@ -149,14 +175,14 @@ async def weather_command(client, message):
             else:
                 responses.append(f"{E_WARN} Không tìm thấy: {c}")
         responses.append(f"{E_GLOBE} Bạn có thể nhập tên thành phố để xem thời tiết nơi khác. {E_PIN_LOC}")
-        await status_msg.edit_text("\n\n".join(responses), parse_mode=enums.ParseMode.HTML)
+        await _edit_safe(status_msg, "\n\n".join(responses))
         return
 
     loc = await geocode(city)
     if not loc:
-        await status_msg.edit_text(
+        await _edit_safe(
+            status_msg,
             f"{E_WARN} Không tìm thấy thành phố. Thử tên tiếng Anh (vd: Hanoi, Da Nang).",
-            parse_mode=enums.ParseMode.HTML,
         )
         return
 
@@ -165,8 +191,7 @@ async def weather_command(client, message):
     name = loc.get("name", city)
     data = await get_forecast(lat, lon)
     if not data:
-        await status_msg.edit_text(f"{E_WARN} Không lấy được dữ liệu thời tiết.", parse_mode=enums.ParseMode.HTML)
+        await _edit_safe(status_msg, f"{E_WARN} Không lấy được dữ liệu thời tiết.")
         return
 
-    text = format_weather_message(name, data)
-    await status_msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
+    await _edit_safe(status_msg, format_weather_message(name, data))

@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 import re
 import shutil
 import tempfile
@@ -28,7 +29,7 @@ from pyrogram.raw.types import (
 )
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from dorasuper import app
-from dorasuper.emoji import E_GROUP, E_LOADING, E_TIP, E_UPD
+from dorasuper.emoji import E_ERROR, E_GROUP, E_LOADING, E_TIP, E_UPD
 from dorasuper.helper import fetch, use_chat_lang
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.core.decorator.errors import capture_err
@@ -43,6 +44,7 @@ __HELP__ = """
 /laysticker - Chuyển đổi sticker thành ảnh.
 /stickerid - Xem ID của sticker.
 /taosticker [Trả lời ảnh/video/gif] [emoji] - Chuyển đổi ảnh, video, hoặc GIF thành sticker.
+/meme - Gửi ngẫu nhiên một meme từ Imgflip.
 /mmf [Trả lời ảnh/video/gif/emoji] Tạo meme vui bằng cách chèn văn bản. Sử dụng dấu ; để phân tách văn bản trên và dưới.
 /q [số] - Tạo quote dưới dạng Sticker từ tin nhắn (ví dụ: /q 3 để lấy 3 tin nhắn).
 /r - Tạo quote với reply message.</blockquote>
@@ -306,6 +308,49 @@ async def _del_user_cmd(client, chat_id, msg_id):
         await client.delete_messages(chat_id, msg_id)
     except Exception:
         pass
+
+
+IMGFLIP_GET_MEMES = "https://api.imgflip.com/get_memes"
+
+
+@app.on_message(filters.command(["meme", "memes"], COMMAND_HANDLER), group=2)
+@capture_err
+async def cmd_meme(client, message):
+    """Gửi một meme ngẫu nhiên từ Imgflip (api.imgflip.com/get_memes)."""
+    rid = message.id
+    wait_msg = await message.reply_msg(f"{E_UPD} Đang lấy meme{E_LOADING}", reply_to_message_id=rid)
+    try:
+        resp = await fetch.get(IMGFLIP_GET_MEMES)
+        if resp.status_code != 200:
+            await wait_msg.edit(f"{E_ERROR} Không lấy được danh sách meme.")
+            await _del_user_cmd(client, message.chat.id, message.id)
+            return
+        try:
+            data = resp.json()
+        except Exception:
+            data = {}
+        memes = (data or {}).get("data", {}).get("memes", [])
+        if not memes:
+            await wait_msg.edit("😢 Không tìm thấy meme nào.")
+            await _del_user_cmd(client, message.chat.id, message.id)
+            return
+        meme = random.choice(memes)
+        photo_url = meme.get("url") or ""
+        if not photo_url:
+            await wait_msg.edit(f"{E_ERROR} Meme không có link ảnh.")
+            await _del_user_cmd(client, message.chat.id, message.id)
+            return
+        await wait_msg.delete()
+        await message.reply_photo(photo=photo_url, reply_to_message_id=rid)
+        await _del_user_cmd(client, message.chat.id, message.id)
+    except Exception as e:
+        LOGGER.exception("cmd_meme: %s", e)
+        try:
+            await wait_msg.edit(f"{E_ERROR} Lỗi: {str(e)[:200]}")
+        except Exception:
+            await message.reply_msg(f"{E_ERROR} Lỗi: {str(e)[:200]}", reply_to_message_id=rid)
+        await _del_user_cmd(client, message.chat.id, message.id)
+
 
 @app.on_message(filters.command(["mmf"], COMMAND_HANDLER))
 @capture_err

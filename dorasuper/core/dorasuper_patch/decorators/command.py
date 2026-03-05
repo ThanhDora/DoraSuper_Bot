@@ -123,8 +123,10 @@ def command(
             except BaseException as exception:
                 return await handle_error(exception, message)
 
+        handler_group = kwargs.pop("group", 0)
         self.add_handler(
-            pyrogram.handlers.MessageHandler(callback=decorator, filters=filtercmd)
+            pyrogram.handlers.MessageHandler(callback=decorator, filters=filtercmd),
+            group=handler_group,
         )
         return decorator
 

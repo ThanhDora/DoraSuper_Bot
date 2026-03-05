@@ -1,3 +1,4 @@
+import re
 import random
 import logging
 from logging import getLogger
@@ -10,6 +11,29 @@ from dorasuper.core.decorator.errors import capture_err
 from dorasuper.helper import use_chat_lang
 from dorasuper.vars import COMMAND_HANDLER
 from database.funny_db import can_use_command, update_user_command_usage
+
+
+def _emoji_to_unicode(text: str) -> str:
+    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
+    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+
+
+async def _reply_safe(ctx: Message, text: str, **kwargs):
+    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await ctx.reply_text(text, **kwargs)
+    except Exception:
+        return await ctx.reply_text(_emoji_to_unicode(text), **kwargs)
+
+
+async def _edit_safe(msg: Message, text: str, **kwargs):
+    """Sửa tin: thử emoji động trước, lỗi thì sửa bằng Unicode."""
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    try:
+        return await msg.edit_text(text, **kwargs)
+    except Exception:
+        return await msg.edit_text(_emoji_to_unicode(text), **kwargs)
 
 # Định nghĩa các câu đạo lý
 DAO_LY_LIST = [
@@ -212,7 +236,7 @@ LOGGER = getLogger("DoraSuper")
 __MODULE__ = "DaoLy"
 __HELP__ = "<blockquote>/daoly - Gửi một câu đạo lý ngẫu nhiên. (Chỉ dùng được 1 lần/ngày)</blockquote>"
 
-@app.on_message(filters.command(["daoly"], COMMAND_HANDLER))
+@app.on_message(filters.command(["daoly"], COMMAND_HANDLER), group=-1)
 @capture_err
 @use_chat_lang()
 async def daoly(_, ctx: Message, strings):
@@ -221,51 +245,45 @@ async def daoly(_, ctx: Message, strings):
     có giới hạn sử dụng 1 lần/ngày cho mỗi người dùng,
     và nhắc đến người dùng trong câu trả lời.
     """
-    # Gửi một tin nhắn tạm thời để thông báo đang xử lý
-    msg = await ctx.reply_msg(f"{E_LOADING} Đang xử lý đạo lý...", quote=True)
+    msg = await _reply_safe(ctx, f"{E_LOADING} Đang xử lý đạo lý...", quote=True)
 
     try:
-        # Kiểm tra xem tin nhắn có phải từ người dùng hợp lệ không
         if not ctx.from_user:
-            await msg.edit_msg("Lệnh này chỉ dành cho người dùng, không phải kênh hoặc nhóm ẩn danh!")
+            if msg:
+                await _edit_safe(msg, "Lệnh này chỉ dành cho người dùng, không phải kênh hoặc nhóm ẩn danh!")
             return
 
-        # Lấy ID người gửi và ID chat
         sender_id = ctx.from_user.id
-        sender_mention = ctx.from_user.mention(style="markdown") # Lấy mention của người gửi
+        sender_mention = ctx.from_user.mention
         chat_id = ctx.chat.id
-        command = "daoly" # Tên lệnh để theo dõi việc sử dụng trong cơ sở dữ liệu
+        command = "daoly"
 
-        # Kiểm tra xem người dùng có được phép sử dụng lệnh hôm nay không
         if not await can_use_command(chat_id, sender_id, command):
-            await msg.edit_msg(
-                f"{E_LIMIT} Bạn đã sử dụng lệnh /{command} hôm nay. Hãy thử lại vào ngày mai!",
-                parse_mode=enums.ParseMode.HTML,
-            )
+            if msg:
+                await _edit_safe(
+                    msg,
+                    f"{E_LIMIT} Bạn đã sử dụng lệnh /{command} hôm nay. Hãy thử lại vào ngày mai!",
+                )
             return
 
-        # Nếu người dùng được phép, tiến hành lấy và gửi câu đạo lý
         random_daoly = random.choice(DAO_LY_LIST)
-        
-        # Tạo chuỗi HTML với dòng nhắc đến người dùng, blockquote và chữ ký
         response_text = (
-            f"<b>Đây là đạo lý hôm nay dành cho {sender_mention}!</b>\n\n" # Dòng mới được thêm
+            f"<b>Đây là đạo lý hôm nay dành cho {sender_mention}!</b>\n\n"
             f"<blockquote>{random_daoly}</blockquote>\n\n"
             f"<i>Đạo lý bởi DoraSuper</i>"
         )
-        
-        # Gửi tin nhắn HTML
-        await ctx.reply_msg(response_text, quote=True)
-        
-        # Cập nhật trạng thái sử dụng lệnh của người dùng trong cơ sở dữ liệu
+
+        await _reply_safe(ctx, response_text, quote=True)
         await update_user_command_usage(chat_id, sender_id, command)
-        
-        # Xóa tin nhắn tạm thời "Đang xử lý..." sau khi gửi thành công
-        await msg.delete()
+
+        if msg:
+            try:
+                await msg.delete()
+            except Exception:
+                pass
 
     except Exception as e:
-        # Ghi log lỗi nếu có vấn đề xảy ra
-        LOGGER.error(f"Lỗi trong lệnh daoly: {str(e)}")
-        # Cập nhật tin nhắn lỗi cho người dùng
-        await msg.edit_msg(f"{E_ERROR} Lỗi, vui lòng thử lại sau! 😔")
+        LOGGER.error("Lỗi trong lệnh daoly: %s", str(e))
+        if msg:
+            await _edit_safe(msg, f"{E_ERROR} Lỗi, vui lòng thử lại sau! 😔")
 
