@@ -38,7 +38,7 @@ __MODULE__ = "🎮 Fun & Game"
 __HELP__ = """
 <blockquote>🎲 <b>Fun & Game</b>
 
-/xucxac, /tungxx – Tung xúc xắc (dice)
+/xucxac, /tungxx – Tung xúc xắc (dùng /dice ở module Trò chơi)
 /tungxu [sấp|ngửa] – Tung đồng xu, đoán sấp hoặc ngửa
 
 👤 /anony [tin nhắn] – Gửi tin nhắn nặc danh (reply tin người nhận)
@@ -47,7 +47,7 @@ __HELP__ = """
 """
 
 
-@app.on_message(filters.command(["xucxac", "tungxx", "dice"], COMMAND_HANDLER))
+@app.on_message(filters.command(["xucxac", "tungxx"], COMMAND_HANDLER))
 @use_chat_lang()
 async def dice(c, m, strings):
     dices = await c.send_dice(m.chat.id, reply_to_message_id=m.id)

@@ -21,7 +21,6 @@ NO_DELETE_COMMANDS = {
     "kang", "unkang", "taosticker", "stickerid", "laysticker",  # stickers — cần reply
     "broadcast",  # reply để broadcast
     "summarize", "tomtat", "rewrite", "vietlai",  # ai reply
-    "love", "hate",  # love — bot gửi ảnh reply, không xóa tin lệnh trước
 }
 
 

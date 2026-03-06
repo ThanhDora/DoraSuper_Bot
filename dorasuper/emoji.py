@@ -149,3 +149,15 @@ E_CRY = '<emoji id="5341654395153033616">😭</emoji>'
 E_ONE = '<emoji id="6190247251743350036">1️⃣</emoji>'
 E_TWO = '<emoji id="6188137842980428774">2️⃣</emoji>'
 E_THREE = '<emoji id="6190671134950693952">3️⃣</emoji>'
+
+# Mây (cụm emoji chào mừng)
+E_MAY = (
+    '<emoji id="6307806876071369673">☁</emoji>',
+    '<emoji id="6305260085018892193">☁</emoji>',
+    '<emoji id="6307832259328088519">☁</emoji>',
+    '<emoji id="6307475961726119552">☁</emoji>',
+    '<emoji id="6307677073569749886">☁</emoji>',
+    # '<emoji id="6307669922449201204">☁</emoji>',
+)
+
+E_MAY_CUTE = "".join(E_MAY) * 2

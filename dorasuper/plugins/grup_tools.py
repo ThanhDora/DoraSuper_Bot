@@ -48,8 +48,7 @@ from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.safe_reply import reply_safe
 from dorasuper.vars import COMMAND_HANDLER, SUDO, SUPPORT_CHAT
 from utils import temp
-from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_NOTE, E_OTO, E_SUCCESS, E_USER, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
-
+from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_MAY_CUTE, E_NOTE, E_OTO, E_SUCCESS, E_USER, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
 
 LOGGER = getLogger("DoraSuper")
 
@@ -249,9 +248,9 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
 
         custom_message, buttons = await get_custom_welcome(member.chat.id)
         if join_count == 1:
-            welcome_text = f"{E_WELCOME} Chào mừng {E_WELCOME1}{mention}{E_WELCOME2} đến với nhóm {member.chat.title}!\n\n⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰\n{custom_message or 'Vui lòng xem nội quy để tránh vi phạm nhé!'}\n{E_OTO}"
+            welcome_text = f"{E_WELCOME} Chào mừng {E_WELCOME1}<b>{mention}</b>{E_WELCOME2} đến với nhóm {member.chat.title}!\n\n{E_MAY_CUTE}\n{custom_message or 'Vui lòng xem nội quy để tránh vi phạm nhé!'}\n{E_OTO}"
         else:
-            welcome_text = f"{E_WELCOME} Xin chào {E_WELCOME1}{mention}{E_WELCOME2} đã quay lại nhóm {member.chat.title} lần thứ {join_count}!\n\n⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰⋰\n{custom_message or 'Trước đây bạn đã rời đi nên giờ hãy đọc lại nội quy để tránh vi phạm nhé!'}\n{E_OTO}"
+            welcome_text = f"{E_WELCOME} Xin chào {E_WELCOME1}<b>{mention}</b>{E_WELCOME2} đã quay lại nhóm {member.chat.title} lần thứ {join_count}!\n\n{E_MAY_CUTE}\n{custom_message or 'Trước đây bạn đã rời đi nên giờ hãy đọc lại nội quy để tránh vi phạm nhé!'}\n{E_OTO}"
 
         if (temp.MELCOW).get(f"welcome-{member.chat.id}") is not None:
             try:

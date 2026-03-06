@@ -1,15 +1,33 @@
 import random
-import logging
+from html import escape
 from logging import getLogger
 from pyrogram import enums, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from dorasuper import app
-from dorasuper.emoji import E_ERROR, E_FIRE, E_LIMIT
+from dorasuper.emoji import (
+    E_ERROR,
+    E_FIRE,
+    E_FLOWER,
+    E_HEART2,
+    E_LIMIT,
+    E_LOADING,
+    E_RAINBOW,
+    E_SPARKLE,
+    E_USER,
+    E_WARN,
+)
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.vars import COMMAND_HANDLER
-from database.funny_db import can_use_command, update_user_command_usage
+from dorasuper.helper.safe_reply import reply_safe
 
 LOGGER = getLogger("DoraSuper")
+
+try:
+    from database.funny_db import can_use_command, update_user_command_usage
+except Exception as e:
+    LOGGER.warning("funny_rate: không load được funny_db, bỏ qua giới hạn: %s", e)
+    can_use_command = None
+    update_user_command_usage = None
 
 __MODULE__ = "ĐánhGiáVui"
 __HELP__ = """
@@ -40,87 +58,139 @@ BUTTON = [[InlineKeyboardButton("Ủng Hộ", url="https://thanhdora3605.dev")]]
 
 # Hàm chung để xử lý các lệnh
 async def handle_fun_command(ctx, command, caption_template, emoji):
+    msg = None
     try:
-        # Lấy thông tin người dùng
-        chat_id = ctx.chat.id
-        sender_id = ctx.from_user.id  # Always track usage for the sender
-        if ctx.reply_to_message:
-            user_id = ctx.reply_to_message.from_user.id
-            user_name = ctx.reply_to_message.from_user.first_name
-        else:
-            user_id = ctx.from_user.id
-            user_name = ctx.from_user.first_name
-
-        # Kiểm tra xem người gửi có thể sử dụng lệnh không
-        if not await can_use_command(chat_id, sender_id, command):
-            await ctx.reply_msg(
-                f"{E_LIMIT} Bạn đã sử dụng lệnh /{command} hôm nay. Hãy thử lại vào ngày mai!",
-                quote=True,
+        # Phản hồi ngay (dùng app.send_message để tránh lỗi bound/patch)
+        loading_text = f"{E_LOADING} Đang xử lý..."
+        try:
+            msg = await app.send_message(
+                ctx.chat.id,
+                loading_text,
+                reply_to_message_id=ctx.id,
                 parse_mode=enums.ParseMode.HTML,
             )
+        except Exception as e1:
+            LOGGER.warning("funny_rate send_message: %s", e1)
+            try:
+                msg = await reply_safe(ctx, loading_text, quote=True)
+            except Exception:
+                msg = await app.send_message(ctx.chat.id, "⏳ Đang xử lý...", reply_to_message_id=ctx.id)
+        if not msg:
             return
 
-        mention = f"[{user_name}](tg://user?id={user_id})"
-        percentage = random.randint(1, 100)
-        
-        # Tùy chỉnh caption theo lệnh
-        if command in ["boob", "cock"]:
-            caption = caption_template.format(mention=mention, value=percentage)
+        sender = getattr(ctx, "from_user", None)
+        if not sender:
+            try:
+                await msg.edit_text(f"{E_USER} Chỉ dùng lệnh này từ tài khoản thành viên.", parse_mode=enums.ParseMode.HTML)
+            except Exception:
+                await reply_safe(ctx, f"{E_USER} Chỉ dùng lệnh này từ tài khoản thành viên.", quote=True)
+            return
+
+        chat_id = ctx.chat.id
+        sender_id = sender.id
+
+        if ctx.reply_to_message:
+            target = getattr(ctx.reply_to_message, "from_user", None)
+            if not target:
+                try:
+                    await msg.edit_text(f"{E_WARN} Không xác định được người được trả lời.", parse_mode=enums.ParseMode.HTML)
+                except Exception:
+                    await reply_safe(ctx, f"{E_WARN} Không xác định được người được trả lời.", quote=True)
+                return
+            user_id = target.id
+            user_name = getattr(target, "first_name", None) or "User"
         else:
-            caption = caption_template.format(mention=mention, value=percentage)
+            user_id = sender.id
+            user_name = getattr(sender, "first_name", None) or "User"
 
-        # Gửi media và caption
-        await app.send_document(
-            chat_id=ctx.chat.id,
-            document=MEDIA[command],
-            caption=caption,
-            reply_markup=InlineKeyboardMarkup(BUTTON),
-            reply_to_message_id=ctx.reply_to_message.id if ctx.reply_to_message else ctx.id
-        )
+        # Giới hạn 1 lần/ngày (bỏ qua nếu DB không load)
+        if can_use_command is not None:
+            try:
+                if not await can_use_command(chat_id, sender_id, command):
+                    await reply_safe(
+                        ctx,
+                        f"{E_LIMIT} Bạn đã dùng /{command} hôm nay. Thử lại ngày mai!",
+                        quote=True,
+                        parse_mode=enums.ParseMode.HTML,
+                    )
+                    try:
+                        await msg.delete()
+                    except Exception:
+                        pass
+                    return
+            except Exception as db_err:
+                LOGGER.warning("funny_rate can_use_command: %s", db_err)
 
-        # Cập nhật dữ liệu sử dụng lệnh cho người gửi
-        await update_user_command_usage(chat_id, sender_id, command)
+        mention = f'<a href="tg://user?id={user_id}">{escape(user_name)}</a>'
+        percentage = random.randint(1, 100)
+        caption = caption_template.format(mention=mention, value=percentage)
+
+        try:
+            await app.send_document(
+                chat_id=ctx.chat.id,
+                document=MEDIA[command],
+                caption=caption,
+                parse_mode=enums.ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup(BUTTON),
+                reply_to_message_id=ctx.reply_to_message.id if ctx.reply_to_message else ctx.id,
+            )
+        except Exception as send_err:
+            LOGGER.warning("funny_rate send_document %s: %s", command, send_err)
+            err_text = f"{E_ERROR} Lỗi gửi media: {send_err!s}. Thử lại sau."
+            try:
+                await msg.edit_text(err_text, parse_mode=enums.ParseMode.HTML)
+            except Exception:
+                await reply_safe(ctx, err_text, quote=True)
+            return
+
+        try:
+            await msg.delete()
+        except Exception:
+            pass
+
+        if update_user_command_usage is not None:
+            try:
+                await update_user_command_usage(chat_id, sender_id, command)
+            except Exception as db_err:
+                LOGGER.warning("funny_rate update_user_command_usage: %s", db_err)
 
     except Exception as e:
-        await ctx.reply_msg(f"{E_ERROR} Lỗi, vui lòng thử lại sau.", quote=True)
+        LOGGER.warning("funny_rate %s: %s", command, e, exc_info=True)
+        fallback = f"{E_ERROR} Lỗi, vui lòng thử lại sau."
+        try:
+            await reply_safe(ctx, fallback, quote=True)
+        except Exception:
+            try:
+                await ctx.reply_text("Lỗi, vui lòng thử lại sau.", quote=True)
+            except Exception:
+                if msg:
+                    try:
+                        await msg.edit_text("Lỗi, vui lòng thử lại sau.")
+                    except Exception:
+                        pass
 
-# Định nghĩa các lệnh
-@app.on_message(filters.command(["cutie"], COMMAND_HANDLER))
-@capture_err
-async def cutie(_, ctx):
-    await handle_fun_command(ctx, "cutie", "🍑 {mention} dễ thương {value}% nhé! 🥀", "🍑")
+# group=-1: chạy sớm như /start, /help, /ping để tránh handler khác chặn
+_FUNNY_FILTER = filters.command(
+    ["cutie", "hot", "horny", "sexy", "gay", "lesbian", "boob", "cock"],
+    COMMAND_HANDLER,
+)
 
-@app.on_message(filters.command(["hot"], COMMAND_HANDLER))
+@app.on_message(_FUNNY_FILTER, group=-1)
 @capture_err
-async def hot(_, ctx):
-    await handle_fun_command(ctx, "hot", f"{E_FIRE} {{mention}} nóng bỏng {{value}}%! {E_FIRE}", E_FIRE)
-
-@app.on_message(filters.command(["horny"], COMMAND_HANDLER))
-@capture_err
-async def horny(_, ctx):
-    await handle_fun_command(ctx, "horny", f"{E_FIRE} {{mention}} tò mò {{value}}% nha! {E_FIRE}", E_FIRE)
-
-@app.on_message(filters.command(["sexy"], COMMAND_HANDLER))
-@capture_err
-async def sexy(_, ctx):
-    await handle_fun_command(ctx, "sexy", f"{E_FIRE} {{mention}} quyến rũ {{value}}%! {E_FIRE}", E_FIRE)
-
-@app.on_message(filters.command(["gay"], COMMAND_HANDLER))
-@capture_err
-async def gay(_, ctx):
-    await handle_fun_command(ctx, "gay", "🍷 {mention} gay {value}% nè! 🏳️‍🌈", "🍷")
-
-@app.on_message(filters.command(["lesbian"], COMMAND_HANDLER))
-@capture_err
-async def lesbian(_, ctx):
-    await handle_fun_command(ctx, "lesbian", "💜 {mention} lesbian {value}% đó! 🏳️‍🌈", "💜")
-
-@app.on_message(filters.command(["boob"], COMMAND_HANDLER))
-@capture_err
-async def boob(_, ctx):
-    await handle_fun_command(ctx, "boob", "🍒 Kích thước ngực của {mention} là {value}! 😜", "🍒")
-
-@app.on_message(filters.command(["cock"], COMMAND_HANDLER))
-@capture_err
-async def cock(_, ctx):
-    await handle_fun_command(ctx, "cock", "🍆 Kích thước của {mention} là {value}cm! 😎", "🍆")
+async def funny_rate_handler(_, ctx):
+    cmd = (ctx.command or [None])[0]
+    if not cmd:
+        return
+    templates = {
+        "cutie": (f"{E_SPARKLE} {{mention}} dễ thương {{value}}% nhé! {E_FLOWER}{E_HEART2}", "cutie"),
+        "hot": (f"{E_FIRE} {{mention}} nóng bỏng {{value}}%! {E_FIRE}", "hot"),
+        "horny": (f"{E_FIRE} {{mention}} tò mò {{value}}% nha! {E_FIRE}", "horny"),
+        "sexy": (f"{E_FIRE} {{mention}} quyến rũ {{value}}%! {E_FIRE}", "sexy"),
+        "gay": (f"{E_RAINBOW} {{mention}} gay {{value}}% nè! {E_RAINBOW}", "gay"),
+        "lesbian": (f"{E_FLOWER}{E_HEART2} {{mention}} lesbian {{value}}% đó! {E_RAINBOW}", "lesbian"),
+        "boob": (f"🍒 Kích thước ngực của {{mention}} là {{value}}! {E_SPARKLE}", "boob"),
+        "cock": (f"🍆 Kích thước của {{mention}} là {{value}}cm! {E_FIRE}", "cock"),
+    }
+    spec = templates.get(cmd.lower())
+    if spec:
+        await handle_fun_command(ctx, cmd.lower(), spec[0], spec[1])
