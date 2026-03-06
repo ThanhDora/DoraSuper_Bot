@@ -9,31 +9,9 @@ from dorasuper import app
 from dorasuper.emoji import E_LIMIT, E_LOADING, E_ERROR
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.helper import use_chat_lang
+from dorasuper.helper.safe_reply import edit_safe, reply_safe
 from dorasuper.vars import COMMAND_HANDLER
 from database.funny_db import can_use_command, update_user_command_usage
-
-
-def _emoji_to_unicode(text: str) -> str:
-    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
-    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
-
-
-async def _reply_safe(ctx: Message, text: str, **kwargs):
-    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode."""
-    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
-    try:
-        return await ctx.reply_text(text, **kwargs)
-    except Exception:
-        return await ctx.reply_text(_emoji_to_unicode(text), **kwargs)
-
-
-async def _edit_safe(msg: Message, text: str, **kwargs):
-    """Sửa tin: thử emoji động trước, lỗi thì sửa bằng Unicode."""
-    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
-    try:
-        return await msg.edit_text(text, **kwargs)
-    except Exception:
-        return await msg.edit_text(_emoji_to_unicode(text), **kwargs)
 
 # Định nghĩa các câu đạo lý
 DAO_LY_LIST = [
@@ -245,12 +223,12 @@ async def daoly(_, ctx: Message, strings):
     có giới hạn sử dụng 1 lần/ngày cho mỗi người dùng,
     và nhắc đến người dùng trong câu trả lời.
     """
-    msg = await _reply_safe(ctx, f"{E_LOADING} Đang xử lý đạo lý...", quote=True)
+    msg = await reply_safe(ctx, f"{E_LOADING} Đang xử lý đạo lý...", quote=True)
 
     try:
         if not ctx.from_user:
             if msg:
-                await _edit_safe(msg, "Lệnh này chỉ dành cho người dùng, không phải kênh hoặc nhóm ẩn danh!")
+                await edit_safe(msg, "Lệnh này chỉ dành cho người dùng, không phải kênh hoặc nhóm ẩn danh!")
             return
 
         sender_id = ctx.from_user.id
@@ -260,7 +238,7 @@ async def daoly(_, ctx: Message, strings):
 
         if not await can_use_command(chat_id, sender_id, command):
             if msg:
-                await _edit_safe(
+                await edit_safe(
                     msg,
                     f"{E_LIMIT} Bạn đã sử dụng lệnh /{command} hôm nay. Hãy thử lại vào ngày mai!",
                 )
@@ -273,7 +251,7 @@ async def daoly(_, ctx: Message, strings):
             f"<i>Đạo lý bởi DoraSuper</i>"
         )
 
-        await _reply_safe(ctx, response_text, quote=True)
+        await reply_safe(ctx, response_text, quote=True)
         await update_user_command_usage(chat_id, sender_id, command)
 
         if msg:
@@ -285,5 +263,5 @@ async def daoly(_, ctx: Message, strings):
     except Exception as e:
         LOGGER.error("Lỗi trong lệnh daoly: %s", str(e))
         if msg:
-            await _edit_safe(msg, f"{E_ERROR} Lỗi, vui lòng thử lại sau! 😔")
+            await edit_safe(msg, f"{E_ERROR} Lỗi, vui lòng thử lại sau! 😔")
 

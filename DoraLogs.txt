@@ -819,3 +819,471 @@ IndentationError: expected an indented block after 'if' statement on line 166
 [INFO] - [06-Mar-26 01:35:16 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
 [INFO] - [06-Mar-26 01:35:16 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
 [INFO] - [06-Mar-26 01:35:17 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:40:16 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 01:40:19 - DoraSuper - Failed to load module ai: expected an indented block after 'try' statement on line 830 (ai.py, line 831)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 831
+    url = await rentry(answer)
+    ^^^
+IndentationError: expected an indented block after 'try' statement on line 830
+[ERROR] - [06-Mar-26 01:40:20 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 01:40:22 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 01:40:22 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 01:40:23 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 01:41:07 - DoraSuper - waifus triggered command=kiss chat_id=-1003836954872] -> [waifus:162]
+[INFO] - [06-Mar-26 01:41:28 - root - Stop signal received (SIGINT). Exiting...] -> [idle:76]
+[INFO] - [06-Mar-26 01:41:28 - DoraSuper - ------------------------ Stopped Services ------------------------] -> [__main__:117]
+[INFO] - [06-Mar-26 02:01:38 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 02:01:41 - DoraSuper - Failed to load module ai: expected an indented block after 'try' statement on line 830 (ai.py, line 831)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 831
+    url = await rentry(answer)
+    ^^^
+IndentationError: expected an indented block after 'try' statement on line 830
+[ERROR] - [06-Mar-26 02:01:42 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 02:01:44 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui']] -> [__main__:38]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 02:01:45 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 02:01:45 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 02:02:39 - DoraSuper - waifus triggered command=kiss chat_id=5341455835] -> [waifus:162]
+[INFO] - [06-Mar-26 02:05:34 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 02:05:39 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 02:05:41 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - HELPABLE modules (33): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 02:05:42 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 02:05:43 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 02:08:57 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 02:09:02 - DoraSuper - Failed to load module fun: expected an indented block after 'if' statement on line 166 (fun.py, line 167)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 167
+    await gif_message.delete()
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 166
+[INFO] - [06-Mar-26 02:09:04 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - HELPABLE modules (33): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 02:09:05 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 02:09:06 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 02:13:14 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [06-Mar-26 02:13:17 - DoraSuper - Failed to load module ai: expected an indented block after 'try' statement on line 830 (ai.py, line 831)] -> [__main__:37]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/__main__.py", line 32, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/usr/local/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 831
+    url = await rentry(answer)
+    ^^^
+IndentationError: expected an indented block after 'try' statement on line 830
+[INFO] - [06-Mar-26 02:13:20 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - HELPABLE modules (33): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game']] -> [__main__:38]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 02:13:21 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 02:13:21 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 02:13:22 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:643]
+[ERROR] - [06-Mar-26 02:13:22 - dorasuper.plugins.fun - reply_to_dora: expected an indented block after 'try' statement on line 830 (ai.py, line 831)] -> [fun:677]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 675, in reply_to_dora
+    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, _dora_strings, reply_context=reply_context, replied_to_user=replied_to_user)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 461, in _send_dora_reply
+    from dorasuper.plugins.ai import ask_gemini
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 831
+    url = await rentry(answer)
+    ^^^
+IndentationError: expected an indented block after 'try' statement on line 830
+[INFO] - [06-Mar-26 02:14:08 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora khoá mõm'] -> [fun:643]
+[ERROR] - [06-Mar-26 02:14:08 - dorasuper.plugins.fun - reply_to_dora: expected an indented block after 'try' statement on line 830 (ai.py, line 831)] -> [fun:677]
+Traceback (most recent call last):
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 675, in reply_to_dora
+    await _send_dora_reply(c, m.chat.id, m.id, question, m.from_user, _dora_strings, reply_context=reply_context, replied_to_user=replied_to_user)
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/fun.py", line 461, in _send_dora_reply
+    from dorasuper.plugins.ai import ask_gemini
+  File "/Users/thanhdora/DoraTeam_iBot/dorasuper/plugins/ai.py", line 831
+    url = await rentry(answer)
+    ^^^
+IndentationError: expected an indented block after 'try' statement on line 830
+[INFO] - [06-Mar-26 02:14:41 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 02:14:49 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 02:14:50 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 02:14:50 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 02:14:52 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Dora'] -> [fun:643]
+[WARNING] - [06-Mar-26 02:14:52 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 02:15:01 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='Ngoan'] -> [fun:643]
+[WARNING] - [06-Mar-26 02:15:01 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 02:15:33 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='Dora khoá mõm'] -> [fun:643]
+[WARNING] - [06-Mar-26 02:15:34 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 02:15:57 - DoraSuper - waifus triggered command=chay chat_id=-1003836954872] -> [waifus:162]
+[INFO] - [06-Mar-26 11:51:35 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 11:51:42 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 11:51:43 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 11:51:44 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 11:54:49 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='@thanhdora'] -> [fun:643]
+[WARNING] - [06-Mar-26 11:54:49 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 11:56:11 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='@thanhdora'] -> [fun:643]
+[WARNING] - [06-Mar-26 11:56:11 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 11:57:29 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 11:57:37 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 11:57:38 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 11:57:38 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 12:02:12 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora khoá mõm nó đi'] -> [fun:643]
+[WARNING] - [06-Mar-26 12:02:14 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 12:02:41 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 12:02:48 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 12:02:49 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 12:02:51 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 12:03:22 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='dora cho nó cút mẹ đi'] -> [fun:643]
+[WARNING] - [06-Mar-26 12:03:25 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 12:04:21 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Em giỏi quá'] -> [fun:643]
+[WARNING] - [06-Mar-26 12:04:22 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:648]
+[INFO] - [06-Mar-26 12:04:55 - DoraSuper - waifus triggered command=chay chat_id=5341455835] -> [waifus:162]
+[INFO] - [06-Mar-26 12:05:00 - DoraSuper - waifus triggered command=kiss chat_id=5341455835] -> [waifus:162]
+[INFO] - [06-Mar-26 12:09:17 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 12:11:43 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 12:12:08 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 12:12:16 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 12:12:17 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 12:12:18 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 12:13:38 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 12:13:45 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 12:13:46 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 12:13:47 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 12:13:54 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 12:14:00 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - HELPABLE modules (34): ['adminnhóm', 'afk', 'bộlọc', 'chụpweb', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tạođịachỉgiả', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|fake_human     |filters        |fun            |fungame        |
+|funny_rate     |gemini_ai      |genss          |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|inline_search  |json           |karma          |lang_setting   |
+|locks          |love           |mediainfo      |misc_tools     |
+|movie_view     |notes          |nulis          |ocr            |
+|ping           |quotly         |resetdb        |sangmata       |
+|sed            |session_generator|start_help     |stickers       |
+|waifus         |wallpapers     |weather        |webss          |
+] -> [__main__:52]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 12:14:01 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 12:14:02 - apscheduler.scheduler - Scheduler started] -> [base:181]

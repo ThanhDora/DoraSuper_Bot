@@ -164,7 +164,7 @@ async def coin_flip_callback(client, callback_query: CallbackQuery):
 
     # Xóa GIF sau khi đã chờ xong (nếu đã gửi)
     if gif_message:
-    await gif_message.delete()
+        await gif_message.delete()
 
     await callback_query.edit_message_text(f"{E_PARTY} Kết quả sau khi tung đồng xu: <b>{result}</b>", reply_markup=None, parse_mode=ParseMode.HTML)
 
@@ -207,10 +207,10 @@ responses = [
 
 def _is_bot_mentioned(message) -> bool:
     """Kiểm tra bot có bị @mention trong tin nhắn không (dùng khi bật Privacy mode)."""
-    if not message.text or not BOT_USERNAME:
+    raw = (message.text or message.caption or "") or ""
+    if not raw.strip() or not BOT_USERNAME:
         return False
-    text_lower = message.text.lower()
-    return f"@{BOT_USERNAME}".lower() in text_lower
+    return f"@{BOT_USERNAME}".lower() in raw.lower()
 
 
 def _is_reply_to_bot_ai(message) -> bool:
@@ -685,13 +685,13 @@ async def reply_to_dora(c, m):
 
 
 # Chỉ khi có @mention bot (dự phòng khi bật Privacy hoặc muốn gọi bằng @)
-@app.on_message(filters.text & filters.mentioned & ~filters.via_bot, group=1)
+@app.on_message((filters.text | filters.caption) & filters.mentioned & ~filters.via_bot, group=1)
 @use_chat_lang()
 async def reply_to_mention_dora(c, m, strings):
     if not _is_bot_mentioned(m):
         return
     import re
-    text = (m.text or "").strip()
+    text = (m.text or m.caption or "").strip()
     await _try_execute_dora_command(m, text)
     # AI chỉ trả lời khi có từ "Dora" — chỉ từ khoá (@Bot khoá mõm) thì không gọi AI
     if not _has_dora_text(text):

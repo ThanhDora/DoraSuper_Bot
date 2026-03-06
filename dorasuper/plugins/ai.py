@@ -828,12 +828,12 @@ async def ai_chat(client: Client, message: Message):
         await wait_msg.edit(result, parse_mode=ParseMode.HTML)
     except MessageTooLong:
         try:
-        url = await rentry(answer)
-        await wait_msg.edit(
+            url = await rentry(answer)
+            await wait_msg.edit(
                 f"{E_BOT} <b>Câu trả lời quá dài, đã dán vào Rentry:</b>\n{url}",
                 parse_mode=ParseMode.HTML,
-        )
-    except Exception:
+            )
+        except Exception:
             await wait_msg.edit(f"{E_WARN} Câu trả lời quá dài, em không gửi được. Oppa thử hỏi ngắn hơn nha~", parse_mode=ParseMode.HTML)
     except Exception as e:
         LOGGER.warning("ai_chat edit failed: %s", e)
@@ -841,7 +841,7 @@ async def ai_chat(client: Client, message: Message):
             await wait_msg.edit(result, parse_mode=ParseMode.DISABLED)
         except MessageTooLong:
             try:
-            url = await rentry(answer)
+                url = await rentry(answer)
                 await wait_msg.edit(f"{E_BOT} Câu trả lời quá dài, đã dán vào Rentry:\n{url}", parse_mode=ParseMode.DISABLED)
             except Exception:
                 await wait_msg.edit(f"{E_WARN} Em lỗi format tin nhắn rồi, oppa thử lại nha~", parse_mode=ParseMode.DISABLED)

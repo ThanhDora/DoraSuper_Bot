@@ -20,24 +20,11 @@ from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import adminsOnly, member_permissions
 from dorasuper.core.keyboard import ikb
 from dorasuper.helper.functions import extract_text_and_keyb, extract_urls
+from dorasuper.helper.safe_reply import emoji_to_unicode, reply_safe
 from dorasuper.vars import COMMAND_HANDLER
 from dorasuper.emoji import E_NOTE, E_LIST, E_SUCCESS, E_CROSS, E_WARN, E_GROUP, E_TIP
 
 LOGGER = getLogger("DoraSuper")
-
-
-def _emoji_to_unicode(text: str) -> str:
-    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi custom emoji lỗi)."""
-    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
-
-
-async def _reply_safe(message, text: str, **kwargs):
-    """Gửi tin: thử emoji động (custom) trước, lỗi thì gửi bản Unicode."""
-    kwargs.setdefault("parse_mode", ParseMode.HTML)
-    try:
-        return await message.reply_text(text, **kwargs)
-    except Exception:
-        return await message.reply_text(_emoji_to_unicode(text), **kwargs)
 
 __MODULE__ = "BộLọc"
 __HELP__ = """
@@ -75,7 +62,7 @@ async def _delete_after(msg, seconds: int):
     group=-1,
 )
 async def filters_private(_, message):
-    await _reply_safe(
+    await reply_safe(
         message,
         f"{E_GROUP} <b>Bộ lọc chỉ dùng trong nhóm.</b>\nThêm bot vào nhóm rồi dùng lệnh ở đó.",
     )
@@ -90,14 +77,14 @@ async def filters_private(_, message):
 async def save_filters(_, message):
     try:
         if len(message.command) < 2 or not message.reply_to_message:
-            await _reply_safe(
+            await reply_safe(
                 message,
                 f"{E_TIP} <b>Sử dụng:</b>\nTrả lời tin nhắn bằng <code>/boloc [Tên bộ lọc]</code> để thiết lập bộ lọc mới.",
             )
             return
         name = (message.text or "").split(None, 1)[1].strip()
         if not name:
-            await _reply_safe(
+            await reply_safe(
                 message,
                 f"{E_WARN} <b>Sử dụng:</b> <code>/boloc [TÊN_BỘ_LỌC]</code>",
             )
@@ -154,19 +141,19 @@ async def save_filters(_, message):
         name = name.replace("_", " ")
         _filter = {"type": _type, "data": data, "file_id": file_id}
         await save_filter(chat_id, name, _filter)
-        sent = await _reply_safe(
+        sent = await reply_safe(
             message,
             f"{E_SUCCESS} <b>Đã lưu bộ lọc</b> <code>{name}</code>.",
         )
         asyncio.create_task(_delete_after(sent, 5))
     except UnboundLocalError:
-        await _reply_safe(
+        await reply_safe(
             message,
             f"{E_WARN} Tin nhắn đã trả lời không thể truy cập. Chuyển tiếp tin nhắn và thử lại.",
         )
     except Exception as e:
         LOGGER.exception("save_filters: %s", e)
-        await _reply_safe(
+        await reply_safe(
             message,
             f"{E_CROSS} Có lỗi khi lưu bộ lọc. Thử reply đúng tin nhắn.",
         )
@@ -181,13 +168,13 @@ async def save_filters(_, message):
 async def get_filterss(_, m):
     _filters = await get_filters_names(m.chat.id)
     if not _filters:
-        await _reply_safe(m, f"{E_NOTE} Không có bộ lọc nào trong cuộc trò chuyện này.")
+        await reply_safe(m, f"{E_NOTE} Không có bộ lọc nào trong cuộc trò chuyện này.")
         return
     _filters.sort()
     msg = f"{E_LIST} <b>Danh sách bộ lọc</b> – {m.chat.title} (<code>{m.chat.id}</code>)\n\n"
     for fname in _filters:
         msg += f"• <code>{fname}</code>\n"
-    await _reply_safe(m, msg)
+    await reply_safe(m, msg)
 
 
 # ---- Nhóm: xóa một bộ lọc (admin) ----
@@ -198,20 +185,20 @@ async def get_filterss(_, m):
 @adminsOnly("can_change_info")
 async def del_filter(_, m):
     if len(m.command) < 2:
-        await _reply_safe(m, f"{E_TIP} <b>Sử dụng:</b> <code>/xoaboloc [TÊN_BỘ_LỌC]</code>")
+        await reply_safe(m, f"{E_TIP} <b>Sử dụng:</b> <code>/xoaboloc [TÊN_BỘ_LỌC]</code>")
         return
     name = (m.text or "").split(None, 1)[1].strip()
     if not name:
-        await _reply_safe(m, f"{E_TIP} <b>Sử dụng:</b> <code>/xoaboloc [TÊN_BỘ_LỌC]</code>")
+        await reply_safe(m, f"{E_TIP} <b>Sử dụng:</b> <code>/xoaboloc [TÊN_BỘ_LỌC]</code>")
         return
     chat_id = m.chat.id
     deleted = await delete_filter(chat_id, name)
     if deleted:
-        sent = await _reply_safe(m, f"{E_SUCCESS} Đã xoá bộ lọc <code>{name}</code>.")
+        sent = await reply_safe(m, f"{E_SUCCESS} Đã xoá bộ lọc <code>{name}</code>.")
         if sent:
             asyncio.create_task(_delete_after(sent, 5))
     else:
-        sent = await _reply_safe(m, f"{E_CROSS} Không tìm thấy bộ lọc này.")
+        sent = await reply_safe(m, f"{E_CROSS} Không tìm thấy bộ lọc này.")
         if sent:
             asyncio.create_task(_delete_after(sent, 5))
 
@@ -337,7 +324,7 @@ async def filters_re(_, message):
 async def stop_all(_, message):
     _filters = await get_filters_names(message.chat.id)
     if not _filters:
-        await _reply_safe(message, f"{E_NOTE} Không có bộ lọc trong cuộc trò chuyện này.")
+        await reply_safe(message, f"{E_NOTE} Không có bộ lọc trong cuộc trò chuyện này.")
         return
     keyboard = InlineKeyboardMarkup(
         [
@@ -347,7 +334,7 @@ async def stop_all(_, message):
             ]
         ]
     )
-    await _reply_safe(
+    await reply_safe(
         message,
         f"{E_WARN} <b>Xóa tất cả bộ lọc?</b>\nHành động này không thể hoàn tác.",
         reply_markup=keyboard,
@@ -378,7 +365,7 @@ async def stop_all_cb(_, cb):
                 )
             except Exception:
                 await cb.message.edit_text(
-                    _emoji_to_unicode(f"{E_SUCCESS} Đã xóa thành công tất cả bộ lọc trong cuộc trò chuyện này."),
+                    emoji_to_unicode(f"{E_SUCCESS} Đã xóa thành công tất cả bộ lọc trong cuộc trò chuyện này."),
                 )
         else:
             try:
@@ -388,7 +375,7 @@ async def stop_all_cb(_, cb):
                 )
             except Exception:
                 await cb.message.edit_text(
-                    _emoji_to_unicode(f"{E_NOTE} Không có bộ lọc nào để xóa."),
+                    emoji_to_unicode(f"{E_NOTE} Không có bộ lọc nào để xóa."),
                 )
     elif inp == "no":
         try:

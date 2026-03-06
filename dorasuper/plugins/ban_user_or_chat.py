@@ -1,4 +1,3 @@
-import re
 import logging
 from logging import getLogger
 
@@ -10,6 +9,7 @@ from database.users_chats_db import db
 from dorasuper import app, BOT_USERNAME
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.localization import use_chat_lang
+from dorasuper.helper.safe_reply import emoji_to_unicode, reply_safe
 from dorasuper.vars import COMMAND_HANDLER, LOG_CHANNEL, SUDO, SUPPORT_CHAT
 from dorasuper.emoji import (
     E_ERROR,
@@ -28,20 +28,6 @@ from dorasuper.emoji import (
 LOGGER = getLogger("DoraSuper")
 
 
-def _emoji_to_unicode(text: str) -> str:
-    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
-    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
-
-
-async def _reply_safe(message: Message, text: str, **kwargs):
-    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode."""
-    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
-    try:
-        return await message.reply_text(text, **kwargs)
-    except Exception:
-        return await message.reply_text(_emoji_to_unicode(text), **kwargs)
-
-
 @app.on_message(filters.incoming & filters.private, group=-5)
 async def ban_reply(_, ctx: Message):
     if not ctx.from_user:
@@ -49,7 +35,7 @@ async def ban_reply(_, ctx: Message):
     isban, alesan = await db.get_ban_status(ctx.from_user.id)
     if isban:
         reason = (alesan or {}).get("reason", "Không nêu") if alesan else "Không nêu"
-        await _reply_safe(
+        await reply_safe(
             ctx,
             f"{E_ERROR} Tôi rất tiếc, bạn bị cấm sử dụng tôi.\n<b>Lý do:</b> {reason}",
         )
@@ -119,7 +105,7 @@ async def grp_bd(self: Client, ctx: Message, strings):
         reply_markup = InlineKeyboardMarkup(buttons)
         reason = (chck or {}).get("reason") or "Không nêu"
         try:
-            k = await _reply_safe(
+            k = await reply_safe(
                 ctx,
                 f"{E_LIMIT} <b>KHÔNG ĐƯỢC PHÉP TRÒ CHUYỆN</b>\n\nChủ sở hữu của tôi đã hạn chế tôi làm việc ở đây!\n<b>Lý do:</b> <code>{reason}</code>.",
                 reply_markup=reply_markup,
@@ -139,7 +125,7 @@ async def grp_bd(self: Client, ctx: Message, strings):
 @app.on_message(filters.command("banuser", COMMAND_HANDLER) & filters.user(SUDO), group=-1)
 async def ban_a_user(bot, message):
     if len(message.command) == 1:
-        return await _reply_safe(message, f"{E_TIP} Đưa cho tôi user id / username")
+        return await reply_safe(message, f"{E_TIP} Đưa cho tôi user id / username")
     r = message.text.split(None)
     if len(r) > 2:
         reason = message.text.split(None, 2)[2]
@@ -154,24 +140,24 @@ async def ban_a_user(bot, message):
     try:
         k = await bot.get_users(chat)
     except PeerIdInvalid:
-        return await _reply_safe(
+        return await reply_safe(
             message,
             f"{E_USER} Đây là người dùng không hợp lệ, hãy đảm bảo rằng tôi đã gặp họ trước đây.",
         )
     except IndexError:
-        return await _reply_safe(message, f"{E_WARN} Đây có thể là một kênh, hãy đảm bảo đó là một người dùng.")
+        return await reply_safe(message, f"{E_WARN} Đây có thể là một kênh, hãy đảm bảo đó là một người dùng.")
     except Exception as e:
-        return await _reply_safe(message, f"{E_ERROR} Error - {e}")
+        return await reply_safe(message, f"{E_ERROR} Error - {e}")
     else:
         isban, alesan = await db.get_ban_status(k.id)
         if isban:
             reason_show = (alesan or {}).get("reason", "Không nêu") if alesan else "Không nêu"
-            return await _reply_safe(
+            return await reply_safe(
                 message,
                 f"{E_LIMIT} {k.mention} đã bị cấm rồi\n<b>Lý do:</b> {reason_show}",
             )
         await db.ban_user(k.id, reason)
-        await _reply_safe(
+        await reply_safe(
             message,
             f"{E_SUCCESS} Đã cấm người dùng thành công {k.mention}!!\n<b>Lý do:</b> {reason}",
         )
@@ -180,7 +166,7 @@ async def ban_a_user(bot, message):
 @app.on_message(filters.command("unbanuser", COMMAND_HANDLER) & filters.user(SUDO), group=-1)
 async def unban_a_user(bot, message):
     if len(message.command) == 1:
-        return await _reply_safe(message, f"{E_TIP} Đưa cho tôi user id / username")
+        return await reply_safe(message, f"{E_TIP} Đưa cho tôi user id / username")
     r = message.text.split(None)
     chat = message.text.split(None, 2)[1] if len(r) > 2 else message.command[1]
     try:
@@ -191,27 +177,27 @@ async def unban_a_user(bot, message):
     try:
         k = await bot.get_users(chat)
     except PeerIdInvalid:
-        return await _reply_safe(
+        return await reply_safe(
             message,
             f"{E_USER} Đây là một người dùng không hợp lệ, hãy chắc chắn rằng tôi đã gặp anh ấy trước đây.",
         )
     except IndexError:
-        return await _reply_safe(message, f"{E_WARN} Đây có thể là một kênh, hãy chắc chắn rằng đó là một người dùng.")
+        return await reply_safe(message, f"{E_WARN} Đây có thể là một kênh, hãy chắc chắn rằng đó là một người dùng.")
     except Exception as e:
-        return await _reply_safe(message, f"{E_ERROR} Lỗi - {e}")
+        return await reply_safe(message, f"{E_ERROR} Lỗi - {e}")
 
     is_banned, user_data = await db.get_ban_status(k.id)
     if not is_banned or not user_data:
-        return await _reply_safe(message, f"{E_INFO} {k.mention} chưa bị cấm.")
+        return await reply_safe(message, f"{E_INFO} {k.mention} chưa bị cấm.")
 
     await db.remove_ban(user_data["_id"])
-    await _reply_safe(message, f"{E_SUCCESS} Người dùng đã bỏ cấm thành công {k.mention}!!!")
+    await reply_safe(message, f"{E_SUCCESS} Người dùng đã bỏ cấm thành công {k.mention}!!!")
 
 
 @app.on_message(filters.command("disablechat", COMMAND_HANDLER) & filters.user(SUDO), group=-1)
 async def disable_chat(bot, message):
     if len(message.command) == 1:
-        return await _reply_safe(message, f"{E_TIP} Cho tôi một ID trò chuyện")
+        return await reply_safe(message, f"{E_TIP} Cho tôi một ID trò chuyện")
     r = message.text.split(None)
     if len(r) > 2:
         reason = message.text.split(None, 2)[2]
@@ -222,17 +208,17 @@ async def disable_chat(bot, message):
     try:
         chat_ = int(chat)
     except ValueError:
-        return await _reply_safe(message, f"{E_WARN} Cho Tôi Một ID Trò Chuyện Hợp Lệ")
+        return await reply_safe(message, f"{E_WARN} Cho Tôi Một ID Trò Chuyện Hợp Lệ")
     cha_t = await db.get_chat(chat_)
     if not cha_t:
-        return await _reply_safe(message, f"{E_GROUP} Không Tìm Thấy Cuộc Trò Chuyện Trong DB")
+        return await reply_safe(message, f"{E_GROUP} Không Tìm Thấy Cuộc Trò Chuyện Trong DB")
     if cha_t["is_disabled"]:
-        return await _reply_safe(
+        return await reply_safe(
             message,
             f"{E_INFO} Cuộc trò chuyện này đã bị vô hiệu hóa rồi:\nLý do: <code>{cha_t['reason']}</code>",
         )
     await db.disable_chat(chat_, reason)
-    await _reply_safe(message, f"{E_SUCCESS} Trò chuyện bị vô hiệu hóa thành công")
+    await reply_safe(message, f"{E_SUCCESS} Trò chuyện bị vô hiệu hóa thành công")
     # Gửi tin tạm biệt + rời nhóm; nếu PEER_ID_INVALID (ID sai / bot đã bị kick) thì chỉ log, không báo lỗi cho user
     try:
         buttons = [
@@ -257,19 +243,19 @@ async def disable_chat(bot, message):
 @app.on_message(filters.command("enablechat", COMMAND_HANDLER) & filters.user(SUDO), group=-1)
 async def re_enable_chat(_, ctx: Message):
     if len(ctx.command) == 1:
-        return await _reply_safe(ctx, f"{E_TIP} Cho tôi một ID trò chuyện")
+        return await reply_safe(ctx, f"{E_TIP} Cho tôi một ID trò chuyện")
     chat = ctx.command[1]
     try:
         chat_ = int(chat)
     except ValueError:
-        return await _reply_safe(ctx, f"{E_WARN} Cho Tôi Một ID Trò Chuyện Hợp Lệ")
+        return await reply_safe(ctx, f"{E_WARN} Cho Tôi Một ID Trò Chuyện Hợp Lệ")
     sts = await db.get_chat(chat_)
     if not sts:
-        return await _reply_safe(ctx, f"{E_GROUP} Không Tìm Thấy Cuộc Trò Chuyện Trong DB !")
+        return await reply_safe(ctx, f"{E_GROUP} Không Tìm Thấy Cuộc Trò Chuyện Trong DB !")
     if not sts.get("is_disabled"):
-        return await _reply_safe(
+        return await reply_safe(
             ctx,
             f"{E_INFO} Cuộc trò chuyện này đang được phép hoạt động rồi, không cần bật lại.",
         )
     await db.re_enable_chat(chat_)
-    await _reply_safe(ctx, f"{E_SUCCESS} Trò chuyện được kích hoạt lại thành công")
+    await reply_safe(ctx, f"{E_SUCCESS} Trò chuyện được kích hoạt lại thành công")

@@ -45,26 +45,13 @@ from dorasuper.core.decorator.permissions import (
 )
 from dorasuper.helper import fetch, use_chat_lang
 from dorasuper.helper.emoji_fmt import EMOJI_FMT
+from dorasuper.helper.safe_reply import reply_safe
 from dorasuper.vars import COMMAND_HANDLER, SUDO, SUPPORT_CHAT
 from utils import temp
 from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_NOTE, E_OTO, E_SUCCESS, E_USER, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
 
 
 LOGGER = getLogger("DoraSuper")
-
-
-def _emoji_to_unicode(text: str) -> str:
-    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
-    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
-
-
-async def _reply_safe(message: Message, text: str, **kwargs):
-    """Gửi tin: thử emoji động trước, lỗi thì gửi Unicode."""
-    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
-    try:
-        return await message.reply_text(text, **kwargs)
-    except Exception:
-        return await message.reply_text(_emoji_to_unicode(text), **kwargs)
 
 
 def extract_links(text: str) -> list:
@@ -336,7 +323,7 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
 @app.adminsOnly("can_change_info")
 async def welcome_toggle_handler(client, message):
     is_enabled = await toggle_welcome(message.chat.id)
-    await _reply_safe(
+    await reply_safe(
         message,
         f"{E_HEART} Tin nhắn chào mừng hiện đã {'bật' if is_enabled else 'tắt'}.",
     )
@@ -394,7 +381,7 @@ async def custom_welcome_handler(c: Client, m: Message):
 @app.adminsOnly("can_change_info")
 async def goodbye_toggle_handler(client, message):
     is_enabled = await toggle_goodbye(message.chat.id)
-    await _reply_safe(
+    await reply_safe(
         message,
         f"{E_HEART} Tin nhắn tạm biệt hiện đã {'bật' if is_enabled else 'tắt'}.",
     )
@@ -453,7 +440,7 @@ async def custom_goodbye_handler(c: Client, m: Message):
 @app.adminsOnly("can_restrict_members")
 async def ban_on_leave_toggle_handler(client, message):
     is_enabled = await toggle_ban_on_leave(message.chat.id)
-    await _reply_safe(
+    await reply_safe(
         message,
         f"{E_SUCCESS} Chức năng cấm khi người dùng tự ý rời nhóm hiện đã {'bật' if is_enabled else 'tắt'}.",
     )

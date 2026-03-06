@@ -33,6 +33,18 @@ def _strip_custom_emoji_entities(entities):
     ]
 
 
+def _html_drop_custom_emoji(html_text: str) -> str:
+    """Thay thẻ <emoji id="...">...</emoji> bằng ký tự bên trong để tránh DocumentInvalid (bot không dùng custom emoji trong checkin)."""
+    if not html_text or "<emoji" not in html_text:
+        return html_text
+    return re.sub(
+        r'<emoji\s+id="\d+"[^>]*>([^<]*)</emoji>',
+        lambda m: (m.group(1).strip() or "•"),
+        html_text,
+        flags=re.IGNORECASE,
+    )
+
+
 def _html_to_entities(html_text: str):
     """Parse HTML subset + custom emoji to (text, entities)."""
     entities = []
@@ -53,10 +65,9 @@ def _html_to_entities(html_text: str):
                     if inner_end != -1:
                         inner = html.unescape(html_text[inner_start:inner_end])
                         fallback = (inner.strip() or "•")
-                        fallback_char = fallback[0]
-                        out.append(fallback_char)
+                        out.append(fallback)
                         offset = out_len
-                        length = _utf16_len(fallback_char)
+                        length = _utf16_len(fallback)
                         out_len += length
                         entities.append(
                             MessageEntity(
@@ -177,7 +188,12 @@ async def _edit_caption_html(msg: Message, html_caption: str, **kwargs):
                 **kwargs,
             )
         except Exception:
-            return await msg.edit_caption(caption=text, **kwargs)
+            try:
+                return await msg.edit_caption(caption=text, **kwargs)
+            except Exception:
+                safe_caption = _html_drop_custom_emoji(html_caption)
+                st, ent = _html_to_entities(safe_caption)
+                return await msg.edit_caption(caption=st, caption_entities=ent, **kwargs)
 
 VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 DEFAULT_PIC = "assets/profilepic.png"
@@ -245,13 +261,21 @@ def _make_card(name, uid, total, last_time, avatar_img, group_name):
         f_sub = ImageFont.truetype("assets/Roboto-Regular.ttf", 22)
     except:
         f_bold = ImageFont.load_default(); f_reg = ImageFont.load_default(); f_sub = ImageFont.load_default()
-    with Pilmoji(card) as pilmoji:
-        pilmoji.text((50, 50), "CHỨNG NHẬN ĐIỂM DANH ✅", fill="#00FFCC", font=f_bold)
-        pilmoji.text((260, 140), f"👤 Thành viên: {name}", fill="white", font=f_reg)
-        pilmoji.text((260, 190), f"🆔 ID: {uid}", fill="#BBBBBB", font=f_reg)
-        pilmoji.text((260, 240), f"🏆 Tích lũy: {total} lượt", fill="#FFD700", font=f_reg)
-        pilmoji.text((260, 290), f"🕒 Lần cuối: {last_time}", fill="#00BFFF", font=f_reg)
-        pilmoji.text((50, 385), f"📍 Nhóm: {group_name}", fill="#888888", font=f_sub)
+    try:
+        with Pilmoji(card) as pilmoji:
+            pilmoji.text((50, 50), "CHỨNG NHẬN ĐIỂM DANH ✅", fill="#00FFCC", font=f_bold)
+            pilmoji.text((260, 140), f"👤 Thành viên: {name}", fill="white", font=f_reg)
+            pilmoji.text((260, 190), f"🆔 ID: {uid}", fill="#BBBBBB", font=f_reg)
+            pilmoji.text((260, 240), f"🏆 Tích lũy: {total} lượt", fill="#FFD700", font=f_reg)
+            pilmoji.text((260, 290), f"🕒 Lần cuối: {last_time}", fill="#00BFFF", font=f_reg)
+            pilmoji.text((50, 385), f"📍 Nhóm: {group_name}", fill="#888888", font=f_sub)
+    except Exception:
+        draw.text((50, 50), "CHUNG NHAN DIEM DANH", fill="#00FFCC", font=f_bold)
+        draw.text((260, 140), f"Thanh vien: {name}", fill="white", font=f_reg)
+        draw.text((260, 190), f"ID: {uid}", fill="#BBBBBB", font=f_reg)
+        draw.text((260, 240), f"Tich luy: {total} luot", fill="#FFD700", font=f_reg)
+        draw.text((260, 290), f"Lan cuoi: {last_time}", fill="#00BFFF", font=f_reg)
+        draw.text((50, 385), f"Nhom: {group_name}", fill="#888888", font=f_sub)
     buf = io.BytesIO()
     card.convert("RGB").save(buf, format="JPEG", quality=95)
     buf.seek(0)
@@ -349,7 +373,8 @@ async def rank_cmd(_, ctx: Message):
     res = f"{E_STAT} <b>TOP 10 ĐIỂM DANH THÁNG {now.month}</b>\n{E_PIN_LOC} Tại: <b>{chat_title}</b>\n\n"
     if top:
         for i, it in enumerate(top, 1):
-            res += f"{i}. {_mention_html(it['_id'], it.get('user_name') or 'User')} — <code>{it['count']}</code> lượt\n"
+            medal = E_ONE if i == 1 else E_TWO if i == 2 else E_THREE if i == 3 else f"{i}."
+            res += f"{medal} {_mention_html(it['_id'], it.get('user_name') or 'User')} — <code>{it['count']}</code> lượt\n"
     else:
         res = res.rstrip() + "\n<i>Chưa có dữ liệu</i>"
     reply_text = res or "Chưa có dữ liệu."

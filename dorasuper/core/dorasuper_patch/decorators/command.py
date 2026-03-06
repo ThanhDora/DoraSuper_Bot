@@ -4,6 +4,7 @@ import pyrogram
 from pyrogram.methods import Decorators
 
 from dorasuper.core import pyro_cooldown
+from dorasuper.emoji import E_ADMIN, E_GROUP, E_LOCK, E_MSG, E_USER, E_WARN
 from dorasuper.vars import COMMAND_HANDLER
 
 from ..utils import handle_error
@@ -89,15 +90,21 @@ def command(
             _del = 6  # Tin lỗi tự xóa sau vài giây
             if is_disabled:
                 return await message.reply_msg(
-                    "Xin lỗi, lệnh này đã bị chủ sở hữu vô hiệu hóa.", del_in=_del
+                    f"{E_LOCK} Xin lỗi, lệnh này đã bị chủ sở hữu vô hiệu hóa.",
+                    del_in=_del,
+                    parse_mode=pyrogram.enums.ParseMode.HTML,
                 )
             if not message.from_user and no_channel:
                 return await message.reply_msg(
-                    "Tôi không thể xác định người dùng. Hãy sử dụng lệnh của tôi trong trò chuyện riêng tư.", del_in=_del
+                    f"{E_USER} {E_WARN} Tôi không thể xác định người dùng. Hãy sử dụng lệnh của tôi trong trò chuyện riêng tư.",
+                    del_in=_del,
+                    parse_mode=pyrogram.enums.ParseMode.HTML,
                 )
             if self_admin and message.chat.type != pyrogram.enums.ChatType.SUPERGROUP:
                 return await message.reply_msg(
-                    "Lệnh này chỉ có thể sử dụng trong nhóm.", del_in=_del
+                    f"{E_GROUP} Lệnh này chỉ có thể sử dụng trong nhóm.",
+                    del_in=_del,
+                    parse_mode=pyrogram.enums.ParseMode.HTML,
                 )
             if self_admin:
                 me = await client.get_chat_member(
@@ -108,14 +115,22 @@ def command(
                     pyrogram.enums.ChatMemberStatus.ADMINISTRATOR,
                 ):
                     return await message.reply_msg(
-                        "Tôi phải là quản trị viên để thực hiện lệnh này", del_in=_del
+                        f"{E_ADMIN} {E_WARN} Tôi phải là quản trị viên để thực hiện lệnh này.",
+                        del_in=_del,
+                        parse_mode=pyrogram.enums.ParseMode.HTML,
                     )
             if group_only and message.chat.type != pyrogram.enums.ChatType.SUPERGROUP:
                 return await message.reply_msg(
-                    "Lệnh này chỉ có thể sử dụng trong nhóm.", del_in=_del
+                    f"{E_GROUP} Lệnh này chỉ có thể sử dụng trong nhóm.",
+                    del_in=_del,
+                    parse_mode=pyrogram.enums.ParseMode.HTML,
                 )
             if pm_only and message.chat.type != pyrogram.enums.ChatType.PRIVATE:
-                return await message.reply_msg("Lệnh này chỉ có thể được sử dụng trong các PM.", del_in=_del)
+                return await message.reply_msg(
+                    f"{E_MSG} Lệnh này chỉ có thể được sử dụng trong các PM.",
+                    del_in=_del,
+                    parse_mode=pyrogram.enums.ParseMode.HTML,
+                )
             try:
                 await func(client, message)
             except pyrogram.errors.exceptions.forbidden_403.ChatWriteForbidden:
