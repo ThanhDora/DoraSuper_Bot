@@ -18,7 +18,7 @@ from pyrogram.errors import MessageIdInvalid, PeerIdInvalid, ReactionInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ChatPermissions
 from dorasuper import app, user, BOT_USERNAME
 from dorasuper.emoji import (
-    E_NOTE, E_SEARCH, E_WARN, E_BOT, E_PARTY, E_WAIT, E_MSG, E_VUAM,
+    E_BACK, E_NOTE, E_SEARCH, E_WARN, E_BOT, E_PARTY, E_WAIT, E_MSG, E_VUAM,
     E_QUESTION, E_STAR, E_BELL, E_MEGAPHONE, E_HEART, E_MUSIC, E_FIRE,
     E_GLOBE, E_SOS, E_SHIELD, E_PIN_LOC, E_SPARKLE, E_ROCKET, E_HEART3,
     E_THUNDER, E_MENU, E_COFFEE, E_SUCCESS, E_LOCK, E_LOADING, E_PENDING,
@@ -641,6 +641,28 @@ async def reply_to_dora(c, m):
     try:
         full_text = (m.text or m.caption or "").strip()
         LOGGER.info("reply_to_dora triggered chat_id=%s text=%r", m.chat.id, (full_text or "")[:60])
+
+        # Dora đi nào: chỉ SUDO, trong nhóm — bot rời nhóm (cùng kiểu với Dora khoá mõm)
+        if (
+            m.chat.type in (ChatType.SUPERGROUP, ChatType.GROUP)
+            and m.from_user
+            and m.from_user.id in (SUDO or [])
+            and re.search(r"dora\s+đi\s+nào", full_text, re.IGNORECASE)
+        ):
+            try:
+                await m.reply(
+                    f"{E_ROCKET} Đi đây! {E_BACK} Tạm biệt cả nhóm.",
+                    parse_mode=ParseMode.HTML,
+                )
+                await app.leave_chat(m.chat.id)
+            except Exception as e:
+                LOGGER.warning("Dora đi nào leave: %s", e)
+                try:
+                    await m.reply(f"{E_WARN} Không rời được: {e}", parse_mode=ParseMode.HTML)
+                except Exception:
+                    pass
+            return
+
         # Reply vào tin của bot → xử lý follow-up ngay tại đây (trả lời tiếp, kể cả có gọi Dora)
         if _is_reply_to_bot_ai(m):
             question = re.sub(r"(?i)[dDđĐ]ora[\s,]*(?:ơi|à|ê|nè)?[\s,]*", "", full_text).strip() or full_text

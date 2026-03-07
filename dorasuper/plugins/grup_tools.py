@@ -48,7 +48,7 @@ from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.safe_reply import reply_safe
 from dorasuper.vars import COMMAND_HANDLER, SUDO, SUPPORT_CHAT
 from utils import temp
-from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_MAY_CUTE, E_NOTE, E_OTO, E_SUCCESS, E_USER, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
+from dorasuper.emoji import E_BACK, E_CROSS, E_ERROR, E_HEART, E_LOADING, E_MAY_CUTE, E_NOTE, E_OTO, E_ROCKET, E_SUCCESS, E_USER, E_VIP, E_WELCOME, E_WELCOME1, E_WELCOME2
 
 LOGGER = getLogger("DoraSuper")
 
@@ -567,6 +567,7 @@ async def leave_a_chat(bot, message):
     except Exception as e:
         await message.reply(f"{E_ERROR} Error - {e}")
         await bot.leave_chat(chat)
+
 
 @app.on_message(filters.command(["tagid"], COMMAND_HANDLER))
 async def tag_by_id(client, message):

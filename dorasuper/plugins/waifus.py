@@ -53,7 +53,7 @@ COMMANDS = {
     "bite": {"category": "bite", "emoji": E_BITE_YOUR_LIPS, "text": "đã cắn"},
     "kiss": {"category": "kiss", "emoji": E_HEART4, "text": "đã hôn"},
     "highfive": {"category": "highfive", "emoji": E_PARTY, "text": "đã đập tay"},
-    "die": {"category": "cry", "emoji": E_CRY, "text": "đã chết"},
+    "die": {"category": "cry", "emoji": E_CRY, "text": "đã giết"},
     "chay": {"category": "run", "emoji": E_ROCKET, "text": "đã chạy"},
     "shoot": {"category": "shoot", "emoji": E_FIRE, "text": "đã bắn"},
     "dance": {"category": "dance", "emoji": E_PARTY, "text": "đã nhảy"},

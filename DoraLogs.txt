@@ -458,3 +458,208 @@ SyntaxError: '(' was never closed
 [INFO] - [06-Mar-26 13:17:41 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
 [INFO] - [06-Mar-26 13:17:41 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
 [INFO] - [06-Mar-26 13:17:42 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 13:21:14 - DoraSuper - waifus triggered command=slap chat_id=-1003540703692] -> [waifus:162]
+[INFO] - [06-Mar-26 13:23:20 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 13:23:27 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:52]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 13:23:28 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 13:23:29 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 13:23:51 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='Dora đi nào'] -> [fun:643]
+[WARNING] - [06-Mar-26 13:23:51 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 13:25:59 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 13:26:05 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:52]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 13:26:06 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 13:26:07 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 13:26:13 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='Dora đi nào'] -> [fun:643]
+[WARNING] - [06-Mar-26 13:26:13 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 13:26:45 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Key at 12 Thai ?'] -> [fun:643]
+[WARNING] - [06-Mar-26 13:26:45 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 13:28:38 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Vậy là hôm nay lúc 12 giờ trưa giờ Thái Lan sẽ có một sự kiệ'] -> [fun:643]
+[WARNING] - [06-Mar-26 13:28:39 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 13:30:29 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 13:30:36 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:52]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 13:30:37 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 13:30:38 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 13:30:46 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003836954872 text='Dora đi nào'] -> [fun:643]
+[INFO] - [06-Mar-26 13:30:47 - DoraSuper - Goodbye message error: Telegram says: [406 CHANNEL_PRIVATE] (caused by "messages.SendMessage") Pyrogram 2.3.58 thinks: The channel/supergroup is not accessible] -> [grup_tools:156]
+[INFO] - [06-Mar-26 13:30:47 - DoraSuper - Không thể cấm người dùng 8663283762: Telegram says: [406 CHANNEL_PRIVATE] (caused by "channels.EditBanned") Pyrogram 2.3.58 thinks: The channel/supergroup is not accessible] -> [grup_tools:167]
+[INFO] - [06-Mar-26 13:31:08 - DoraSuper - waifus triggered command=chay chat_id=-1003540703692] -> [waifus:162]
+[INFO] - [06-Mar-26 13:32:03 - root - Stop signal received (SIGINT). Exiting...] -> [idle:76]
+[INFO] - [06-Mar-26 13:32:03 - DoraSuper - ------------------------ Stopped Services ------------------------] -> [__main__:117]
+[INFO] - [06-Mar-26 13:32:25 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [06-Mar-26 13:32:32 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:52]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [06-Mar-26 13:32:33 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [06-Mar-26 13:32:33 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [06-Mar-26 13:33:45 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002412177997 text='Dora đi nào'] -> [fun:643]
+[INFO] - [06-Mar-26 16:00:50 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://www.tiktok.com/@_withlyy/video/7599298111206395143?i] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 16:02:17 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://www.tiktok.com/@kazumi_vn94/video/758664991790136040] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 16:17:58 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://www.tiktok.com/@tini.1998/video/7597376436458097928?] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 19:06:43 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='K như e @ThanhDora'] -> [fun:643]
+[WARNING] - [06-Mar-26 19:06:43 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 20:28:41 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='Mẹ game nhà phát hành mới ra đúng đc 1 game gặp e @ThanhDora'] -> [fun:643]
+[WARNING] - [06-Mar-26 20:28:41 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 20:55:46 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.instagram.com/reel/DVYGa8sEXG4/?utm_source=ig_we] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 20:58:53 - DoraSuper - auto_download_link: chat=5341455835 url=https://www.tiktok.com/@punxinhh2/video/7599719522819411220?] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 22:18:29 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='Sao nay k call với Thanh Dora'] -> [fun:643]
+[WARNING] - [06-Mar-26 22:18:29 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 22:22:43 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='a Thanh call với iostut ròi chị'] -> [fun:643]
+[WARNING] - [06-Mar-26 22:22:43 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 23:22:48 - DoraSuper - auto_download_link: chat=-1002502809309 url=https://vt.tiktok.com/ZSu85PwMT/] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 23:49:14 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://www.tiktok.com/@thegioi_hoanmy/video/759099246112471] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 23:50:08 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://www.tiktok.com/@thnantientyty/video/7610631019334536] -> [downloadsVideo:1363]
+[INFO] - [06-Mar-26 23:53:24 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='em này xinh nè mây'] -> [fun:643]
+[WARNING] - [06-Mar-26 23:53:24 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 23:53:46 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='anh khen em trong video cơ không phải em'] -> [fun:643]
+[WARNING] - [06-Mar-26 23:53:46 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 23:54:10 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='em ngủ đi'] -> [fun:643]
+[WARNING] - [06-Mar-26 23:54:10 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [06-Mar-26 23:54:29 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='em chúc chị Mây ngủ ngon giúp anh'] -> [fun:643]
+[WARNING] - [06-Mar-26 23:54:29 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 00:35:37 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='@ThanhDora'] -> [fun:643]
+[WARNING] - [07-Mar-26 00:35:37 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 00:35:40 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='@ThanhDora'] -> [fun:643]
+[WARNING] - [07-Mar-26 00:35:40 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 02:21:44 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='@ThanhDora'] -> [fun:643]
+[WARNING] - [07-Mar-26 02:21:44 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 02:34:41 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://www.tiktok.com/@yan.vn94/video/7614080855153085717?i] -> [downloadsVideo:1363]
+[INFO] - [07-Mar-26 11:46:29 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='@ThanhDora'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:46:30 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 11:49:33 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='DoraSuper sắp xâm chiếm thế giới 😇'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:49:33 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 11:51:05 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='Dora chào em'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:51:05 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 11:51:18 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='dẹo mắc ói'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:51:19 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 11:51:19 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='dora nhớ anh không'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:51:19 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 11:51:56 - DoraSuper - auto_download_link: chat=-1003882219288 url=https://kktiktok.com/t/ZSuLXfCvw] -> [downloadsVideo:1363]
+[INFO] - [07-Mar-26 11:52:44 - DoraSuper - waifus triggered command=die chat_id=-1003882219288] -> [waifus:162]
+[INFO] - [07-Mar-26 11:53:14 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='Dora khoá mõm 10m'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:53:15 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[INFO] - [07-Mar-26 11:54:43 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [07-Mar-26 11:54:51 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:38]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - +===============================================================+] -> [__main__:49]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - |                        DoraSuper                           |] -> [__main__:50]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:51]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:52]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:53]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:54]
+[INFO] - [07-Mar-26 11:54:52 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:56]
+[INFO] - [07-Mar-26 11:54:52 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [07-Mar-26 11:55:11 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='Dora bỏ immom'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:55:12 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 11:55:31 - DoraSuper - Updated admin cache for -1003882219288 [F4ck Chat]] -> [admin:113]
+[INFO] - [07-Mar-26 11:56:28 - DoraSuper - waifus triggered command=shoot chat_id=-1003882219288] -> [waifus:162]
+[INFO] - [07-Mar-26 11:57:27 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='a phải bảo là “Dora kick nó” kiểu v'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:57:28 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 11:57:42 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='Xong em bay'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:57:42 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 11:57:48 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='láo mày'] -> [fun:643]
+[WARNING] - [07-Mar-26 11:57:48 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 12:00:39 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003882219288 text='chưa gì đã phản rồi 🐧'] -> [fun:643]
+[WARNING] - [07-Mar-26 12:00:39 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 12:02:10 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='Em thử nhắn dora đi nào xem'] -> [fun:643]
+[INFO] - [07-Mar-26 12:03:06 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-5021523662 text='chào dora'] -> [fun:643]
+[WARNING] - [07-Mar-26 12:03:06 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 12:03:34 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-5021523662 text='dora'] -> [fun:643]
+[WARNING] - [07-Mar-26 12:03:34 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 12:03:52 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-5021523662 text='dora, tiktok có gì hay ko'] -> [fun:643]
+[WARNING] - [07-Mar-26 12:03:52 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
+[INFO] - [07-Mar-26 12:04:27 - DoraSuper - auto_download_link: chat=-5021523662 url=https://vt.tiktok.com/ZSuRXWkn8/] -> [downloadsVideo:1363]
+[INFO] - [07-Mar-26 13:10:45 - DoraSuper - waifus triggered command=slap chat_id=-1003157934072] -> [waifus:162]
+[INFO] - [07-Mar-26 13:17:18 - DoraSuper - auto_download_link: chat=-1003476714676 url=https://x.com/beautyverse_lab/status/2029845715070111786?s=4] -> [downloadsVideo:1363]
+[INFO] - [07-Mar-26 13:18:34 - DoraSuper - auto_download_link: chat=-1003476714676 url=https://x.com/keshiaiart/status/2029942120983957745?s=46] -> [downloadsVideo:1363]
+[INFO] - [07-Mar-26 13:19:16 - DoraSuper - auto_download_link: chat=-1003476714676 url=https://www.instagram.com/p/DVQBEL4EcYV/?igsh=OWphbWIwa2h1YW] -> [downloadsVideo:1363]
+[INFO] - [07-Mar-26 13:19:19 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
+[INFO] - [07-Mar-26 13:19:20 - private_request - None [400] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [07-Mar-26 13:19:21 - instagrapi - https://i.instagram.com/api/v1/challenge/] -> [private:328]
+[INFO] - [07-Mar-26 13:19:22 - private_request - None [200] GET https://i.instagram.com/api/v1/challenge/ (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
+[INFO] - [07-Mar-26 13:19:23 - public_request - [None] [400] GET https://www.instagram.com/graphql/query/?variables=%7B%22user_id%22%3A%2247944333652%22%2C%22include_reel%22%3Atrue%7D&query_hash=ad99dd9d3646cc3c0dda65debcd266a7] -> [public:174]
