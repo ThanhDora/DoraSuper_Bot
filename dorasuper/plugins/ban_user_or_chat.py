@@ -11,6 +11,7 @@ from dorasuper.helper.emoji_fmt import EMOJI_FMT
 from dorasuper.helper.localization import use_chat_lang
 from dorasuper.helper.safe_reply import emoji_to_unicode, reply_safe
 from dorasuper.vars import COMMAND_HANDLER, LOG_CHANNEL, SUDO, SUPPORT_CHAT
+from dorasuper.log_topics import LOG_TOPIC_IDS
 from dorasuper.emoji import (
     E_ERROR,
     E_GROUP,
@@ -93,6 +94,7 @@ async def grp_bd(self: Client, ctx: Message, strings):
                     ttl=ctx.chat.title, cid=ctx.chat.id, tot=total, r_j=r_j, link=group_link, **EMOJI_FMT
                 ),
                 parse_mode=enums.ParseMode.HTML,
+                message_thread_id=LOG_TOPIC_IDS["new_groups"],
             )
         except Exception as e:
             LOGGER.warning("Không gửi được tin lên LOG: %s", e)

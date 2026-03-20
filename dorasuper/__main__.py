@@ -10,6 +10,7 @@ from pyrogram import __version__, enums, idle
 from pyrogram.raw.all import layer
 
 from database import dbname
+from dorasuper.log_topics import ensure_log_topics
 from dorasuper import (
     BOT_NAME,
     BOT_USERNAME,
@@ -36,6 +37,12 @@ async def start_bot():
             except Exception as e:
                 LOGGER.error("Failed to load module %s: %s", module, e, exc_info=True)
         LOGGER.info("HELPABLE modules (%d): %s", len(HELPABLE), sorted(HELPABLE.keys()))
+
+        # Tạo forum topics trong LOG_CHANNEL (nếu chưa có)
+        try:
+            await ensure_log_topics(app)
+        except Exception as e:
+            LOGGER.error("Không tạo được LOG_CHANNEL topics: %s", e)
 
         bot_modules = ""
         j = 1

@@ -617,19 +617,20 @@ def _dora_or_cmd_filter(_, __, m):
     # Khi dùng / lệnh thì thôi — chỉ handler lệnh chạy
     if raw.strip().startswith("/"):
         return False
-    # Tin hiện tại có "Dora" → gọi Dora (hoặc từ khoá)
-    if _has_dora_text(raw):
-        return True
-    # Reply kèm nội dung: reply vào tin có "Dora" HOẶC reply vào tin của bot (follow-up) → vào handler
     reply = m.reply_to_message
-    if reply and raw.strip():
-        replied_raw = (reply.text or reply.caption or "") or ""
-        if _has_dora_text(replied_raw):
+    # Nếu là reply
+    if reply:
+        # Lệnh Dora khoá mõm / đá / cấm...: cho phép dù tin được reply không có "Dora"
+        if _has_dora_text(raw) and _has_cmd_keyword(raw):
             return True
         # Reply vào tin của bot (bất kể nội dung) → follow-up Dora
         if _is_reply_to_bot_ai(m):
             return True
-    return False
+        # AI chỉ kích hoạt khi tin được reply có "Dora"
+        replied_raw = (reply.text or reply.caption or "") or ""
+        return _has_dora_text(replied_raw)
+    # Không phải reply: chỉ cần tin hiện tại có "Dora" (gọi Dora trực tiếp trong chat)
+    return _has_dora_text(raw)
 
 @app.on_message(
     (filters.text | filters.caption) & ~filters.via_bot & (filters.group | filters.private) & filters.create(_dora_or_cmd_filter),

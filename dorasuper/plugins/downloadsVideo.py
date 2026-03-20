@@ -901,6 +901,14 @@ async def _send_result_to_log_channel(ctx: Message, platform: str, caption: str,
         prefix = f"{E_MSG} {E_USER} PM từ {u.first_name or 'User'} (id: <code>{u.id}</code>) | {platform}\n\n"
     cap = prefix + (caption or "")
     try:
+        # Chọn topic phù hợp dựa trên loại media
+        from dorasuper.log_topics import LOG_TOPIC_IDS
+        if images:
+            _thread = LOG_TOPIC_IDS["photos"]
+        elif videos:
+            _thread = LOG_TOPIC_IDS["videos"]
+        else:
+            _thread = None
         if len(images) > 1:
             jpeg_list: list[bytes] = []
             for p in images[:MAX_ALBUM_PHOTOS]:
@@ -912,15 +920,15 @@ async def _send_result_to_log_channel(ctx: Message, platform: str, caption: str,
                     InputMediaPhoto(media=io.BytesIO(jpeg_list[0]), caption=cap, parse_mode=enums.ParseMode.HTML),
                     *[InputMediaPhoto(media=io.BytesIO(b)) for b in jpeg_list[1:]],
                 ]
-                await app.send_media_group(LOG_CHANNEL, media=media_list)
+                await app.send_media_group(LOG_CHANNEL, media=media_list, message_thread_id=_thread)
         elif len(images) == 1:
             jpeg_bytes = await asyncio.to_thread(_image_to_jpeg_sync, images[0])
             if jpeg_bytes and len(jpeg_bytes) <= MAX_FILE_SIZE:
-                await app.send_photo(LOG_CHANNEL, photo=io.BytesIO(jpeg_bytes), caption=cap, parse_mode=enums.ParseMode.HTML)
+                await app.send_photo(LOG_CHANNEL, photo=io.BytesIO(jpeg_bytes), caption=cap, parse_mode=enums.ParseMode.HTML, message_thread_id=_thread)
             else:
-                await app.send_photo(LOG_CHANNEL, photo=images[0], caption=cap, parse_mode=enums.ParseMode.HTML)
+                await app.send_photo(LOG_CHANNEL, photo=images[0], caption=cap, parse_mode=enums.ParseMode.HTML, message_thread_id=_thread)
         elif videos:
-            await app.send_video(LOG_CHANNEL, video=videos[0], caption=cap, parse_mode=enums.ParseMode.HTML)
+            await app.send_video(LOG_CHANNEL, video=videos[0], caption=cap, parse_mode=enums.ParseMode.HTML, message_thread_id=_thread)
         elif other:
             await app.send_document(LOG_CHANNEL, document=other[0], caption=cap, parse_mode=enums.ParseMode.HTML)
     except Exception as e:

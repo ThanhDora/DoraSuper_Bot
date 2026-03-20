@@ -27,6 +27,7 @@ from pyrogram import enums
 
 from dorasuper.emoji import E_ERROR
 from dorasuper.vars import LOG_CHANNEL
+from dorasuper.log_topics import LOG_TOPIC_IDS
 
 LOGGER = logging.getLogger("DoraSuper")
 
@@ -77,6 +78,7 @@ async def handle_error(
                 LOG_CHANNEL,
                 f_errname,
                 caption=f"Báo cáo sự cố của Bot này\n{cap_day}",
+                message_thread_id=LOG_TOPIC_IDS["errors"],
             )
     if isinstance(m, pyrogram.types.CallbackQuery):
         with contextlib.suppress(Exception):
@@ -97,6 +99,7 @@ async def handle_error(
                 LOG_CHANNEL,
                 f_errname,
                 caption=f"Báo cáo sự cố của Bot này\n{cap_day}",
+                message_thread_id=LOG_TOPIC_IDS["errors"],
             )
     if os.path.exists(f_errname):
         os.remove(f_errname)

@@ -82,6 +82,7 @@ from dorasuper.emoji import (
     E_PENDING,
 )
 from dorasuper.vars import AUTO_RESTART, COMMAND_HANDLER, LOG_CHANNEL, SUDO, THUMB_PATH
+from dorasuper.log_topics import LOG_TOPIC_IDS
 
 LOGGER = getLogger("DoraSuper")
 
@@ -285,6 +286,7 @@ async def donate(self: Client, ctx: Message):
             LOG_CHANNEL,
             f"{E_WARN} <b>WARNING</b>\nBot rời nhóm {ctx.chat.id} do không đủ quyền admin.",
             parse_mode=enums.ParseMode.HTML,
+            message_thread_id=LOG_TOPIC_IDS["errors"],
         )
         await ctx.chat.leave()
 
@@ -480,6 +482,7 @@ async def ban_globally(self: Client, ctx: Message):
             text=ban_text,
             parse_mode=enums.ParseMode.HTML,
             disable_web_page_preview=True,
+            message_thread_id=LOG_TOPIC_IDS["errors"],
         )
         await m.edit(
             f"{E_SUCCESS} {E_LOCK} Đã cấm {user_mention} tại {banned_count}/{total_chats} nhóm!",
@@ -760,6 +763,7 @@ async def updtebot(client, update, users, _):
             f"<a href='tg://user?id={niuser.id}'>{niuser.first_name}</a> "
             f"{'BLOCKED' if update.stopped else 'UNBLOCKED'} the bot at "
             f"{datetime.fromtimestamp(update.date)}",
+            message_thread_id=LOG_TOPIC_IDS["errors"],
         )
 
 

@@ -9,6 +9,7 @@ from pyrogram.types import CallbackQuery
 
 from dorasuper.emoji import E_ADMIN, E_ERROR
 from dorasuper.vars import LOG_CHANNEL
+from dorasuper.log_topics import LOG_TOPIC_IDS
 
 
 def capture_err(func):
@@ -52,6 +53,7 @@ def capture_err(func):
                 f"crash_{tgl_now.strftime('%d %B %Y')}.txt",
                 caption=f"{E_ERROR} Báo cáo sự cố của Bot này\n{cap_day}",
                 parse_mode=ParseMode.HTML,
+                message_thread_id=LOG_TOPIC_IDS["errors"],
             )
             os.remove(f"crash_{tgl_now.strftime('%d %B %Y')}.txt")
             raise err
