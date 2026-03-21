@@ -13,3 +13,5 @@ gen-lang-client-*.json
 
 # Log đối thoại AI (huấn luyện) – tùy chọn commit
 logs/
+
+venv/
