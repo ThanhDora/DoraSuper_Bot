@@ -15,3 +15,7 @@ gen-lang-client-*.json
 logs/
 
 venv/
+
+# File tải về (video TikTok, ảnh tạm) — không commit, tránh vượt giới hạn GitHub 100MB
+downloads/
+*.part
