@@ -43,11 +43,7 @@ LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "TảiVideo"
 __HELP__ = """
-<blockquote>Gửi link TikTok, X (Twitter), Facebook hoặc Instagram - Bot tự tải và gửi video/ảnh.
-• TikTok: video + ảnh/album (gallery-dl, TikWM, Cobalt)
-• X (Twitter): video/ảnh (x.com, twitter.com)
-• Facebook: video và ảnh (fb.com, fb.watch, facebook.com)
-• Instagram: video/Reels (instagram.com)
+<blockquote>Gửi link từ bất kỳ mạng xã hội nào (TikTok, Facebook, Instagram, YouTube, X/Twitter, Threads, Pinterest, Reddit, Douyin, Xiaohongshu, Bilibili, CapCut, Kuaishou, SoundCloud) - Bot tự tải và gửi video/ảnh/âm thanh.
 
 Lệnh:
 /autodl - Bật/tắt tự động tải link trong nhóm (admin)
@@ -57,7 +53,7 @@ Lệnh:
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 MAX_ALBUM_PHOTOS = 10  # Telegram giới hạn media group tối đa 10 ảnh
 
-# Regex theo từng nền tảng (dễ mở rộng thêm YouTube, ...)
+# Regex theo từng nền tảng (hỗ trợ đầy đủ tất cả mạng xã hội)
 URL_PATTERNS = {
     "tiktok": re.compile(
         r"(?:https?://)?(?:www\.|vm\.|vt\.|m\.|t\.)?(?:tiktok\.com|tiktokv\.com|kktiktok\.com)/[^\s]+",
@@ -73,6 +69,46 @@ URL_PATTERNS = {
     ),
     "x": re.compile(
         r"(?:https?://)?(?:www\.|mobile\.)?(?:twitter\.com|x\.com)/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "youtube": re.compile(
+        r"(?:https?://)?(?:www\.)?(?:youtube\.com|youtu\.be|youtube-nocookie\.com)/(?:watch\?v=|embed/|v/|shorts/)?([a-zA-Z0-9_-]{11})|[^\s]*youtube\.com[^\s]+",
+        re.IGNORECASE,
+    ),
+    "reddit": re.compile(
+        r"(?:https?://)?(?:www\.)?reddit\.com/r/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "pinterest": re.compile(
+        r"(?:https?://)?(?:www\.|cz\.|pl\.|[a-z]{2}\.)?pinterest\.(?:com|[a-z]{2,3})/pin/[^\s]+|pin\.it/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "threads": re.compile(
+        r"(?:https?://)?(?:www\.)?threads\.net/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "douyin": re.compile(
+        r"(?:https?://)?(?:www\.|v\.)?douyin\.com/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "xiaohongshu": re.compile(
+        r"(?:https?://)?(?:www\.)?xiaohongshu\.com/[^\s]+|xhslink\.com/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "bilibili": re.compile(
+        r"(?:https?://)?(?:www\.)?bilibili\.com/[^\s]+|b23\.tv/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "capcut": re.compile(
+        r"(?:https?://)?(?:www\.)?capcut\.com/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "kuaishou": re.compile(
+        r"(?:https?://)?(?:www\.|v\.)?kuaishou\.com/[^\s]+",
+        re.IGNORECASE,
+    ),
+    "soundcloud": re.compile(
+        r"(?:https?://)?(?:www\.)?soundcloud\.com/[^\s]+",
         re.IGNORECASE,
     ),
 }
@@ -724,6 +760,55 @@ async def _download_tiktok_photo(url: str, out_dir: str) -> tuple[list[str] | No
 # TikWM API (fallback TikTok) — theo logic ytttins_dl
 TIKWM_API = "https://www.tikwm.com/api/"
 
+PUBLIC_COBALT_URLS = [
+    "https://api.cobalt.tools",
+    "https://cobalt.api.ryzetech.live",
+    "https://api.box.so/cobalt",
+]
+
+
+async def _fetch_cobalt_universal(url: str) -> dict | None:
+    """Gọi Cobalt API cho bất kỳ mạng xã hội nào. Trả về response JSON nếu thành công, None nếu lỗi."""
+    if not url.strip():
+        return None
+    u = url.strip()
+    if not u.startswith("http"):
+        u = "https://" + u
+
+    urls_to_try = []
+    if COBALT_URL:
+        urls_to_try.append(COBALT_URL)
+    for p_url in PUBLIC_COBALT_URLS:
+        if p_url not in urls_to_try:
+            urls_to_try.append(p_url)
+
+    for api_url in urls_to_try:
+        try:
+            LOGGER.info(f"Attempting to download via Cobalt instance: {api_url}")
+            timeout = aiohttp.ClientTimeout(total=20)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(
+                    f"{api_url}/",
+                    json={
+                        "url": u,
+                        "videoQuality": "1080",
+                        "downloadMode": "auto",
+                        "subtitleLang": "vi",
+                    },
+                    headers={
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    }
+                ) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        if data and data.get("status") in ("picker", "tunnel", "redirect"):
+                            return data
+        except Exception as e:
+            LOGGER.warning("Cobalt API error on %s: %s", api_url, e)
+    return None
+
 
 async def _fetch_cobalt_tiktok(url: str) -> dict | None:
     """Gọi Cobalt API cho TikTok. Trả về response JSON nếu thành công, None nếu lỗi."""
@@ -936,15 +1021,15 @@ async def _send_result_to_log_channel(ctx: Message, platform: str, caption: str,
 
 
 async def _process_download(ctx: Message, url: str, platform: str):
-    """Xử lý tải và gửi media (video, ảnh đơn hoặc album ảnh TikTok)."""
+    """Xử lý tải và gửi media (video, ảnh đơn hoặc album ảnh cho mọi mạng xã hội)."""
     if platform == "tiktok":
         url = _normalize_tiktok_url(url)
     m = await ctx.reply_msg(f"{E_SHOUT}Đang tải từ {platform}{E_LOADING}", quote=True)
 
-    # TikTok: ưu tiên Cobalt (redirect/tunnel/picker — theo ytttins_dl)
-    if platform == "tiktok" and COBALT_URL:
-        data = await _fetch_cobalt_tiktok(url)
-        if data and data.get("status") == "picker":
+    # 1. Thử Cobalt API trước tiên cho tất cả nền tảng
+    data = await _fetch_cobalt_universal(url)
+    if data:
+        if data.get("status") == "picker":
             picker = data.get("picker") or []
             if picker:
                 try:
@@ -980,7 +1065,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
                     if collected:
                         shared_by = (ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user and ctx.from_user.username else (ctx.from_user.first_name or ""))) if ctx.from_user else ""
                         fake_info = {"webpage_url": url}
-                        caption = _build_caption(fake_info, 0, "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
+                        caption = _build_caption(fake_info, 0, platform, shared_by) or f"{E_SUCCESS} Tải từ {platform.title()}"
                         await m.edit_msg(f"{E_UPD} Đang gửi{E_LOADING}")
                         imgs = [p for p in collected if p.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))]
                         videos = [p for p in collected if p.lower().endswith((".mp4", ".mov", ".webm"))]
@@ -1007,6 +1092,8 @@ async def _process_download(ctx: Message, url: str, platform: str):
                                 await app.delete_messages(ctx.chat.id, ctx.id)
                             except Exception:
                                 pass
+                        # PM (nhắn riêng): gửi bản sao vào LOG_CHANNEL
+                        await _send_result_to_log_channel(ctx, platform, caption, imgs, videos, [])
                         try:
                             for f in os.listdir(out_dir):
                                 p = os.path.join(out_dir, f)
@@ -1018,14 +1105,14 @@ async def _process_download(ctx: Message, url: str, platform: str):
                         return
                 except Exception as e:
                     LOGGER.warning("Cobalt picker: %s", e)
-        if data and data.get("status") in ("tunnel", "redirect"):
+        elif data.get("status") in ("tunnel", "redirect"):
             download_url = (data.get("url") or "").strip()
             if download_url:
                 shared_by = ""
                 if ctx.from_user:
                     shared_by = ctx.from_user.mention or (f"@{ctx.from_user.username}" if ctx.from_user.username else ctx.from_user.first_name or "")
                 fake_info = {"webpage_url": url}
-                caption = _build_caption(fake_info, 0, "tiktok", shared_by) or f"{E_SUCCESS} Tải từ TikTok"
+                caption = _build_caption(fake_info, 0, platform, shared_by) or f"{E_SUCCESS} Tải từ {platform.title()}"
                 try:
                     if download_url.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
                         await ctx.reply_photo(
@@ -1033,6 +1120,7 @@ async def _process_download(ctx: Message, url: str, platform: str):
                             caption=caption,
                             parse_mode=enums.ParseMode.HTML,
                         )
+                        await _send_result_to_log_channel(ctx, platform, caption, [download_url], [], [])
                     else:
                         timeout = aiohttp.ClientTimeout(total=60)
                         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -1046,12 +1134,26 @@ async def _process_download(ctx: Message, url: str, platform: str):
                             )
                             return
                         await m.edit_msg(f"{E_UPD} Đang gửi{E_LOADING}")
-                        await ctx.reply_video(
-                            video=io.BytesIO(file_bytes),
-                            caption=caption,
-                            parse_mode=enums.ParseMode.HTML,
-                            supports_streaming=True,
-                        )
+                        is_audio = platform in ("soundcloud",) or download_url.lower().endswith((".mp3", ".m4a", ".ogg", ".opus", ".wav"))
+                        if is_audio:
+                            audio_io = io.BytesIO(file_bytes)
+                            audio_io.name = f"{platform}_audio.mp3"
+                            await ctx.reply_audio(
+                                audio=audio_io,
+                                caption=caption,
+                                parse_mode=enums.ParseMode.HTML,
+                            )
+                            await _send_result_to_log_channel(ctx, platform, caption, [], [], [audio_io])
+                        else:
+                            video_io = io.BytesIO(file_bytes)
+                            video_io.name = f"{platform}_video.mp4"
+                            await ctx.reply_video(
+                                video=video_io,
+                                caption=caption,
+                                parse_mode=enums.ParseMode.HTML,
+                                supports_streaming=True,
+                            )
+                            await _send_result_to_log_channel(ctx, platform, caption, [], [video_io], [])
                     await m.delete()
                     if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
                         try:
@@ -1221,6 +1323,25 @@ async def _process_download(ctx: Message, url: str, platform: str):
                     paths, err, info = paths_gd, None, {}
                 else:
                     err = f"Instagram: {err_gd or err_ig or err}"
+
+        # Pinterest: fallback sang gallery-dl
+        if (err or not paths) and platform == "pinterest":
+            paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
+            if paths_gd:
+                paths, err, info = paths_gd, None, {}
+
+        # Threads: fallback sang gallery-dl
+        if (err or not paths) and platform == "threads":
+            paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
+            if paths_gd:
+                paths, err, info = paths_gd, None, {}
+
+        # Xiaohongshu: fallback sang gallery-dl
+        if (err or not paths) and platform == "xiaohongshu":
+            paths_gd, err_gd = await asyncio.to_thread(_download_images_gallery_dl_sync, url, out_dir)
+            if paths_gd:
+                paths, err, info = paths_gd, None, {}
+
         if err:
             return await m.edit_msg(f"{E_ERROR} {err}")
 
@@ -1363,6 +1484,11 @@ async def auto_download_mentioned(_, ctx: Message):
 @new_task
 async def auto_download_link(_, ctx: Message):
     """Tự động tải khi tin nhắn chứa link."""
+    if ctx.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+        from database.autodl_db import is_autodl_on
+        if not await is_autodl_on(ctx.chat.id):
+            return
+
     text = (ctx.text or ctx.caption or "").strip()
     result = _extract_supported_url(text)
     if not result:

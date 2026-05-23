@@ -19,3 +19,12 @@ venv/
 # File tải về (video TikTok, ảnh tạm) — không commit, tránh vượt giới hạn GitHub 100MB
 downloads/
 *.part
+
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS/editor artifacts
+.DS_Store
+

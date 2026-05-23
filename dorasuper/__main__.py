@@ -88,12 +88,19 @@ async def start_bot():
                 with open("restart.pickle", "rb") as status:
                     chat_id, message_id = pickle.load(status)
                 os.remove("restart.pickle")
-                await app.edit_message_text(
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    text=f"{E_SUCCESS} <b>DoraSuper đã khởi động lại thành công!</b>",
-                    parse_mode=enums.ParseMode.HTML,
-                )
+                try:
+                    await app.edit_message_text(
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        text=f"{E_SUCCESS} <b>DoraSuper đã khởi động lại thành công!</b>",
+                        parse_mode=enums.ParseMode.HTML,
+                    )
+                except Exception:
+                    await app.send_message(
+                        chat_id=chat_id,
+                        text=f"{E_SUCCESS} <b>DoraSuper đã khởi động lại thành công!</b>",
+                        parse_mode=enums.ParseMode.HTML,
+                    )
             except Exception as e:
                 LOGGER.error(f"Failed to handle restart.pickle: {str(e)}")
 

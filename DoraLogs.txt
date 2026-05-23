@@ -1,28 +1,1653 @@
-[INFO] - [20-Mar-26 17:27:16 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.tiktok.com/@nocni03/photo/7612288506907626772?_r] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 17:28:52 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.tiktok.com/@nocni03/photo/7612288506907626772?_r] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 17:28:57 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/godsehee0411/status/2034803933412302873?s=46] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 17:29:30 - DoraSuper - Updated admin cache for -1003368550175 [iOSVN Chats]] -> [admin:113]
-[INFO] - [20-Mar-26 17:50:51 - DoraSuper - waifus triggered command=shoot chat_id=-1003368550175] -> [waifus:162]
-[INFO] - [20-Mar-26 17:51:50 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora cho nó cút khỏi tầm mắt anh'] -> [fun:644]
-[WARNING] - [20-Mar-26 17:51:52 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [20-Mar-26 17:53:46 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora ghi nhớ 𝙈𝙞𝙣𝙞𝙊𝙣 𝙍𝙖𝙧𝙚 là thằng mà anh ghét nhất em nhé'] -> [fun:644]
-[WARNING] - [20-Mar-26 17:53:46 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [20-Mar-26 17:53:57 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='dạ'] -> [fun:644]
-[INFO] - [20-Mar-26 17:54:30 - DoraSuper - waifus triggered command=hug chat_id=-1003368550175] -> [waifus:162]
-[INFO] - [20-Mar-26 17:56:09 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Cho eim cốc sữa đá nữa 😇'] -> [fun:644]
-[INFO] - [20-Mar-26 18:00:01 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
-[INFO] - [20-Mar-26 18:00:09 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
-[INFO] - [20-Mar-26 18:00:09 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:39]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - LOG_TOPIC [commands] đã có: thread_id=3160] -> [log_topics:49]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - LOG_TOPIC [photos] đã có: thread_id=3161] -> [log_topics:49]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - LOG_TOPIC [videos] đã có: thread_id=3162] -> [log_topics:49]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - LOG_TOPIC [new_groups] đã có: thread_id=3163] -> [log_topics:49]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - LOG_TOPIC [errors] đã có: thread_id=3164] -> [log_topics:49]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - LOG_TOPICS: commands=3160, photos=3161, videos=3162, new_groups=3163, errors=3164] -> [log_topics:74]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - +===============================================================+] -> [__main__:56]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - |                        DoraSuper                           |] -> [__main__:57]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:58]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+[INFO] - [23-May-26 10:41:06 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:45]
+[ERROR] - [23-May-26 10:41:06 - DoraSuper - Failed to load module admin: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/admin.py", line 24, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:06 - DoraSuper - Failed to load module admin_log_messages: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/admin_log_messages.py", line 11, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module afk: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/afk.py", line 12, in <module>
+    from dorasuper.core.decorator.permissions import adminsOnly
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 11, in <module>
+    from dorasuper.helper.emoji_fmt import EMOJI_FMT
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module ai: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/ai.py", line 19, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module autoapprove: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/autoapprove.py", line 14, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module ban_user_or_chat: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/ban_user_or_chat.py", line 9, in <module>
+    from dorasuper.helper.emoji_fmt import EMOJI_FMT
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module blacklist_chat: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/blacklist_chat.py", line 16, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module broadcast: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/broadcast.py", line 11, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module checkin: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 14, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module daoly: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/daoly.py", line 7, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module dev: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module downloadsVideo: cannot import name 'capture_err' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/downloadsVideo.py", line 23, in <module>
+    from dorasuper.core.decorator import capture_err, new_task
+ImportError: cannot import name 'capture_err' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module filters: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/filters.py", line 18, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module fun: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/fun.py", line 15, in <module>
+    from dorasuper.helper.timezone import VN_TZ
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module fungame: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/fungame.py", line 8, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module funny_rate: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/funny_rate.py", line 19, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module getid_emoji: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/getid_emoji.py", line 10, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module goldprice: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/goldprice.py", line 2, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module grup_tools: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/grup_tools.py", line 10, in <module>
+    from dorasuper.helper.timezone import VN_TZ
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module imdb_search: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/imdb_search.py", line 25, in <module>
+    from dorasuper.helper import GENRES_EMOJI, Cache, fetch, get_random_string, search_jw
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module inkick_user: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/inkick_user.py", line 13, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module json: 'Client' object has no attribute 'on_cmd'] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/json.py", line 12, in <module>
+    @app.on_cmd("json")
+     ^^^^^^^^^^
+AttributeError: 'Client' object has no attribute 'on_cmd'
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module karma: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/karma.py", line 5, in <module>
+    from dorasuper.helper.timezone import now_vn
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module lang_setting: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/lang_setting.py", line 16, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module locks: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/locks.py", line 11, in <module>
+    from dorasuper.core.decorator.permissions import adminsOnly, list_admins
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 11, in <module>
+    from dorasuper.helper.emoji_fmt import EMOJI_FMT
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module love: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/love.py", line 11, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module mediainfo: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/mediainfo.py", line 13, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module ping: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/ping.py", line 13, in <module>
+    from dorasuper.helper.human_read import get_readable_time
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module quotly: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/quotly.py", line 14, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module sangmata: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/sangmata.py", line 15, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module sed: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/sed.py", line 10, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module start_help: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/start_help.py", line 15, in <module>
+    from dorasuper.helper import bot_sys_stats, paginate_modules
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module stickers: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/stickers.py", line 32, in <module>
+    from dorasuper.helper import fetch, use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 1, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+ImportError: cannot import name 'new_task' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[ERROR] - [23-May-26 10:41:07 - DoraSuper - Failed to load module weather: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/weather.py", line 6, in <module>
+    from dorasuper.core.decorator import banned_users
+ImportError: cannot import name 'banned_users' from 'dorasuper.core.decorator' (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py)
+[INFO] - [23-May-26 10:41:07 - DoraSuper - HELPABLE modules (1): ['hhtươngtác']] -> [__main__:37]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - LOG_TOPIC [commands] đã có: thread_id=3160] -> [log_topics:49]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - LOG_TOPIC [photos] đã có: thread_id=3161] -> [log_topics:49]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - LOG_TOPIC [videos] đã có: thread_id=3162] -> [log_topics:49]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - LOG_TOPIC [new_groups] đã có: thread_id=3163] -> [log_topics:49]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - LOG_TOPIC [errors] đã có: thread_id=3164] -> [log_topics:49]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - LOG_TOPICS: commands=3160, photos=3161, videos=3162, new_groups=3163, errors=3164] -> [log_topics:74]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - +===============================================================+] -> [__main__:54]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - |                        DoraSuper                           |] -> [__main__:55]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:56]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |daoly          |delete_command_msg|
+|dev            |downloadsVideo |filters        |fun            |
+|fungame        |funny_rate     |gemini_ai      |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |ping           |quotly         |
+|resetdb        |sangmata       |sed            |start_help     |
+|stickers       |waifus         |weather        ] -> [__main__:57]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:58]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:59]
+[INFO] - [23-May-26 10:41:07 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:61]
+[INFO] - [23-May-26 10:41:08 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [23-May-26 10:41:56 - DoraSuper - waifus triggered command=chay chat_id=5341455835] -> [waifus:136]
+[INFO] - [23-May-26 10:43:28 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module admin: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/admin.py", line 24, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 11, in <module>
+    from dorasuper.helper.emoji_fmt import EMOJI_FMT
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module admin_log_messages: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/admin_log_messages.py", line 11, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 12, in <module>
+    from dorasuper.helper.sqlite_helper import Cache
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module afk: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/afk.py", line 12, in <module>
+    from dorasuper.core.decorator.permissions import adminsOnly
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 12, in <module>
+    from dorasuper.helper.sqlite_helper import Cache
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module ai: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/ai.py", line 19, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 12, in <module>
+    from dorasuper.helper.sqlite_helper import Cache
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module autoapprove: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/autoapprove.py", line 14, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 12, in <module>
+    from dorasuper.helper.sqlite_helper import Cache
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module ban_user_or_chat: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/ban_user_or_chat.py", line 10, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module blacklist_chat: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/blacklist_chat.py", line 16, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module broadcast: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/broadcast.py", line 11, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module checkin: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/checkin.py", line 14, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module daoly: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/daoly.py", line 7, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module dev: cannot import name 'shell_exec' from partially initialized module 'dorasuper.plugins.dev' (most likely due to a circular import) (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py)] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+ImportError: cannot import name 'shell_exec' from partially initialized module 'dorasuper.plugins.dev' (most likely due to a circular import) (/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py)
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module downloadsVideo: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/downloadsVideo.py", line 23, in <module>
+    from dorasuper.core.decorator import capture_err, new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module filters: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/filters.py", line 18, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module fun: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/fun.py", line 15, in <module>
+    from dorasuper.helper.timezone import VN_TZ
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module fungame: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/fungame.py", line 8, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module funny_rate: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/funny_rate.py", line 19, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module getid_emoji: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/getid_emoji.py", line 10, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module goldprice: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/goldprice.py", line 2, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module grup_tools: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/grup_tools.py", line 10, in <module>
+    from dorasuper.helper.timezone import VN_TZ
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module imdb_search: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/imdb_search.py", line 25, in <module>
+    from dorasuper.helper import GENRES_EMOJI, Cache, fetch, get_random_string, search_jw
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module inkick_user: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/inkick_user.py", line 13, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module karma: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/karma.py", line 5, in <module>
+    from dorasuper.helper.timezone import now_vn
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module lang_setting: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/lang_setting.py", line 16, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module locks: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/locks.py", line 11, in <module>
+    from dorasuper.core.decorator.permissions import adminsOnly, list_admins
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module love: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/love.py", line 11, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module mediainfo: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/mediainfo.py", line 13, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module quotly: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/quotly.py", line 14, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module sangmata: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/sangmata.py", line 15, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module sed: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/sed.py", line 10, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module start_help: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/start_help.py", line 15, in <module>
+    from dorasuper.helper import bot_sys_stats, paginate_modules
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module stickers: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/stickers.py", line 32, in <module>
+    from dorasuper.helper import fetch, use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 46, in <module>
+    from dorasuper.core.decorator import new_task
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[ERROR] - [23-May-26 10:43:28 - DoraSuper - Failed to load module weather: name 'os' is not defined] -> [__main__:36]
+Traceback (most recent call last):
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/__main__.py", line 31, in start_bot
+    imported_module = importlib.import_module(f"dorasuper.plugins.{module}")
+  File "/opt/homebrew/Cellar/python@3.14/3.14.4_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/weather.py", line 6, in <module>
+    from dorasuper.core.decorator import banned_users
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/__init__.py", line 3, in <module>
+    from .permissions import adminsOnly, require_admin
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/core/decorator/permissions.py", line 15, in <module>
+    from ...helper.localization import (
+    ...<4 lines>...
+    )
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/__init__.py", line 3, in <module>
+    from .ffmpeg_helper import *
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/ffmpeg_helper.py", line 8, in <module>
+    from dorasuper.plugins.dev import shell_exec
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/plugins/dev.py", line 52, in <module>
+    from dorasuper.helper.localization import use_chat_lang
+  File "/Users/lethanhdat/Downloads/Backup/DoraTeam_iBot/dorasuper/helper/localization.py", line 34, in <module>
+    jsons += glob(os.path.join("locales", locale, "*.json"))
+                  ^^
+NameError: name 'os' is not defined. Did you forget to import 'os'?
+[INFO] - [23-May-26 10:43:28 - DoraSuper - HELPABLE modules (1): ['hhtươngtác']] -> [__main__:37]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - LOG_TOPIC [commands] đã có: thread_id=3160] -> [log_topics:49]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - LOG_TOPIC [photos] đã có: thread_id=3161] -> [log_topics:49]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - LOG_TOPIC [videos] đã có: thread_id=3162] -> [log_topics:49]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - LOG_TOPIC [new_groups] đã có: thread_id=3163] -> [log_topics:49]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - LOG_TOPIC [errors] đã có: thread_id=3164] -> [log_topics:49]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - LOG_TOPICS: commands=3160, photos=3161, videos=3162, new_groups=3163, errors=3164] -> [log_topics:74]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - +===============================================================+] -> [__main__:54]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - |                        DoraSuper                           |] -> [__main__:55]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:56]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |daoly          |delete_command_msg|
+|dev            |downloadsVideo |filters        |fun            |
+|fungame        |funny_rate     |gemini_ai      |getid_emoji    |
+|goldprice      |grup_tools     |imdb_search    |inkick_user    |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |ping           |quotly         |
+|resetdb        |sangmata       |sed            |start_help     |
+|stickers       |waifus         |weather        ] -> [__main__:57]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:58]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:59]
+[INFO] - [23-May-26 10:43:29 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:61]
+[INFO] - [23-May-26 10:43:29 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [23-May-26 10:45:56 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [23-May-26 10:45:58 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:39]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - LOG_TOPIC [commands] đã có: thread_id=3160] -> [log_topics:49]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - LOG_TOPIC [photos] đã có: thread_id=3161] -> [log_topics:49]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - LOG_TOPIC [videos] đã có: thread_id=3162] -> [log_topics:49]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - LOG_TOPIC [new_groups] đã có: thread_id=3163] -> [log_topics:49]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - LOG_TOPIC [errors] đã có: thread_id=3164] -> [log_topics:49]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - LOG_TOPICS: commands=3160, photos=3161, videos=3162, new_groups=3163, errors=3164] -> [log_topics:74]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - +===============================================================+] -> [__main__:56]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - |                        DoraSuper                           |] -> [__main__:57]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:58]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
 |auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
 |broadcast      |checkin        |currency       |daoly          |
 |delete_command_msg|dev            |download_upload|downloadsVideo |
@@ -35,74 +1660,93 @@
 |quotly         |resetdb        |sangmata       |sed            |
 |session_generator|start_help     |stickers       |waifus         |
 |wallpapers     |weather        ] -> [__main__:59]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:60]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:61]
-[INFO] - [20-Mar-26 18:00:10 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:63]
-[INFO] - [20-Mar-26 18:00:10 - apscheduler.scheduler - Scheduler started] -> [base:181]
-[INFO] - [20-Mar-26 18:00:20 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:644]
-[WARNING] - [20-Mar-26 18:00:20 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [20-Mar-26 18:00:52 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='em biết ai là người anh ghét nhất không'] -> [fun:644]
-[WARNING] - [20-Mar-26 18:00:52 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [20-Mar-26 18:01:29 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora'] -> [fun:644]
-[WARNING] - [20-Mar-26 18:01:29 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [20-Mar-26 18:01:38 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://vt.tiktok.com/ZSug8mYAH/] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:02:53 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.tiktok.com/@nocni03/photo/7612288506907626772?_r] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:03:56 - DoraSuper - Updated admin cache for -1003731475134 [Bào Game Tân Thủ ⚔️]] -> [admin:113]
-[INFO] - [20-Mar-26 18:08:29 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.tiktok.com/@nocni03/photo/7612288506907626772?_r] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:09:31 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.tiktok.com/@04th04_201/photo/7598413763611479303] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:13:23 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Tiếp đi @ThanhDora'] -> [fun:644]
-[INFO] - [20-Mar-26 18:13:31 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.tiktok.com/@04th04_201/photo/7598413763611479303] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:16:01 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.instagram.com/p/DV_hfatk-Dj/?igsh=bGxydnc1Z3M0dm] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:16:05 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
-[INFO] - [20-Mar-26 18:16:06 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [20-Mar-26 18:16:07 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DV_hfatk-Dj%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [20-Mar-26 18:16:11 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DV_hfatk-Dj%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [20-Mar-26 18:16:14 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DV_hfatk-Dj%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [20-Mar-26 18:16:15 - instagrapi - https://i.instagram.com/api/v1/media/3854947100573032675/info/] -> [private:328]
-[INFO] - [20-Mar-26 18:16:16 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3854947100573032675/info/ (385.0.0.47.74, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [20-Mar-26 18:19:09 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora'] -> [fun:644]
-[WARNING] - [20-Mar-26 18:19:09 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [20-Mar-26 18:19:35 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora em là ai'] -> [fun:644]
-[WARNING] - [20-Mar-26 18:19:36 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [20-Mar-26 18:26:17 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://www.instagram.com/p/DV_hfatk-Dj/?igsh=bGxydnc1Z3M0dm] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 18:26:22 - instagrapi - https://i.instagram.com/api/v1/users/47944333652/info/] -> [private:328]
-[INFO] - [20-Mar-26 18:26:22 - private_request - None [200] GET https://i.instagram.com/api/v1/users/47944333652/info/?is_prefetch=false&entry_point=self_profile&from_module=self_profile&is_app_start=False (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [20-Mar-26 18:26:24 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DV_hfatk-Dj%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [20-Mar-26 18:26:27 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DV_hfatk-Dj%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [20-Mar-26 18:26:30 - public_request - [None] [401] GET https://www.instagram.com/graphql/query/?variables=%7B%22shortcode%22%3A%22DV_hfatk-Dj%22%2C%22child_comment_count%22%3A3%2C%22fetch_comment_count%22%3A40%2C%22parent_comment_count%22%3A24%2C%22has_threaded_comments%22%3Afalse%7D&query_hash=477b65a610463740ccdb83135b2014db] -> [public:174]
-[INFO] - [20-Mar-26 18:26:31 - instagrapi - https://i.instagram.com/api/v1/media/3854947100573032675/info/] -> [private:328]
-[INFO] - [20-Mar-26 18:26:32 - private_request - licexac275 [200] GET https://i.instagram.com/api/v1/media/3854947100573032675/info/ (364.0.0.35.86, OnePlus 6T Dev)] -> [private:493]
-[INFO] - [20-Mar-26 18:30:38 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora ngon'] -> [fun:644]
-[WARNING] - [20-Mar-26 18:30:38 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [20-Mar-26 18:52:02 - DoraSuper - Updated admin cache for -1003368550175 [iOSVN Chats]] -> [admin:113]
-[INFO] - [20-Mar-26 20:39:20 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Dora'] -> [fun:644]
-[WARNING] - [20-Mar-26 20:39:20 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [20-Mar-26 21:15:38 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='Vui vui ngta cho mute như cu @ThanhDora nó ghét nó mute 30p'] -> [fun:644]
-[INFO] - [20-Mar-26 21:18:12 - DoraSuper - auto_download_link: chat=-1003368550175 url=https://vt.tiktok.com/ZSugyFud9/] -> [downloadsVideo:1371]
-[INFO] - [20-Mar-26 21:19:05 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003368550175 text='Dora đi nào'] -> [fun:644]
-[INFO] - [20-Mar-26 21:19:06 - DoraSuper - Updated admin cache for -1003368550175 [iOSVN Chats]] -> [admin:113]
-[INFO] - [20-Mar-26 21:45:38 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='đợi a Doraemon của t về cái'] -> [fun:644]
-[WARNING] - [20-Mar-26 21:45:38 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [20-Mar-26 21:55:06 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='@ThanhDora'] -> [fun:644]
-[WARNING] - [20-Mar-26 21:55:07 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [21-Mar-26 12:08:48 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://vt.tiktok.com/ZSupHC3H4/] -> [downloadsVideo:1371]
-[INFO] - [21-Mar-26 14:02:25 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='@ThanhDora'] -> [fun:644]
-[INFO] - [21-Mar-26 14:05:54 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://kktiktok.com/t/ZSupbV3qd] -> [downloadsVideo:1371]
-[INFO] - [21-Mar-26 14:05:56 - DoraSuper - TikWM GET code=-1 msg=Url parsing is failed! Please check url.] -> [downloadsVideo:778]
-[INFO] - [21-Mar-26 14:05:57 - DoraSuper - TikWM POST code=-1 msg=Free Api Limit: 1 request/second.] -> [downloadsVideo:778]
-[INFO] - [21-Mar-26 14:06:38 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://www.tiktok.com/@bth2k11/photo/7617803389065415957?_r] -> [downloadsVideo:1371]
-[INFO] - [21-Mar-26 20:48:20 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='@thanhdora'] -> [fun:644]
-[WARNING] - [21-Mar-26 20:48:21 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
-[INFO] - [21-Mar-26 21:31:53 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='@ThanhDora bắn k anh'] -> [fun:644]
-[WARNING] - [21-Mar-26 21:31:53 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [21-Mar-26 23:16:56 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://vt.tiktok.com/ZS9RH59v7RBro-rKoqU/] -> [downloadsVideo:1371]
-[INFO] - [21-Mar-26 23:17:31 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003540703692 text='t kìa ae'] -> [fun:644]
-[WARNING] - [21-Mar-26 23:17:32 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [21-Mar-26 23:19:17 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://vt.tiktok.com/ZS9RH59v7RBro-rKoqU/] -> [downloadsVideo:1371]
-[INFO] - [21-Mar-26 23:23:30 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1002497163915 text='Acc t'] -> [fun:644]
-[WARNING] - [21-Mar-26 23:23:30 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [21-Mar-26 23:32:33 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003157934072 text='https://t.me/DoraTeamMods/2307/2311\nCon gậy gỗ này có tua nh'] -> [fun:644]
-[INFO] - [21-Mar-26 23:52:10 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=-1003157934072 text='khum có'] -> [fun:644]
-[WARNING] - [21-Mar-26 23:52:11 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:650]
-[INFO] - [22-Mar-26 00:13:33 - DoraSuper - auto_download_link: chat=-1002497163915 url=https://kktiktok.com/t/ZSusQL7yd] -> [downloadsVideo:1371]
-[INFO] - [22-Mar-26 00:13:56 - DoraSuper - auto_download_link: chat=-1003540703692 url=https://kktiktok.com/t/ZSusQL7yd] -> [downloadsVideo:1371]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:60]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:61]
+[INFO] - [23-May-26 10:45:59 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:63]
+[INFO] - [23-May-26 10:45:59 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [23-May-26 10:46:03 - DoraSuper - auto_download_link: chat=5341455835 url=https://kktiktok.com/t/ZSxPJbEGG] -> [downloadsVideo:1371]
+[INFO] - [23-May-26 10:46:34 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:644]
+[WARNING] - [23-May-26 10:46:34 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[ERROR] - [23-May-26 10:46:35 - DoraSuper - Grok API error: Error code: 400 - {'code': 'Client specified an invalid argument', 'error': 'Incorrect API key provided: xa***RO. You can obtain an API key from https://console.x.ai.'}] -> [ai:743]
+[INFO] - [23-May-26 10:46:42 - DoraSuper - auto_download_link: chat=5341455835 url=https://x.com/77sunnyx/status/2057869835305103870?s=20] -> [downloadsVideo:1371]
+[INFO] - [23-May-26 10:48:03 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:644]
+[WARNING] - [23-May-26 10:48:03 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[ERROR] - [23-May-26 10:48:04 - DoraSuper - Grok API error: Error code: 400 - {'code': 'Client specified an invalid argument', 'error': 'Incorrect API key provided: xa***RO. You can obtain an API key from https://console.x.ai.'}] -> [ai:743]
+[INFO] - [23-May-26 10:48:09 - dorasuper.plugins.fun - reply_to_dora triggered chat_id=5341455835 text='dora'] -> [fun:644]
+[WARNING] - [23-May-26 10:48:10 - DoraSuper - Grok Responses API error: name 'XAI_RESPONSES_URL' is not defined] -> [ai:651]
+[ERROR] - [23-May-26 10:48:10 - DoraSuper - Grok API error: Error code: 400 - {'code': 'Client specified an invalid argument', 'error': 'Incorrect API key provided: xa***RO. You can obtain an API key from https://console.x.ai.'}] -> [ai:743]
+[INFO] - [23-May-26 10:49:18 - root - Stop signal received (SIGTERM). Exiting...] -> [idle:76]
+[INFO] - [23-May-26 10:49:18 - DoraSuper - ------------------------ Stopped Services ------------------------] -> [__main__:131]
+[INFO] - [23-May-26 11:30:23 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [23-May-26 11:30:38 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:39]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - LOG_TOPIC [commands] đã có: thread_id=3160] -> [log_topics:49]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - LOG_TOPIC [photos] đã có: thread_id=3161] -> [log_topics:49]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - LOG_TOPIC [videos] đã có: thread_id=3162] -> [log_topics:49]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - LOG_TOPIC [new_groups] đã có: thread_id=3163] -> [log_topics:49]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - LOG_TOPIC [errors] đã có: thread_id=3164] -> [log_topics:49]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - LOG_TOPICS: commands=3160, photos=3161, videos=3162, new_groups=3163, errors=3164] -> [log_topics:74]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - +===============================================================+] -> [__main__:56]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - |                        DoraSuper                           |] -> [__main__:57]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:58]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:59]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:60]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:61]
+[INFO] - [23-May-26 11:30:38 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:63]
+[INFO] - [23-May-26 11:30:39 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [23-May-26 11:30:44 - DoraSuper - auto_download_link: chat=5341455835 url=https://v.douyin.com/0ckIXrN37LU/] -> [downloadsVideo:1497]
+[INFO] - [23-May-26 11:30:44 - DoraSuper - Attempting to download via Cobalt instance: https://api.cobalt.tools] -> [downloadsVideo:787]
+[INFO] - [23-May-26 11:30:44 - DoraSuper - Attempting to download via Cobalt instance: https://cobalt.api.ryzetech.live] -> [downloadsVideo:787]
+[WARNING] - [23-May-26 11:30:44 - DoraSuper - Cobalt API error on https://cobalt.api.ryzetech.live: Cannot connect to host cobalt.api.ryzetech.live:443 ssl:default [nodename nor servname provided, or not known]] -> [downloadsVideo:809]
+[INFO] - [23-May-26 11:30:44 - DoraSuper - Attempting to download via Cobalt instance: https://api.box.so/cobalt] -> [downloadsVideo:787]
+[WARNING] - [23-May-26 11:30:45 - DoraSuper - Cobalt API error on https://api.box.so/cobalt: Cannot connect to host api.box.so:443 ssl:default [nodename nor servname provided, or not known]] -> [downloadsVideo:809]
+[INFO] - [23-May-26 11:32:18 - root - Stop signal received (SIGTERM). Exiting...] -> [idle:76]
+[INFO] - [23-May-26 11:32:38 - DoraSuper - [INFO]: IMPORTING PLUGINS] -> [__init__:46]
+[INFO] - [23-May-26 11:32:40 - telethon.crypto.aes - libssl detected, it will be used for encryption] -> [aes:23]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - HELPABLE modules (32): ['adminnhóm', 'afk', 'bộlọc', 'côngcụmedia', 'danhsáchđen', 'daoly', 'getid', 'ghichú', 'hhtươngtác', 'kiểmtrađổitên', 'logadmin', 'lệnhchodev', 'nhãndán', 'ocr', 'siêuquảntrị', 'sửaquyền', 'tiềntệ', 'tròchơi', 'tìmkiếmảnh', 'tìmphim', 'tínhnănginline', 'tínhnăngkhác', 'tươngtácnhóm', 'tạophiên', 'tảivideo', 'tảivề', 'tựđộngchấpnhận', 'viếttay', 'yêughét', 'đánhgiávui', '🎮 fun & game', '🤖 trợ lý ai']] -> [__main__:39]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - LOG_TOPIC [commands] đã có: thread_id=3160] -> [log_topics:49]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - LOG_TOPIC [photos] đã có: thread_id=3161] -> [log_topics:49]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - LOG_TOPIC [videos] đã có: thread_id=3162] -> [log_topics:49]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - LOG_TOPIC [new_groups] đã có: thread_id=3163] -> [log_topics:49]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - LOG_TOPIC [errors] đã có: thread_id=3164] -> [log_topics:49]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - LOG_TOPICS: commands=3160, photos=3161, videos=3162, new_groups=3163, errors=3164] -> [log_topics:74]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - +===============================================================+] -> [__main__:56]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - |                        DoraSuper                           |] -> [__main__:57]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:58]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - |admin          |admin_log_messages|afk            |ai             |
+|auto_forwarder |autoapprove    |ban_user_or_chat|blacklist_chat |
+|broadcast      |checkin        |currency       |daoly          |
+|delete_command_msg|dev            |download_upload|downloadsVideo |
+|filters        |fun            |fungame        |funny_rate     |
+|gemini_ai      |genss          |getid_emoji    |goldprice      |
+|grup_tools     |imdb_search    |inkick_user    |inline_search  |
+|json           |karma          |lang_setting   |locks          |
+|love           |mediainfo      |misc_tools     |movie_view     |
+|notes          |nulis          |ocr            |ping           |
+|quotly         |resetdb        |sangmata       |sed            |
+|session_generator|start_help     |stickers       |waifus         |
+|wallpapers     |weather        ] -> [__main__:59]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - +===============+===============+===============+===============+] -> [__main__:60]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - [INFO]: BOT STARTED AS @DoraSuper_Bot!] -> [__main__:61]
+[INFO] - [23-May-26 11:32:40 - DoraSuper - [INFO]: SENDING ONLINE STATUS] -> [__main__:63]
+[INFO] - [23-May-26 11:32:41 - apscheduler.scheduler - Scheduler started] -> [base:181]
+[INFO] - [23-May-26 11:32:43 - DoraSuper - auto_download_link: chat=5341455835 url=https://v.douyin.com/0ckIXrN37LU/] -> [downloadsVideo:1497]
+[INFO] - [23-May-26 11:32:44 - DoraSuper - Attempting to download via Cobalt instance: https://api.cobalt.tools] -> [downloadsVideo:787]
+[INFO] - [23-May-26 11:32:44 - DoraSuper - Attempting to download via Cobalt instance: https://cobalt.api.ryzetech.live] -> [downloadsVideo:787]
+[WARNING] - [23-May-26 11:32:44 - DoraSuper - Cobalt API error on https://cobalt.api.ryzetech.live: Cannot connect to host cobalt.api.ryzetech.live:443 ssl:default [nodename nor servname provided, or not known]] -> [downloadsVideo:809]
+[INFO] - [23-May-26 11:32:44 - DoraSuper - Attempting to download via Cobalt instance: https://api.box.so/cobalt] -> [downloadsVideo:787]
+[WARNING] - [23-May-26 11:32:45 - DoraSuper - Cobalt API error on https://api.box.so/cobalt: Cannot connect to host api.box.so:443 ssl:default [nodename nor servname provided, or not known]] -> [downloadsVideo:809]
+[INFO] - [23-May-26 11:32:58 - root - Stop signal received (SIGTERM). Exiting...] -> [idle:76]
+[INFO] - [23-May-26 11:32:58 - DoraSuper - ------------------------ Stopped Services ------------------------] -> [__main__:131]
