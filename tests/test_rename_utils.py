@@ -1,4 +1,5 @@
 import importlib.util, pathlib
+from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
     "rename_utils", pathlib.Path(__file__).parent.parent / "dorasuper/helper/rename_utils.py")
@@ -26,3 +27,66 @@ def test_metadata_parse_and_cmd():
 def test_caption():
     assert ru.format_caption("{filename} - {filesize}", "a.mp4", "1 MB", "00:00:01") == "a.mp4 - 1 MB"
     assert ru.safe_filename('a/b:c') == "a_b_c"
+
+
+def test_artwork_url_larger():
+    assert "512x512" in ru.artwork_url_larger("https://x/100x100bb.jpg")
+    assert "512x512" in ru.artwork_url_larger("https://x/60x60bb.jpg")
+    same = "https://x/512x512bb.jpg"
+    assert ru.artwork_url_larger(same) == same
+    assert ru.artwork_url_larger("") == ""
+    assert ru.artwork_url_larger(None) is None
+
+
+def test_create_itunes_artwork():
+    from io import BytesIO
+    from PIL import Image
+    buf = BytesIO()
+    Image.new("RGB", (64, 64), (20, 40, 200)).save(buf, format="PNG")
+    raw = ru.create_itunes_artwork(buf.getvalue(), size=128)
+    img = Image.open(BytesIO(raw))
+    assert img.size == (128, 128)
+    assert img.format == "PNG"
+
+
+def test_extract_bundle_info_from_ipa(tmp_path):
+    import zipfile, plistlib
+    ipa = tmp_path / "demo.ipa"
+    plist = {
+        "CFBundleIdentifier": "com.example.demo",
+        "CFBundleDisplayName": "DemoApp",
+        "CFBundleShortVersionString": "1.2.3",
+    }
+    with zipfile.ZipFile(ipa, "w") as z:
+        z.writestr("Payload/Demo.app/Info.plist", plistlib.dumps(plist))
+    bid, name, ver = ru.extract_bundle_info_from_ipa(str(ipa))
+    assert bid == "com.example.demo"
+    assert name == "DemoApp"
+    assert ver == "1.2.3"
+    bid2, _, _ = ru.get_bundle_id_from_file(str(ipa), extension_hint="x.ipa")
+    assert bid2 == "com.example.demo"
+
+
+def test_inject_itunes_artwork(tmp_path):
+    import zipfile
+    ipa = tmp_path / "a.ipa"
+    with zipfile.ZipFile(ipa, "w") as z:
+        z.writestr("Payload/A.app/Info.plist", b"x")
+        z.writestr("Payload/A.app/foo", b"bar")
+    art = b"PNGDATA"
+    out = ru.inject_itunes_artwork_into_ipa(str(ipa), art, out_dir=str(tmp_path))
+    assert out and Path(out).exists()
+    with zipfile.ZipFile(out) as z:
+        assert "iTunesArtwork" in z.namelist()
+        assert z.read("iTunesArtwork") == art
+        assert z.read("Payload/A.app/foo") == b"bar"
+
+
+def test_caption_gamename():
+    assert ru.format_caption("{gamename} - {filename}", "a.ipa", "1MB", "00:00:00", "My Game") == "My Game - a.ipa"
+
+
+def test_sanitize_and_search_terms():
+    assert "/" not in ru.sanitize_filename_for_app("A/B:C")
+    terms = ru._search_terms_for_bundle("com.company.myapp")
+    assert "com.company.myapp" in terms and "myapp" in terms

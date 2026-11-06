@@ -21,6 +21,9 @@ from dorasuper.helper.pyro_progress import humanbytes, progress_for_pyrogram
 from dorasuper.helper.rename_utils import (
     MAX_RENAME_SIZE, add_prefix_suffix, change_metadata, convert_duration,
     ensure_extension, format_caption, probe, safe_filename,
+    get_bundle_id_from_file, fetch_itunes_artwork, fetch_itunes_artwork_and_inject_ipa,
+    fetch_itunes_track_name, fetch_itunes_version, sanitize_filename_for_app,
+    prepare_thumb_rgb,
 )
 from dorasuper.vars import COMMAND_HANDLER
 
@@ -39,7 +42,7 @@ __HELP__ = """<blockquote>Gửi tài liệu/video/audio vào chat riêng với b
 /see_prefix, /del_prefix - Xem / xoá tiền tố
 /set_suffix [text] - Đặt hậu tố tên file
 /see_suffix, /del_suffix - Xem / xoá hậu tố
-/set_caption [text] - Caption riêng. Biến: {filename} {filesize} {duration}
+/set_caption [text] - Caption riêng. Biến: {filename} {filesize} {duration} {gamename}
 /see_caption (/view_caption), /del_caption (/delcaption, /delete_caption)
 /set_thumb - Trả lời ảnh (hoặc gửi ảnh kèm caption /set_thumb) để đặt thumbnail
 /view_thumb (/viewthumb), /del_thumb (/delthumb, /delete_thumb)
@@ -49,7 +52,9 @@ __HELP__ = """<blockquote>Gửi tài liệu/video/audio vào chat riêng với b
 --change-video-title Tên
 --change-audio-title Tên
 --change-subtitle-title Tên
---change-author Tên</code></blockquote>"""
+--change-author Tên</code>
+
+Khi đổi tên file <b>.ipa</b>/<b>.deb</b>, bot tự lấy ảnh từ Apple iTunes làm thumbnail (và chèn vào IPA nếu là .ipa).</blockquote>"""
 
 PM = filters.private & filters.incoming
 
@@ -131,7 +136,7 @@ async def set_caption(_, m: Message):
     val = _arg(m)
     if not val:
         return await m.reply(
-            f"{E_TIP} Dùng: <code>/set_caption {{filename}} | {{filesize}} | {{duration}}</code>",
+            f"{E_TIP} Dùng: <code>/set_caption {{filename}} | {{filesize}} | {{duration}} | {{gamename}}</code>",
             parse_mode=HTML,
         )
     await rename_db.set_field(m.from_user.id, "caption", val)
@@ -275,6 +280,26 @@ async def rename_reply(c, m: Message):
     await process_rename(c, file_msg, media, m.text)
 
 
+def _shrink_thumb(path: str):
+    """Chuẩn hoá thumbnail JPEG ≤ ~200KB, 320x320."""
+    if not path or not os.path.exists(path):
+        return None
+    try:
+        from PIL import Image
+        img = prepare_thumb_rgb(Image.open(path))
+        img = img.resize((320, 320), getattr(Image, "LANCZOS", Image.BICUBIC))
+        # luôn lưu .jpg để Telegram nhận thumb ổn định
+        out = path if path.lower().endswith((".jpg", ".jpeg")) else (os.path.splitext(path)[0] + ".jpg")
+        for q in (85, 70, 55, 40, 30, 20):
+            img.save(out, "JPEG", quality=q, optimize=True)
+            if os.path.getsize(out) <= 200 * 1024:
+                break
+        return out
+    except Exception as e:
+        LOGGER.warning("rename thumb shrink error: %s", e)
+        return None
+
+
 async def process_rename(c, file_msg: Message, media, raw_name: str):
     uid = file_msg.from_user.id
     s = await rename_db.get_settings(uid)
@@ -300,30 +325,107 @@ async def process_rename(c, file_msg: Message, media, raw_name: str):
             else:
                 await status.edit(f"{E_WARN} Không chèn được metadata, gửi file gốc...", parse_mode=HTML)
 
+        # --- Apple iTunes artwork cho .ipa / .deb ---
+        orig_name = (media.file_name or "").strip()
+        orig_low = orig_name.lower()
+        new_low = (new_name or "").lower()
+        is_ipa = orig_low.endswith(".ipa") or new_low.endswith(".ipa")
+        is_deb = orig_low.endswith(".deb") or new_low.endswith(".deb")
+        is_ipa_deb = is_ipa or is_deb
+        itunes_thumb = None
+        itunes_track_name = None
+        bundle_id = app_name = version = None
+
+        if is_ipa_deb:
+            await status.edit(f"{E_LOADING} Đang giải nén file, tìm Bundle ID...", parse_mode=HTML)
+            ext_hint = orig_name if (orig_low.endswith(".ipa") or orig_low.endswith(".deb")) else new_name
+            bundle_id, app_name, version = get_bundle_id_from_file(upload_path, extension_hint=ext_hint)
+            if bundle_id:
+                LOGGER.info(
+                    "rename iTunes bundle_id=%s app=%s version=%s file=%s",
+                    bundle_id, app_name or "", version or "", orig_name,
+                )
+                await status.edit(f"{E_LOADING} Đang lấy ảnh từ iTunes...", parse_mode=HTML)
+                try:
+                    if is_ipa:
+                        modified_ipa, thumb_path, err = await fetch_itunes_artwork_and_inject_ipa(
+                            bundle_id, upload_path, out_dir=work,
+                        )
+                        if modified_ipa and thumb_path:
+                            upload_path = modified_ipa
+                            itunes_thumb = thumb_path
+                            LOGGER.info("Đã chèn iTunesArtwork vào IPA. bundle_id=%s", bundle_id)
+                        elif err:
+                            LOGGER.warning("iTunes inject IPA: %s", err)
+                    if itunes_thumb is None:
+                        itunes_path, err = await fetch_itunes_artwork(bundle_id, out_dir=work)
+                        if itunes_path:
+                            itunes_thumb = itunes_path
+                        elif err:
+                            LOGGER.warning("iTunes artwork: %s", err)
+                except Exception as e:
+                    LOGGER.warning("iTunes fetch error: %s", e, exc_info=True)
+                try:
+                    itunes_track_name = await fetch_itunes_track_name(bundle_id)
+                except Exception:
+                    itunes_track_name = None
+            else:
+                LOGGER.info("Không tìm thấy Bundle ID | file=%s", orig_name)
+
         info = await probe(upload_path)
         try:
             duration = int(float(info.get("format", {}).get("duration", 0)))
         except (TypeError, ValueError):
             duration = 0
-        caption = format_caption(s.get("caption"), new_name, humanbytes(media.file_size or 0),
-                                 convert_duration(duration))
 
+        # Caption: {gamename} + style AppName cho ipa/deb
+        caption = format_caption(
+            s.get("caption"), new_name, humanbytes(media.file_size or 0),
+            convert_duration(duration), gamename=itunes_track_name or "",
+        )
+        if is_ipa_deb and bundle_id and (app_name or version or bundle_id):
+            itunes_version = None
+            if not version:
+                try:
+                    itunes_version = await fetch_itunes_version(bundle_id)
+                except Exception:
+                    itunes_version = None
+            app_name_val = itunes_track_name or app_name or "N/A"
+            app_version_val = version or itunes_version or "N/A"
+            caption = (
+                f"<b>Tên app</b> : {app_name_val}" + chr(10)
+                + f"<b>Phiên bản</b> : {app_version_val}" + chr(10)
+                + f"<b>Bundle ID</b> : {bundle_id}"
+            )
+        elif itunes_track_name and not s.get("caption"):
+            caption = f"<b>{itunes_track_name}</b>" + chr(10) + caption
+
+        # Đổi tên upload theo track name iTunes (giữ prefix/suffix) khi có
+        upload_name = new_name
+        if itunes_track_name and is_ipa_deb:
+            safe_name = sanitize_filename_for_app(itunes_track_name)
+            ext = os.path.splitext(upload_path)[1] or (".ipa" if is_ipa else ".deb")
+            upload_name = safe_filename(
+                add_prefix_suffix(f"{safe_name}{ext}", s.get("prefix"), s.get("suffix"))
+            )
+
+        # Thumbnail: ưu tiên ảnh iTunes nếu lấy được; không thì thumb user / file
         thumb = None
-        tid = s.get("thumb") or (media.thumbs[0].file_id if getattr(media, "thumbs", None) else None)
-        if tid:
-            try:
-                thumb = await c.download_media(tid, file_name=os.path.join(work, "thumb.jpg"))
-                from PIL import Image
-                img = Image.open(thumb).convert("RGB")
-                img.thumbnail((320, 320))
-                img.save(thumb, "JPEG", quality=85)
-            except Exception as e:
-                LOGGER.warning("rename thumb error: %s", e)
-                thumb = None
+        if itunes_thumb:
+            thumb = _shrink_thumb(itunes_thumb)
+        if thumb is None:
+            tid = s.get("thumb") or (media.thumbs[0].file_id if getattr(media, "thumbs", None) else None)
+            if tid:
+                try:
+                    user_thumb = await c.download_media(tid, file_name=os.path.join(work, "thumb.jpg"))
+                    thumb = _shrink_thumb(user_thumb)
+                except Exception as e:
+                    LOGGER.warning("rename thumb error: %s", e)
+                    thumb = None
 
         start = time.time()
         await c.send_document(
-            file_msg.chat.id, upload_path, file_name=new_name, thumb=thumb, caption=caption,
+            file_msg.chat.id, upload_path, file_name=upload_name, thumb=thumb, caption=caption,
             parse_mode=HTML, reply_to_message_id=file_msg.id,
             progress=progress_for_pyrogram,
             progress_args=(f"{E_UPLOAD} Đang tải lên...", status, start, "-"),
