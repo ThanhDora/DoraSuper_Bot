@@ -20,6 +20,7 @@ ym = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(ym)
 YetaError, clamp_seconds, is_private_chat = ym.YetaError, ym.clamp_seconds, ym.is_private_chat
 parse_error, parse_image_response, parse_video_job = ym.parse_error, ym.parse_image_response, ym.parse_video_job
+friendly_yeta_message = ym.friendly_yeta_message
 remaining_videos, sanitize_error, vn_date_str = ym.remaining_videos, ym.sanitize_error, ym.vn_date_str
 
 
@@ -57,6 +58,21 @@ class T(unittest.TestCase):
         self.assertTrue(e.model_not_found)
         e = parse_error(401, {"code": "fail_to_fetch_task", "message": "AuthenticationError"})
         self.assertFalse(e.model_not_found)
+        self.assertTrue(e.upstream_auth)
+        nested = '{"error":{"code":"AuthenticationError","message":"The API key doesn\'t exist."}}'
+        e = parse_error(401, {"code": "fail_to_fetch_task", "message": nested})
+        self.assertTrue(e.upstream_auth)
+        self.assertIn("doesn't exist", e.message.lower())
+        detail = (
+            '{"status":402,"title":"Insufficient balance",'
+            '"detail":"Insufficient balance to complete this request. '
+            'Required: 200000 amount (20.0 credits), Available: 67500 amount (6.75 credits)"}'
+        )
+        e = parse_error(402, {"code": "fail_to_fetch_task", "message": detail})
+        self.assertTrue(e.insufficient_credits)
+        tip = friendly_yeta_message(e)
+        self.assertIn("20", tip)
+        self.assertIn("6.75", tip)
         s = sanitize_error("bad SECRET123 Bearer abc <x>", "SECRET123")
         self.assertNotIn("SECRET123", s)
         self.assertNotIn("abc", s)

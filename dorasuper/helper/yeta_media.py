@@ -1,7 +1,8 @@
-"""Yeta media API client (image/video). Không import app để test được."""
+"""Yeta media API client (video). Không import app để test được."""
 import asyncio
 import base64
 import html
+import json
 import re
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -31,6 +32,22 @@ class YetaError(Exception):
     def model_not_found(self) -> bool:
         t = f"{self.code} {self.message}".lower()
         return "model_not_found" in t or "no available channel" in t
+
+    @property
+    def insufficient_credits(self) -> bool:
+        t = f"{self.code} {self.message} {self.status}".lower()
+        return self.status == 402 or "insufficient balance" in t or (
+            "insufficient" in t and "credit" in t
+        )
+
+    @property
+    def upstream_auth(self) -> bool:
+        t = f"{self.code} {self.message}".lower()
+        return (
+            "authenticationerror" in t
+            or "api key doesn't exist" in t
+            or "api key does not exist" in t
+        )
 
 
 def vn_date_str(now: datetime | None = None) -> str:
@@ -77,7 +94,59 @@ def parse_error(status: int, data) -> YetaError:
         message = message or str(data.get("message") or data.get("detail") or "")
     elif isinstance(data, str):
         message = data[:300]
+    message, extra_code = _unwrap_nested(message)
+    code = extra_code or code
     return YetaError(message or f"HTTP {status}", code, status)
+
+
+def _unwrap_nested(message: str) -> tuple[str, str]:
+    raw = (message or "").strip()
+    if not raw.startswith("{") and not raw.startswith("["):
+        return message, ""
+    try:
+        inner = json.loads(raw)
+    except Exception:
+        return message, ""
+    extra = ""
+    if isinstance(inner, dict):
+        err = inner.get("error")
+        if isinstance(err, dict):
+            extra = str(err.get("code") or err.get("type") or "")
+            message = str(err.get("message") or err.get("detail") or message)
+        elif inner.get("detail"):
+            extra = extra or str(inner.get("status") or inner.get("title") or "")
+            message = str(inner.get("detail"))
+        elif inner.get("message"):
+            message = str(inner.get("message"))
+            extra = extra or str(inner.get("code") or inner.get("title") or "")
+    return message, extra
+
+
+def _credit_amounts(message: str) -> tuple[str, str]:
+    req = re.search(r"Required:.*?\((\d+(?:\.\d+)?)\s*credits?\)", message or "", re.I)
+    avail = re.search(r"Available:.*?\((\d+(?:\.\d+)?)\s*credits?\)", message or "", re.I)
+    return (req.group(1) if req else "", avail.group(1) if avail else "")
+
+
+VIDEO_FALLBACK_MODELS = ("wan-3.0-uncensored", "koray-1.0")
+
+
+def friendly_yeta_message(err: YetaError) -> str:
+    if err.insufficient_credits:
+        req, avail = _credit_amounts(err.message)
+        if req and avail:
+            return (
+                f"Tài khoản Yeta không đủ credit để tạo video "
+                f"(cần khoảng {req}, hiện còn khoảng {avail}). "
+                f"Anh/chị nạp thêm trên Yeta rồi thử lại nhé."
+            )
+        return "Tài khoản Yeta không đủ credit để tạo video. Anh/chị nạp thêm trên Yeta rồi thử lại nhé."
+    if err.upstream_auth:
+        return (
+            "Yeta chưa kết nối được kênh tạo video này. "
+            "Anh/chị kiểm tra lại cấu hình model trên Yeta hoặc nạp credit để dùng model khác nhé."
+        )
+    return err.message
 
 
 def parse_image_response(data) -> tuple[str, bytes | str]:
@@ -149,11 +218,28 @@ class YetaClient:
         data = await self._request("POST", "/v1/videos", {
             "model": model, "prompt": prompt,
             "seconds": clamp_seconds(seconds), "resolution": resolution,
+            "audio": False,
         })
         job = parse_video_job(data)
         if not job["id"]:
             raise YetaError(job.get("error") or "Máy chủ không trả về mã tác vụ video.")
         return job
+
+    async def submit_video_with_fallback(self, model, prompt, seconds=5, resolution="720p") -> dict:
+        tried = []
+        last = None
+        for name in (model, *VIDEO_FALLBACK_MODELS):
+            if not name or name in tried:
+                continue
+            tried.append(name)
+            try:
+                return await self.submit_video(name, prompt, seconds, resolution)
+            except YetaError as e:
+                last = e
+                if e.upstream_auth or e.model_not_found:
+                    continue
+                raise
+        raise last or YetaError("Không tạo được video.")
 
     async def wait_video(self, job_id, timeout=360, interval=5) -> dict:
         loop = asyncio.get_event_loop()

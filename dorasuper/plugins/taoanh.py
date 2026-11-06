@@ -8,23 +8,22 @@ from pyrogram.types import Message
 from database.media_gen_db import add_video_used, get_video_used
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
-from dorasuper.emoji import E_ERROR, E_MOVIE, E_PHOTO, E_SUCCESS, E_WAIT, E_WARN
+from dorasuper.emoji import E_ERROR, E_MOVIE, E_SUCCESS, E_WAIT, E_WARN
 from dorasuper.helper.yeta_media import (
-    NO_IMAGE_MODEL_MSG, VIDEO_DAILY_LIMIT, YetaClient, YetaError,
-    is_private_chat, remaining_videos, sanitize_error,
+    VIDEO_DAILY_LIMIT, YetaClient, YetaError,
+    friendly_yeta_message, is_private_chat, remaining_videos, sanitize_error,
 )
 from dorasuper.vars import (
-    ANTHROPIC_AUTH_TOKEN, ANTHROPIC_BASE_URL, ANTHROPIC_IMAGE_MODEL, ANTHROPIC_MODEL,
+    ANTHROPIC_AUTH_TOKEN, ANTHROPIC_BASE_URL, ANTHROPIC_MODEL,
     ANTHROPIC_VIDEO_RESOLUTION, ANTHROPIC_VIDEO_SECONDS, COMMAND_HANDLER,
 )
 
 LOGGER = getLogger("DoraSuper")
 
-__MODULE__ = "TạoẢnh"
+__MODULE__ = "TạoVideo"
 __HELP__ = f"""
-{E_PHOTO} <b>Tạo ảnh và video bằng AI</b> (chỉ dùng khi nhắn riêng với bot)
+{E_MOVIE} <b>Tạo video bằng AI</b> (chỉ dùng khi nhắn riêng với bot)
 
-/taoanh nội dung cần tạo – Tạo ảnh từ mô tả.
 /taovideo nội dung cần tạo – Tạo video ngắn từ mô tả.
 
 {E_WARN} Mỗi người được tạo tối đa {VIDEO_DAILY_LIMIT} video mỗi ngày (tính theo giờ Việt Nam).
@@ -32,7 +31,8 @@ __HELP__ = f"""
 
 _video_locks: set[int] = set()
 _PM_ONLY = f"{E_WARN} Lệnh này chỉ dùng được khi anh/chị nhắn riêng với bot. Anh/chị vui lòng mở chat riêng với bot rồi thử lại nhé."
-_NOT_CONFIGURED = f"{E_WARN} Tính năng tạo ảnh/video chưa được thiết lập. Anh/chị vui lòng liên hệ quản trị viên bot nhé."
+_NOT_CONFIGURED = f"{E_WARN} Tính năng tạo video chưa được thiết lập. Anh/chị vui lòng liên hệ quản trị viên bot nhé."
+_IMAGE_REMOVED = f"{E_WARN} Lệnh tạo ảnh đã tắt. Anh/chị dùng <code>/taovideo nội dung cần tạo</code> để tạo video nhé."
 
 
 def _client():
@@ -61,32 +61,19 @@ async def _precheck(ctx: Message, usage: str):
 
 
 def _err(e) -> str:
-    return f"{E_ERROR} Rất tiếc, máy chủ tạo nội dung báo lỗi: <i>{sanitize_error(getattr(e, 'message', e), ANTHROPIC_AUTH_TOKEN)}</i>\nAnh/chị thử lại sau ít phút nhé."
+    raw = friendly_yeta_message(e) if isinstance(e, YetaError) else getattr(e, "message", e)
+    return (
+        f"{E_ERROR} Rất tiếc, chưa tạo được video: "
+        f"<i>{sanitize_error(raw, ANTHROPIC_AUTH_TOKEN)}</i>"
+    )
 
 
 @app.on_message(filters.command(["taoanh"], COMMAND_HANDLER))
 @capture_err
-async def taoanh_cmd(_, ctx: Message):
-    prompt = await _precheck(ctx, "/taoanh")
-    if not prompt:
-        return
-    if not ANTHROPIC_IMAGE_MODEL:
-        return await ctx.reply_msg(f"{E_WARN} {NO_IMAGE_MODEL_MSG}", quote=True, parse_mode=enums.ParseMode.HTML)
-    msg = await ctx.reply_msg(f"{E_WAIT} Đang tạo ảnh, anh/chị chờ em một chút nhé...", quote=True, parse_mode=enums.ParseMode.HTML)
-    try:
-        kind, val = await _client().generate_image(ANTHROPIC_IMAGE_MODEL, prompt)
-    except YetaError as e:
-        text = f"{E_WARN} {NO_IMAGE_MODEL_MSG}" if e.model_not_found else _err(e)
-        return await msg.edit_msg(text, parse_mode=enums.ParseMode.HTML)
-    except Exception as e:
-        LOGGER.warning("taoanh failed: %s", type(e).__name__)
-        return await msg.edit_msg(_err("Không kết nối được máy chủ."), parse_mode=enums.ParseMode.HTML)
-    photo = val
-    if kind == "bytes":
-        photo = io.BytesIO(val)
-        photo.name = "taoanh.png"
-    await ctx.reply_photo(photo, caption=f"{E_SUCCESS} Ảnh của anh/chị đã xong!", quote=True, parse_mode=enums.ParseMode.HTML)
-    await msg.delete()
+async def taoanh_removed(_, ctx: Message):
+    if not is_private_chat(ctx.chat.type):
+        return await ctx.reply_msg(_PM_ONLY, quote=True, parse_mode=enums.ParseMode.HTML)
+    await ctx.reply_msg(_IMAGE_REMOVED, quote=True, parse_mode=enums.ParseMode.HTML)
 
 
 @app.on_message(filters.command(["taovideo"], COMMAND_HANDLER))
@@ -108,8 +95,10 @@ async def taovideo_cmd(_, ctx: Message):
         msg = await ctx.reply_msg(f"{E_WAIT} Đang gửi yêu cầu tạo video...", quote=True, parse_mode=enums.ParseMode.HTML)
         client = _client()
         try:
-            job = await client.submit_video(ANTHROPIC_MODEL, prompt, ANTHROPIC_VIDEO_SECONDS, ANTHROPIC_VIDEO_RESOLUTION)
+            job = await client.submit_video_with_fallback(
+                ANTHROPIC_MODEL, prompt, ANTHROPIC_VIDEO_SECONDS, ANTHROPIC_VIDEO_RESOLUTION)
         except Exception as e:
+            LOGGER.warning("taovideo submit failed: %s", type(e).__name__)
             return await msg.edit_msg(_err(e if isinstance(e, YetaError) else "Không kết nối được máy chủ."), parse_mode=enums.ParseMode.HTML)
         used = await add_video_used(uid)  # tính lượt khi job đã được nhận
         left = remaining_videos(used)
