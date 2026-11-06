@@ -10,7 +10,7 @@ from pyrogram.errors import BadRequest
 from dorasuper import app
 from dorasuper.emoji import E_MSG, E_USER
 from dorasuper.vars import LOG_CHANNEL, COMMAND_HANDLER, SUDO
-from dorasuper.log_topics import LOG_TOPIC_IDS
+from dorasuper.log_topics import LOG_TOPIC_IDS, topic_id
 
 LOGGER = getLogger("DoraSuper")
 __MODULE__ = "LogAdmin"
@@ -76,7 +76,7 @@ async def log_user_message_to_admin(_, message):
                     extra = extra[:remaining]
                     cap += f"\n\n<blockquote>{extra}</blockquote>"
             # Ảnh → TOPIC_PHOTOS, Video → TOPIC_VIDEOS
-            _thread = LOG_TOPIC_IDS["videos"] if message.video else LOG_TOPIC_IDS["photos"]
+            _thread = topic_id("videos") if message.video else topic_id("photos")
             try:
                 await message.copy(LOG_CHANNEL, caption=cap, parse_mode=ParseMode.HTML, message_thread_id=_thread)
             except BadRequest:
@@ -103,7 +103,7 @@ async def log_user_message_to_admin(_, message):
             LOG_CHANNEL,
             body,
             parse_mode=ParseMode.HTML,
-            message_thread_id=LOG_TOPIC_IDS["commands"],
+            message_thread_id=topic_id("commands"),
         )
     except BadRequest as e:
         # MessageIdInvalid có thể xảy ra nếu tin đã bị xóa (vd: delete_command_msg) trước khi gửi
