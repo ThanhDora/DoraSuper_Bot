@@ -2,10 +2,25 @@ import base64
 import unittest
 from datetime import datetime, timezone
 
-from dorasuper.helper.yeta_media import (
-    YetaError, clamp_seconds, is_private_chat, parse_error, parse_image_response,
-    parse_video_job, remaining_videos, sanitize_error, vn_date_str,
-)
+import importlib.util
+import pathlib
+import sys
+import types
+
+try:
+    import httpx  # noqa: F401
+except ImportError:  # môi trường test không có httpx
+    _h = types.ModuleType("httpx")
+    _h.HTTPError = Exception
+    sys.modules["httpx"] = _h
+
+_P = pathlib.Path(__file__).resolve().parents[1] / "dorasuper" / "helper" / "yeta_media.py"
+_spec = importlib.util.spec_from_file_location("yeta_media_test", _P)
+ym = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(ym)
+YetaError, clamp_seconds, is_private_chat = ym.YetaError, ym.clamp_seconds, ym.is_private_chat
+parse_error, parse_image_response, parse_video_job = ym.parse_error, ym.parse_image_response, ym.parse_video_job
+remaining_videos, sanitize_error, vn_date_str = ym.remaining_videos, ym.sanitize_error, ym.vn_date_str
 
 
 class T(unittest.TestCase):
