@@ -110,7 +110,7 @@ async def getid_cmd(_, ctx: Message):
                 await _send_safe(ctx.chat.id, "⚠️ Tin đó không có emoji/sticker để lấy ID. Thử reply tin có sticker hoặc tin có chữ kèm emoji (custom hoặc Unicode).", ctx.id)
                 return
 
-            # Tên sau lệnh: /getemoji Snow → ra dòng E_SNOW = '<emoji id="...">❄️</emoji>' để copy
+            # Tên sau lệnh: /getemoji Snow → ra dòng E_SNOW = '<tg-emoji emoji-id="...">❄️</tg-emoji>' để copy
             var_base = ""
             if len(ctx.command) > 1:
                 var_base = _emoji_var_name(" ".join(ctx.command[1:]))
@@ -121,7 +121,7 @@ async def getid_cmd(_, ctx: Message):
                     var = f"{var_base}_{i + 1}" if len(emoji_entries) > 1 else var_base
                     if str(eid).isdigit():
                         fb_esc = (fallback or "•").replace("\\", "\\\\").replace("'", "\\'")
-                        py_lines.append(f'{var} = \'<emoji id="{eid}">{fb_esc}</emoji>\'')
+                        py_lines.append(f'{var} = \'<tg-emoji emoji-id="{eid}">{fb_esc}</tg-emoji>\'')
                     else:
                         py_lines.append(f"# {var}: {eid}")
                 out = "\n".join(py_lines)

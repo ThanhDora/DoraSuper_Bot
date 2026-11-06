@@ -524,7 +524,8 @@ async def _send_dora_reply(client, chat_id, reply_to_id, question, from_user, st
         try:
             await client.send_message(chat_id, response, reply_to_message_id=reply_to_id, parse_mode=ParseMode.HTML)
         except Exception:
-            fallback = re.sub(r'<emoji\s+id="[^"]*">([^<]*)</emoji>', lambda x: x.group(1), response)
+            from dorasuper.tg_emoji import to_unicode
+            fallback = to_unicode(response)
             await client.send_message(chat_id, fallback, reply_to_message_id=reply_to_id)
 
 

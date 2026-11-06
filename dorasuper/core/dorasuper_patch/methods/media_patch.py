@@ -1,6 +1,7 @@
 import re
 from logging import getLogger
 from typing import Union, List, Any
+from dorasuper.tg_emoji import to_unicode
 from pyrogram import Client
 from pyrogram.types import Message, InputMedia
 
@@ -14,7 +15,7 @@ _orig_send_media_group = Client.send_media_group
 def clean_emoji_html(text: str) -> str:
     if not text:
         return text
-    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+    return to_unicode(text)
 
 def clean_all_html(text: str) -> str:
     if not text:

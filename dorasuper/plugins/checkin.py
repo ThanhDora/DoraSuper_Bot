@@ -10,6 +10,7 @@ from pilmoji import Pilmoji
 from pyrogram import enums, filters
 from pyrogram.errors.exceptions.bad_request_400 import BadRequest, DocumentInvalid
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, MessageEntity
+from dorasuper.tg_emoji import EMOJI_TAG, to_unicode, premium_enabled
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import E_BELL, E_CHECK, E_GREEN, E_ID, E_ONE, E_PIN_LOC, E_RECYCLE, E_SPARKLE, E_STAT, E_THREE, E_TROPHY, E_TWO, E_USER, E_WAIT, E_LOADING
@@ -34,15 +35,8 @@ def _strip_custom_emoji_entities(entities):
 
 
 def _html_drop_custom_emoji(html_text: str) -> str:
-    """Thay thẻ <emoji id="...">...</emoji> bằng ký tự bên trong để tránh DocumentInvalid (bot không dùng custom emoji trong checkin)."""
-    if not html_text or "<emoji" not in html_text:
-        return html_text
-    return re.sub(
-        r'<emoji\s+id="\d+"[^>]*>([^<]*)</emoji>',
-        lambda m: (m.group(1).strip() or "•"),
-        html_text,
-        flags=re.IGNORECASE,
-    )
+    """Keep the fallback of either legacy or official custom emoji tags."""
+    return to_unicode(html_text) if html_text else html_text
 
 
 def _html_to_entities(html_text: str):
@@ -55,30 +49,21 @@ def _html_to_entities(html_text: str):
     i = 0
     while i < len(html_text):
         if html_text[i] == "<":
-            # Custom emoji: <emoji id="...">x</emoji>
-            if html_text.startswith("<emoji", i):
-                m = re.match(r'<emoji\s+id="(\d+)">', html_text[i:], re.IGNORECASE)
-                if m:
-                    emoji_id = m.group(1)
-                    inner_start = i + m.end()
-                    inner_end = html_text.find("</emoji>", inner_start)
-                    if inner_end != -1:
-                        inner = html.unescape(html_text[inner_start:inner_end])
-                        fallback = (inner.strip() or "•")
-                        out.append(fallback)
-                        offset = out_len
-                        length = _utf16_len(fallback)
-                        out_len += length
-                        entities.append(
-                            MessageEntity(
-                                type=enums.MessageEntityType.CUSTOM_EMOJI,
-                                offset=offset,
-                                length=length,
-                                custom_emoji_id=int(emoji_id),
-                            )
-                        )
-                        i = inner_end + len("</emoji>")
-                        continue
+            # Both supported spellings produce official UTF-16 entities.
+            m = EMOJI_TAG.match(html_text, i)
+            if m:
+                fallback = html.unescape(m["alt"]).strip() or "•"
+                out.append(fallback)
+                length = _utf16_len(fallback)
+                if premium_enabled():
+                    entities.append(MessageEntity(
+                        type=enums.MessageEntityType.CUSTOM_EMOJI,
+                        offset=out_len, length=length,
+                        custom_emoji_id=int(m["id"]),
+                    ))
+                out_len += length
+                i = m.end()
+                continue
 
             # Links: <a href="...">text</a>
             if html_text.startswith("<a", i):

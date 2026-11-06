@@ -2,19 +2,29 @@
 # Tránh ENTITY_TEXT_INVALID / DocumentInvalid khi dùng E_* từ dorasuper.emoji.
 
 import asyncio
-import re
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
 from pyrogram import enums
 from pyrogram.types import Message
 
-if TYPE_CHECKING:
-    pass
+from dorasuper.tg_emoji import (
+    to_unicode as emoji_to_unicode,
+    to_html,
+    plain_markup,
+    emoji_error,
+    premium_enabled,
+)
 
-
-def emoji_to_unicode(text: str) -> str:
-    """Chuyển <emoji id="...">...</emoji> → Unicode (fallback khi emoji động lỗi)."""
-    return re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', r'\1', str(text))
+def _fallback_kwargs(kwargs):
+    kwargs = kwargs.copy()
+    if "reply_markup" in kwargs:
+        kwargs["reply_markup"] = plain_markup(kwargs["reply_markup"])
+    if kwargs.get("entities"):
+        kwargs["entities"] = [
+            e for e in kwargs["entities"]
+            if e.type != enums.MessageEntityType.CUSTOM_EMOJI
+        ]
+    return kwargs
 
 
 async def reply_safe(
@@ -29,10 +39,13 @@ async def reply_safe(
     """
     kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
     del_in = kwargs.pop("del_in", del_in)
+    text = to_html(text) if premium_enabled() else emoji_to_unicode(text)
     try:
         sent = await message.reply_text(text, **kwargs)
-    except Exception:
-        sent = await message.reply_text(emoji_to_unicode(text), **kwargs)
+    except Exception as exc:
+        if not emoji_error(exc):
+            raise
+        sent = await message.reply_text(emoji_to_unicode(text), **_fallback_kwargs(kwargs))
     if del_in and sent:
         async def _del():
             await asyncio.sleep(del_in)
@@ -47,7 +60,10 @@ async def reply_safe(
 async def edit_safe(msg: Message, text: str, **kwargs: Any) -> Optional[Message]:
     """Sửa tin: thử emoji động trước, lỗi thì sửa bằng Unicode."""
     kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    text = to_html(text) if premium_enabled() else emoji_to_unicode(text)
     try:
         return await msg.edit_text(text, **kwargs)
-    except Exception:
-        return await msg.edit_text(emoji_to_unicode(text), **kwargs)
+    except Exception as exc:
+        if not emoji_error(exc):
+            raise
+        return await msg.edit_text(emoji_to_unicode(text), **_fallback_kwargs(kwargs))

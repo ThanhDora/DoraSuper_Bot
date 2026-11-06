@@ -124,7 +124,7 @@ _ALLOWED_EMOJI_IDS = set()
 for _name, _val in vars(_emoji_mod).items():
     if _name.startswith("E_"):
         s = _val if isinstance(_val, str) else ("".join(_val) if isinstance(_val, tuple) else "")
-        for _m in re.finditer(r'<emoji\s+id="(\d+)"', s):
+        for _m in re.finditer(r'<(?:emoji|tg-emoji)\s+(?:id|emoji-id)="(\d+)"', s):
             _ALLOWED_EMOJI_IDS.add(_m.group(1))
         if isinstance(_val, str) and _name[2:] not in _skip:
             AI_EMOJI_PLACEHOLDERS[f"[{_name[2:]}]"] = _val
@@ -304,13 +304,13 @@ _UNICODE_EMOJI_TO_CUSTOM = {
 }
 
 
-# Regex: thẻ <emoji id="...">nội dung</emoji> với nội dung không chứa < (một cấp, không lồng)
-_RE_EMOJI_TAG = re.compile(r'<emoji\s+id="\d+"[^>]*>[^<]*</emoji>')
+# Legacy and official custom emoji tags (one level, no nested content).
+_RE_EMOJI_TAG = re.compile(r'<(?:emoji|tg-emoji)\s+(?:id|emoji-id)="\d+"[^>]*>[^<]*</(?:emoji|tg-emoji)>')
 
 
 def _normalize_emoji_tag(tag: str) -> str:
     """Chuẩn hóa thẻ emoji: gộp nhiều variation selector (U+FE0F) thành một, tránh lỗi hiển thị ❤️️."""
-    match = re.match(r'(<emoji\s+id="\d+"[^>]*>)([^<]*)(</emoji>)', tag)
+    match = re.match(r'(<(?:emoji|tg-emoji)\s+(?:id|emoji-id)="\d+"[^>]*>)([^<]*)(</(?:emoji|tg-emoji)>)', tag)
     if not match:
         return tag
     prefix, inner, suffix = match.group(1), match.group(2), match.group(3)
@@ -319,15 +319,15 @@ def _normalize_emoji_tag(tag: str) -> str:
 
 
 def _flatten_nested_emoji(text: str) -> str:
-    """Gỡ thẻ emoji lồng nhau: <emoji><emoji>x</emoji></emoji> → <emoji>x</emoji>. Lặp đến khi hết lồng."""
-    if not text or "<emoji" not in text:
+    """Flatten nested legacy/official emoji tags until only the inner tag remains."""
+    if not text or not re.search(r"<(?:emoji|tg-emoji)\b", text):
         return text
     prev = ""
     while prev != text:
         prev = text
         # Gỡ một lớp: thẻ ngoài mà bên trong chỉ có đúng một thẻ emoji → giữ thẻ trong
         text = re.sub(
-            r'<emoji\s+id="\d+"[^>]*>\s*(<emoji\s+id="\d+"[^>]*>[^<]*</emoji>)\s*</emoji>',
+            r'<(?:emoji|tg-emoji)\s+(?:id|emoji-id)="\d+"[^>]*>\s*(<(?:emoji|tg-emoji)\s+(?:id|emoji-id)="\d+"[^>]*>[^<]*</(?:emoji|tg-emoji)>)\s*</(?:emoji|tg-emoji)>',
             r"\1",
             text,
         )
@@ -339,7 +339,7 @@ def _replace_unicode_emoji_with_custom(text: str) -> str:
     if not text:
         return text
     # Split có capturing group → parts = [gap0, tag1, gap2, tag3, ...]; chỉ thay unicode ở gap
-    parts = _RE_EMOJI_TAG.split(text)
+    parts = re.split(f"({_RE_EMOJI_TAG.pattern})", text)
     for i in range(0, len(parts), 2):
         part = parts[i]
         for uni, custom_tag in _UNICODE_EMOJI_TO_CUSTOM.items():
@@ -349,7 +349,7 @@ def _replace_unicode_emoji_with_custom(text: str) -> str:
 
 
 def _strip_unknown_custom_emoji(text: str) -> str:
-    """Xóa thẻ <emoji id="..."> do AI tự in (id không có trong danh sách bot); thay bằng ký tự fallback. Chỉ giữ id trong _ALLOWED_EMOJI_IDS."""
+    """Xóa thẻ custom emoji do AI tự in (id không có trong danh sách bot); thay bằng ký tự fallback. Chỉ giữ id trong _ALLOWED_EMOJI_IDS."""
     if not text:
         return text
     def _repl(m):
@@ -357,7 +357,7 @@ def _strip_unknown_custom_emoji(text: str) -> str:
         if eid in _ALLOWED_EMOJI_IDS:
             return m.group(0)
         return (fallback or "").strip()
-    return re.sub(r'<emoji\s+id="(\d+)"[^>]*>([^<]*)</emoji>', _repl, text)
+    return re.sub(r'<(?:emoji|tg-emoji)\s+(?:id|emoji-id)="(\d+)"[^>]*>([^<]*)</(?:emoji|tg-emoji)>', _repl, text)
 
 
 def _collapse_whitespace(text: str) -> str:
@@ -433,10 +433,10 @@ def _site_name_from_url(url: str) -> str:
 
 
 def _escape_answer_for_html(text: str) -> str:
-    """Escape nội dung để gửi ParseMode.HTML: giữ link clickable, giữ thẻ <emoji id="...">, escape phần còn lại."""
+    """Escape nội dung để gửi ParseMode.HTML: giữ link clickable, giữ thẻ custom emoji, escape phần còn lại."""
     if not text:
         return text
-    # 1) Giữ thẻ <emoji id="...">...</emoji> — chuẩn hóa (gộp ️ trùng) rồi thay placeholder
+    # 1) Giữ cả hai dạng thẻ custom emoji, chuẩn hóa rồi thay placeholder
     emoji_tags: list[str] = []
     def save_emoji(m):
         emoji_tags.append(_normalize_emoji_tag(m.group(0)))

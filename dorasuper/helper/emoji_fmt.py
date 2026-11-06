@@ -1,5 +1,3 @@
-import re
-
 from dorasuper.emoji import (
     E_ADMIN, E_AFK, E_ANDROID, E_BACK, E_BELL, E_BOT, E_CALENDAR, E_CAMERA,
     E_LIMIT, E_PIN_LOC, E_RECYCLE, E_RIGHT_ARROW,
@@ -31,13 +29,5 @@ EMOJI_FMT = {
 }
 
 
-def _strip_emoji_for_btn(s):
-    """Remove all emoji from string for button labels."""
-    if not isinstance(s, str):
-        return s
-    s = re.sub(r'<emoji id="[^"]+">(.+?)</emoji>', "", s)
-    s = re.sub(r'<tg-emoji emoji-id="[^"]+">(.+?)</tg-emoji>', "", s)
-    return s
-
-
-EMOJI_FMT_BTN = {k: _strip_emoji_for_btn(v) for k, v in EMOJI_FMT.items()}
+# The button constructor extracts the id into icon_custom_emoji_id, never sends tags.
+EMOJI_FMT_BTN = EMOJI_FMT.copy()

@@ -63,7 +63,8 @@ SUDO = list(
 )
 SUPPORT_CHAT = environ.get("SUPPORT_CHAT", "dabeecao")
 AUTO_RESTART = environ.get("AUTO_RESTART", False)
-# Emoji: True = gửi custom emoji (chỉ hiển thị premium nếu tài khoản chủ bot có Telegram Premium). False = dùng Unicode, hiển thị giống nhau cho mọi người.
+# True: gửi entity/icon chuẩn Telegram (quyền Premium/Fragment do Telegram kiểm tra).
+# False: Unicode trong tin nhắn, không gửi icon custom trên nút.
 USE_PREMIUM_EMOJI = environ.get("USE_PREMIUM_EMOJI", "true").strip().lower() in ("1", "true", "yes")
 
 ## Config For AUtoForwarder
