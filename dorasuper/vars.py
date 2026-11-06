@@ -115,3 +115,13 @@ YT_DLP_COOKIES_FROM_BROWSER = (environ.get("YT_DLP_COOKIES_FROM_BROWSER", "") or
 INSTAGRAM_USERNAME = (environ.get("INSTAGRAM_USERNAME", "") or "").strip()
 INSTAGRAM_PASSWORD = (environ.get("INSTAGRAM_PASSWORD", "") or "").strip()
 INSTAGRAM_SESSION = (environ.get("INSTAGRAM_SESSION", "") or "").strip()  # sessionid (tùy chọn, thay user/pass)
+# Yeta (Anthropic-style) – tạo ảnh / video. Token chỉ đặt trong config.env.
+ANTHROPIC_BASE_URL = (environ.get("ANTHROPIC_BASE_URL", "") or "https://platform.yeta.ai").strip().rstrip("/")
+ANTHROPIC_AUTH_TOKEN = (environ.get("ANTHROPIC_AUTH_TOKEN", "") or "").strip()
+ANTHROPIC_MODEL = (environ.get("ANTHROPIC_MODEL", "") or "seedance-2.0-fast-uncensored").strip()
+ANTHROPIC_IMAGE_MODEL = (environ.get("ANTHROPIC_IMAGE_MODEL", "") or "").strip()
+try:
+    ANTHROPIC_VIDEO_SECONDS = int(environ.get("ANTHROPIC_VIDEO_SECONDS", "5") or 5)
+except ValueError:
+    ANTHROPIC_VIDEO_SECONDS = 5
+ANTHROPIC_VIDEO_RESOLUTION = (environ.get("ANTHROPIC_VIDEO_RESOLUTION", "") or "720p").strip()
