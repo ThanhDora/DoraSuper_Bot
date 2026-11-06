@@ -351,10 +351,11 @@ async def process_rename(c, file_msg: Message, media, raw_name: str):
                         modified_ipa, thumb_path, err = await fetch_itunes_artwork_and_inject_ipa(
                             bundle_id, upload_path, out_dir=work,
                         )
-                        if modified_ipa and thumb_path:
+                        if modified_ipa:
                             upload_path = modified_ipa
-                            itunes_thumb = thumb_path
                             LOGGER.info("Đã chèn iTunesArtwork vào IPA. bundle_id=%s", bundle_id)
+                        if thumb_path:
+                            itunes_thumb = thumb_path
                         elif err:
                             LOGGER.warning("iTunes inject IPA: %s", err)
                     if itunes_thumb is None:
