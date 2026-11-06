@@ -99,6 +99,12 @@ CURRENCY_API = environ.get("CURRENCY_API")
 AI_API_KEY = environ.get("AI_API_KEY", "")
 # AI: grok (xAI) hoặc gemini. Khi gemini cần thêm GEMINI_API_KEY
 AI_PROVIDER = (environ.get("AI_PROVIDER", "grok") or "grok").strip().lower()
+GROK_VIDEO_MODEL = (environ.get("GROK_VIDEO_MODEL", "") or "grok-imagine-video-1.5").strip()
+try:
+    GROK_VIDEO_DURATION = int(environ.get("GROK_VIDEO_DURATION", "5") or 5)
+except ValueError:
+    GROK_VIDEO_DURATION = 5
+GROK_VIDEO_RESOLUTION = (environ.get("GROK_VIDEO_RESOLUTION", "") or "720p").strip()
 GEMINI_API_KEY = environ.get("GEMINI_API_KEY", "")
 # Google Drive upload (getdirect): true = upload lên GDrive, false = dùng tmpfiles
 USE_GDRIVE = environ.get("USE_GDRIVE", "").strip().lower() in ("1", "true", "yes")
