@@ -46,11 +46,11 @@ __HELP__ = """
 /getfile [url/trả lời tệp] - Tải xuống tệp (chủ bot)
 /getdirect [trả lời tệp] - Tải tệp lên tmpfiles hoặc Google Drive để lấy link
 
-<u>Tải Video TikTok:</u>
-/dl [link] - Tải video/ảnh từ TikTok
+<u>Tải ảnh/video mạng xã hội:</u>
+/dl [link] - Tải video/ảnh từ TikTok, Facebook, Instagram, YouTube, X... (hầu hết mạng xã hội)
 /tt [link] - Viết tắt của /dl
 /autodl - Bật/tắt tự động nhận link trong nhóm (admin)
-Gửi link TikTok → bot tự tải (trong nhóm cần bật /autodl trước)</blockquote>
+Gửi link mạng xã hội → bot tự tải (trong nhóm cần bật /autodl trước)</blockquote>
 """
 async def auto_delete_message(message, delay=1800):
     await asyncio.sleep(delay)
