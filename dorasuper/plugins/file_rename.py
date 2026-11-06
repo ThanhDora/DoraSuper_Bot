@@ -6,6 +6,7 @@ import shutil
 from logging import getLogger
 
 from pyrogram import enums, filters
+from pyrogram.file_id import FileId
 from pyrogram.types import (
     CallbackQuery, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, Message,
 )
@@ -309,11 +310,15 @@ async def process_rename(c, file_msg: Message, media, raw_name: str):
     os.makedirs(work, exist_ok=True)
     status = await file_msg.reply(f"{E_LOADING} Đang xử lý...", parse_mode=HTML)
     try:
+        try:
+            src_dc = FileId.decode(media.file_id).dc_id
+        except Exception:
+            src_dc = "-"
         start = time.time()
         path = await c.download_media(
             file_msg, file_name=os.path.join(work, new_name),
             progress=progress_for_pyrogram,
-            progress_args=(f"{E_DOWNLOAD} Đang tải xuống...", status, start, "-"),
+            progress_args=(f"{E_DOWNLOAD} Đang tải xuống...", status, start, src_dc),
         )
         upload_path = path
         if s.get("metadata"):
@@ -429,7 +434,7 @@ async def process_rename(c, file_msg: Message, media, raw_name: str):
             file_msg.chat.id, upload_path, file_name=upload_name, thumb=thumb, caption=caption,
             parse_mode=HTML, reply_to_message_id=file_msg.id,
             progress=progress_for_pyrogram,
-            progress_args=(f"{E_UPLOAD} Đang tải lên...", status, start, "-"),
+            progress_args=(f"{E_UPLOAD} Đang tải lên...", status, start, src_dc),
         )
         await status.delete()
     except Exception as e:
