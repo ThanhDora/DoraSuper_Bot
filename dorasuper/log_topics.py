@@ -43,66 +43,60 @@ _TOPIC_KEYWORDS = {
 }
 
 
-async def _list_forum_topics(app) -> dict[int, str] | None:
-    """Trả về {thread_id: title} các topic hiện có trong LOG_CHANNEL, None nếu không liệt kê được."""
-    topics: dict[int, str] = {}
-    try:
-        if hasattr(app, "get_forum_topics"):
-            async for t in app.get_forum_topics(LOG_CHANNEL):
-                tid = getattr(t, "id", None) or getattr(t, "message_thread_id", None)
-                if tid:
-                    topics[int(tid)] = getattr(t, "title", "") or ""
-            return topics
-        from pyrogram import raw
-        peer = await app.resolve_peer(LOG_CHANNEL)
-        offset_id = offset_topic = offset_date = 0
-        while True:
-            fn = getattr(raw.functions.channels, "GetForumTopics", None) or raw.functions.messages.GetForumTopics
-            kw = dict(offset_date=offset_date, offset_id=offset_id, offset_topic=offset_topic, limit=100)
-            kw["channel" if fn.__module__.endswith("channels") else "peer"] = peer
-            r = await app.invoke(fn(**kw))
-            batch = [t for t in r.topics if hasattr(t, "title")]
-            for t in batch:
-                topics[int(t.id)] = t.title
-            if len(batch) < 100:
-                break
-            last = batch[-1]
-            offset_topic, offset_id, offset_date = last.id, last.top_message, last.date
-        return topics
-    except Exception as e:
-        LOGGER.warning("LOG_TOPICS: không liệt kê được forum topics (%s) — thử quét tin tạo topic", e)
-        import asyncio
+async def _get_raw_messages(app, channel, ids):
+    from pyrogram import raw
+    r = await app.invoke(
+        raw.functions.channels.GetMessages(channel=channel, id=[raw.types.InputMessageID(id=i) for i in ids]),
+        sleep_threshold=0,  # không ngủ chờ FloodWait trong lúc khởi động
+    )
+    return [m for m in r.messages if not isinstance(m, raw.types.MessageEmpty)]
+
+
+async def _scan_range(app, start: int, deadline: float | None, found: dict, batch: int = 200) -> tuple[int, bool]:
+    """Quét tin theo ID (raw GetMessages, 200 ID/lần). Tin dịch vụ 'tạo topic' có id == thread_id.
+    Trả về (id kế tiếp cần quét, đã hết tin chưa). deadline=None → chạy nền, tôn trọng FloodWait."""
+    import asyncio
+    import time
+    from pyrogram import raw
+    from pyrogram.errors import FloodWait
+    peer = await app.resolve_peer(LOG_CHANNEL)
+    channel = raw.types.InputChannel(channel_id=peer.channel_id, access_hash=peer.access_hash)
+    max_seen, cur = start - 1, start
+    while True:
+        if deadline is not None and time.monotonic() > deadline:
+            return cur, False
         try:
-            return await asyncio.wait_for(_scan_topic_created_messages(app), timeout=40)
-        except asyncio.TimeoutError:
-            LOGGER.warning("LOG_TOPICS: quét topic quá 40s, bỏ qua")
-            return None
+            msgs = await _get_raw_messages(app, channel, range(cur, cur + batch))
+        except FloodWait as e:
+            if deadline is not None:
+                return cur, False
+            await asyncio.sleep(int(getattr(e, "value", 10) or 10) + 1)
+            continue
+        for m in msgs:
+            max_seen = max(max_seen, m.id)
+            act = getattr(m, "action", None)
+            if isinstance(m, raw.types.MessageService) and isinstance(act, raw.types.MessageActionTopicCreate):
+                found[int(m.id)] = act.title
+            elif isinstance(m, raw.types.MessageService) and isinstance(act, raw.types.MessageActionTopicEdit) and act.title:
+                rt = getattr(m, "reply_to", None)
+                tid = getattr(rt, "reply_to_top_id", None) or getattr(rt, "reply_to_msg_id", None)
+                if tid:
+                    found[int(tid)] = act.title
+        cur += batch
+        if cur > max_seen + 2000:  # 10 lô rỗng liên tiếp → hết tin
+            return cur, True
+        if _all_matched(found):
+            return cur, False
 
 
-async def _scan_topic_created_messages(app, batch: int = 200, max_id: int = 3000) -> dict[int, str] | None:
-    """Bot không được gọi GetForumTopics; nhưng tin dịch vụ 'tạo topic' có id == thread_id → lấy theo ID."""
-    topics: dict[int, str] = {}
-    empty_batches = 0
-    try:
-        for start in range(1, max_id, batch):
-            msgs = await app.get_messages(LOG_CHANNEL, list(range(start, start + batch)))
-            msgs = [m for m in (msgs if isinstance(msgs, list) else [msgs]) if m and not getattr(m, "empty", False)]
-            if not msgs:
-                empty_batches += 1
-                if empty_batches >= 3:
-                    break
-                continue
-            empty_batches = 0
-            LOGGER.debug("LOG_TOPICS: quét id %d-%d", start, start + batch - 1)
-            for m in msgs:
-                created = getattr(m, "forum_topic_created", None)
-                if created and getattr(created, "title", None):
-                    topics[int(m.id)] = created.title
-        LOGGER.info("LOG_TOPICS: quét được %d topic có sẵn", len(topics))
-        return topics
-    except Exception as e:
-        LOGGER.warning("LOG_TOPICS: không quét được topic (%s) — bot cần quyền admin + Manage Topics", e)
-        return topics or None
+def _all_matched(found: dict) -> bool:
+    used: set = set()
+    for key, name in _TOPICS_DEF:
+        m = _match_topic(key, name, found, used)
+        if not m:
+            return False
+        used.add(m)
+    return True
 
 
 def _match_topic(key: str, name: str, topics: dict[int, str], used: set) -> int | None:
@@ -119,59 +113,86 @@ def _match_topic(key: str, name: str, topics: dict[int, str], used: set) -> int 
     return None
 
 
-async def ensure_log_topics(app) -> None:
-    """Xác định topic IDs cho LOG_CHANNEL: dùng lại ID đã lưu/topic sẵn có theo tên, chỉ tạo khi thiếu."""
-    saved = await _col.find_one({"_id": "log_topics"}) or {}
-    # Ghi đè thủ công từ config.env: LOG_TOPIC_IDS=commands:12,photos:34,videos:56,new_groups:78,errors:90
-    import os
-    for part in (os.environ.get("LOG_TOPIC_IDS") or "").split(","):
-        k, _, v = part.partition(":")
-        if k.strip() in LOG_TOPIC_IDS and v.strip().isdigit():
-            saved[k.strip()] = int(v.strip())
-            LOGGER.info("LOG_TOPIC [%s] lấy từ config: thread_id=%s", k.strip(), v.strip())
-    if all(saved.get(k) for k, _ in _TOPICS_DEF):
-        topics = None  # đủ ID rồi, không cần liệt kê/quét (tin vào ID đã lưu)
-    else:
-        topics = await _list_forum_topics(app)
-
-    mapping: dict[str, int | None] = {}
-    used: set = set()
+def _apply(saved: dict, found: dict) -> dict:
+    mapping, used = {}, set()
+    for key, _ in _TOPICS_DEF:
+        if saved.get(key):
+            used.add(saved[key])
     for key, name in _TOPICS_DEF:
-        topic_id = saved.get(key)
-        if topic_id and (topics is None or topic_id in topics):
-            mapping[key] = topic_id
-            used.add(topic_id)
-            LOGGER.info("LOG_TOPIC [%s] dùng lại ID đã lưu: thread_id=%s", key, topic_id)
+        tid = saved.get(key)
+        if tid:
+            mapping[key] = tid
             continue
-        if topic_id:
-            LOGGER.warning("LOG_TOPIC [%s] ID đã lưu %s không còn tồn tại", key, topic_id)
-        matched = _match_topic(key, name, topics or {}, used)
-        if matched:
-            mapping[key] = matched
-            used.add(matched)
-            LOGGER.info("LOG_TOPIC [%s] khớp topic có sẵn '%s': thread_id=%s", key, topics[matched], matched)
-            continue
-        try:
-            forum_topic = await app.create_forum_topic(chat_id=LOG_CHANNEL, title=name)
-            mapping[key] = forum_topic.id
-            used.add(forum_topic.id)
-            LOGGER.info("LOG_TOPIC [%s] đã tạo mới: thread_id=%s", key, forum_topic.id)
-        except Exception as e:
-            LOGGER.error("LOG_TOPIC [%s] không tìm thấy và không tạo được topic: %s", key, e)
-            mapping[key] = None
+        m = _match_topic(key, name, found, used)
+        if m:
+            used.add(m)
+            LOGGER.info("LOG_TOPIC [%s] khớp topic có sẵn '%s': thread_id=%s", key, found[m], m)
+        mapping[key] = m
+    return mapping
 
-    await _col.update_one({"_id": "log_topics"}, {"$set": mapping}, upsert=True)
+
+def _publish(mapping: dict) -> None:
     for k, v in mapping.items():
         LOG_TOPIC_IDS[k] = v
-
     LOGGER.info(
         "LOG_TOPICS: commands=%s, photos=%s, videos=%s, new_groups=%s, errors=%s",
         LOG_TOPIC_IDS["commands"], LOG_TOPIC_IDS["photos"], LOG_TOPIC_IDS["videos"],
         LOG_TOPIC_IDS["new_groups"], LOG_TOPIC_IDS["errors"],
     )
-    missing = [k for k, v in LOG_TOPIC_IDS.items() if v is None]
-    if missing:
-        LOGGER.warning("LOG_TOPICS thiếu %s — log loại này sẽ vào General", missing)
+
+
+async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
+    try:
+        nxt, _ = await _scan_range(app, start, None, found)
+        mapping = _apply(saved, found)
+        await _col.update_one({"_id": "log_topics"}, {"$set": {**{k: v for k, v in mapping.items() if v}, "scan_next": nxt}}, upsert=True)
+        _publish(mapping)
+        missing = [k for k, v in mapping.items() if v is None]
+        if missing:
+            LOGGER.warning("LOG_TOPICS: quét xong vẫn thiếu %s — đặt LOG_TOPIC_IDS trong config.env hoặc cấp quyền Manage Topics", missing)
+    except Exception as e:
+        LOGGER.warning("LOG_TOPICS: quét nền lỗi: %s", e)
+
+
+async def ensure_log_topics(app) -> None:
+    """Xác định thread_id các tab log: config.env > Mongo > quét tin 'tạo topic' (≤10s, phần còn lại chạy nền) > tạo mới."""
+    import asyncio
+    import os
+    import time
+    saved = {k: v for k, v in (await _col.find_one({"_id": "log_topics"}) or {}).items() if k in LOG_TOPIC_IDS and v}
+    for part in (os.environ.get("LOG_TOPIC_IDS") or "").split(","):
+        k, _, v = part.partition(":")
+        if k.strip() in LOG_TOPIC_IDS and v.strip().isdigit():
+            saved[k.strip()] = int(v.strip())
+    if all(saved.get(k) for k, _ in _TOPICS_DEF):
+        LOGGER.info("LOG_TOPICS: dùng ID đã lưu/config, không cần quét")
+        await _col.update_one({"_id": "log_topics"}, {"$set": {k: saved[k] for k, _ in _TOPICS_DEF}}, upsert=True)
+        _publish(saved)
+        return
+
+    found: dict[int, str] = {}
+    nxt, done = 1, False
+    try:
+        nxt, done = await _scan_range(app, 1, time.monotonic() + 10, found)
+    except Exception as e:
+        LOGGER.warning("LOG_TOPICS: quét nhanh lỗi: %s", e)
+    mapping = _apply(saved, found)
+
+    for key, name in _TOPICS_DEF:
+        if mapping[key] is None and done:  # chỉ tạo khi đã quét hết mà vẫn không có
+            try:
+                t = await app.create_forum_topic(chat_id=LOG_CHANNEL, title=name)
+                mapping[key] = t.id
+                LOGGER.info("LOG_TOPIC [%s] đã tạo mới: thread_id=%s", key, t.id)
+            except Exception as e:
+                LOGGER.error("LOG_TOPIC [%s] không tạo được topic: %s", key, e)
+
+    await _col.update_one({"_id": "log_topics"}, {"$set": {k: v for k, v in mapping.items() if v}}, upsert=True)
+    _publish(mapping)
+    if any(v is None for v in mapping.values()) and not done:
+        LOGGER.info("LOG_TOPICS: chưa đủ, tiếp tục quét nền từ id %s", nxt)
+        saved_now = {k: v for k, v in mapping.items() if v}
+        asyncio.create_task(_background_scan(app, saved_now, found, nxt))
 
 
 def topic_id(key: str) -> int | None:
