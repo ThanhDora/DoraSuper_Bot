@@ -1,0 +1,356 @@
+import html
+import io
+import time
+from datetime import datetime
+
+from pyrogram import enums, filters
+from pyrogram.enums import ChatMemberStatus, ChatType
+from pyrogram.types import Message
+
+from database.up_channel_db import get_up_channel, set_up_channel
+from dorasuper import app
+from dorasuper.core.decorator.errors import capture_err
+from dorasuper.emoji import (
+    E_DART, E_ERROR, E_FIRE, E_GEAR, E_GIFT, E_IOS, E_LINK, E_LOADING,
+    E_LOCK, E_MENU, E_PARTY, E_PIN_LOC, E_ROCKET, E_SHIELD, E_SPARKLE,
+    E_STAR, E_SUCCESS, E_TIP, E_TROPHY, E_USER, E_WARN,
+)
+from dorasuper.helper.channel_up import (
+    build_channel_caption,
+    is_allowed_package,
+    is_appstore_url,
+    lookup_appstore,
+    render_appstore_poster,
+    split_features,
+)
+from dorasuper.vars import COMMAND_HANDLER, SUDO, UP_CHANNEL
+
+__MODULE__ = "ĐăngKênh"
+__HELP__ = f"""
+Đăng file IPA, DEB, dylib,... lên kênh Telegram kèm ảnh App Store và caption có emoji động.
+
+<blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store, nhập chức năng, bot sẽ render ảnh và đăng lên kênh.
+/up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
+/cancel – Hủy phiên /up đang nhập.</blockquote>
+"""
+
+_HANDLER_GROUP = -2
+_SESSION_TTL = 15 * 60
+_sessions = {}
+
+_CAPTION_EMOJI = {
+    "trophy": E_TROPHY,
+    "sparkle": E_SPARKLE,
+    "star": E_STAR,
+    "ios": E_IOS,
+    "user": E_USER,
+    "link": E_LINK,
+    "gift": E_GIFT,
+    "shield": E_SHIELD,
+    "gear": E_GEAR,
+    "rocket": E_ROCKET,
+    "lock": E_LOCK,
+    "dart": E_DART,
+    "pin": E_PIN_LOC,
+    "crown": E_MENU,
+    "fire": E_FIRE,
+    "party": E_PARTY,
+}
+
+
+def _is_sudo(message: Message) -> bool:
+    user = message.from_user
+    return bool(user and user.id in SUDO)
+
+
+def _session_of(message: Message):
+    user = message.from_user
+    if not user:
+        return None, None
+    data = _sessions.get(user.id)
+    if not data:
+        return user.id, None
+    if time.time() - data.get("started", 0) > _SESSION_TTL:
+        _sessions.pop(user.id, None)
+        return user.id, None
+    return user.id, data
+
+
+def _source_file_message(message: Message):
+    reply = message.reply_to_message
+    if reply and reply.document:
+        return reply
+    if message.document:
+        return message
+    return None
+
+
+async def _reply_html(message: Message, text: str, **kwargs):
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    return await message.reply_text(text, **kwargs)
+
+
+async def _resolved_channel():
+    saved = await get_up_channel()
+    return saved if saved is not None else UP_CHANNEL
+
+
+def _post_link(chat, message_id: int) -> str:
+    username = getattr(chat, "username", None)
+    if username:
+        return f"https://t.me/{username}/{message_id}"
+    raw = str(chat.id)
+    if raw.startswith("-100"):
+        raw = raw[4:]
+    return f"https://t.me/c/{raw}/{message_id}"
+
+
+async def _ensure_can_post(channel_id):
+    chat = await app.get_chat(channel_id)
+    me = await app.get_chat_member(chat.id, "me")
+    status = me.status
+    if status == ChatMemberStatus.ADMINISTRATOR:
+        privileges = me.privileges
+        if chat.type == ChatType.CHANNEL and privileges and not privileges.can_post_messages:
+            return chat, "Bot là admin kênh nhưng chưa được quyền đăng tin."
+        return chat, None
+    if status == ChatMemberStatus.OWNER:
+        return chat, None
+    return chat, "Bot cần là admin của kênh và có quyền đăng tin."
+
+
+@app.on_message(filters.command(["up_channel"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_channel(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới đặt được kênh đăng bài.")
+        return
+    args = message.text.split(maxsplit=1)
+    target = args[1].strip() if len(args) > 1 else None
+    if not target:
+        if message.chat.type == ChatType.CHANNEL:
+            target = message.chat.id
+        else:
+            await _reply_html(
+                message,
+                f"{E_TIP} Dùng <code>/up_channel @tenkenh</code> hoặc <code>/up_channel -100...</code> "
+                f"để chọn kênh đăng bài.",
+            )
+            return
+    try:
+        chat, err = await _ensure_can_post(target)
+    except Exception as e:
+        await _reply_html(message, f"{E_ERROR} Không mở được kênh đó: {html.escape(str(e))}")
+        return
+    if err:
+        await _reply_html(message, f"{E_ERROR} {html.escape(err)}")
+        return
+    await set_up_channel(chat.id)
+    title = html.escape(chat.title or str(chat.id))
+    await _reply_html(message, f"{E_SUCCESS} Đã đặt kênh đăng bài: <b>{title}</b> (<code>{chat.id}</code>).")
+
+
+@app.on_message(filters.command(["up"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới dùng được /up.")
+        return
+    channel = await _resolved_channel()
+    if not channel:
+        await _reply_html(
+            message,
+            f"{E_WARN} Chưa chọn kênh đăng bài. Dùng <code>/up_channel @tenkenh</code> trước nhé.",
+        )
+        return
+    file_msg = _source_file_message(message)
+    if not file_msg or not file_msg.document:
+        await _reply_html(
+            message,
+            f"{E_TIP} Hãy trả lời một file <b>ipa</b>, <b>deb</b>, <b>dylib</b>,... bằng lệnh <code>/up</code>.",
+        )
+        return
+    filename = file_msg.document.file_name or ""
+    if not is_allowed_package(filename):
+        await _reply_html(
+            message,
+            f"{E_ERROR} File <code>{html.escape(filename or 'không tên')}</code> không phải ipa/deb/dylib "
+            f"hoặc gói quen thuộc (zip, 7z, rar, tipa).",
+        )
+        return
+    extra = message.text.split(maxsplit=1)
+    preset_link = extra[1].strip() if len(extra) > 1 else ""
+    uid = message.from_user.id
+    _sessions[uid] = {
+        "step": "link",
+        "started": time.time(),
+        "file_chat_id": file_msg.chat.id,
+        "file_msg_id": file_msg.id,
+        "filename": filename,
+        "ask_chat_id": message.chat.id,
+    }
+    if preset_link:
+        await _handle_link(message, preset_link)
+        return
+    await _reply_html(
+        message,
+        f"{E_LINK} Đã nhận file <code>{html.escape(filename)}</code>.\n"
+        f"Hãy gửi link App Store của game này (hoặc <code>/cancel</code> để hủy).",
+    )
+
+
+@app.on_message(filters.command(["cancel", "huy"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_cancel(_, message: Message):
+    uid, data = _session_of(message)
+    if not data:
+        return
+    _sessions.pop(uid, None)
+    await _reply_html(message, f"{E_SUCCESS} Đã hủy đăng bài.")
+
+
+def _is_up_session_text(_, __, message: Message) -> bool:
+    if not message or not message.from_user or not message.text:
+        return False
+    if message.text.startswith("/"):
+        return False
+    uid, data = _session_of(message)
+    return bool(data)
+
+
+@app.on_message(filters.create(_is_up_session_text) & filters.text, group=_HANDLER_GROUP)
+@capture_err
+async def channel_up_session(_, message: Message):
+    uid, data = _session_of(message)
+    if not data:
+        return
+    step = data.get("step")
+    if step == "link":
+        await _handle_link(message, (message.text or "").strip())
+    elif step == "features":
+        await _handle_features(message, (message.text or "").strip())
+
+
+async def _handle_link(message: Message, raw: str):
+    uid, data = _session_of(message)
+    if not data:
+        await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
+        return
+    if not is_appstore_url(raw):
+        await _reply_html(
+            message,
+            f"{E_ERROR} Đây chưa phải link App Store. Hãy gửi link dạng "
+            f"<code>https://apps.apple.com/...</code>",
+        )
+        return
+    status = await _reply_html(message, f"{E_LOADING} Đang lấy thông tin và render ảnh từ App Store...")
+    info = await lookup_appstore(raw)
+    if not info or not info.get("icon_bytes"):
+        await status.edit(
+            f"{E_ERROR} Không lấy được ảnh từ link này. Kiểm tra lại link App Store giúp em.",
+            parse_mode=enums.ParseMode.HTML,
+        )
+        return
+    name = info.get("track_name") or "Ứng dụng"
+    try:
+        poster = render_appstore_poster(info["icon_bytes"], title=name)
+    except Exception:
+        await status.edit(
+            f"{E_ERROR} Render ảnh không thành công. Thử lại link khác giúp em.",
+            parse_mode=enums.ParseMode.HTML,
+        )
+        return
+    data.update(
+        {
+            "step": "features",
+            "started": time.time(),
+            "store_url": info.get("track_view_url") or raw,
+            "name": name,
+            "version": info.get("version") or "",
+            "seller": info.get("seller_name") or "",
+            "poster": poster,
+        }
+    )
+    _sessions[uid] = data
+    photo = io.BytesIO(poster)
+    photo.name = "poster.jpg"
+    caption = (
+        f"{E_SUCCESS} Đây là ảnh sẽ gửi kèm bài đăng của <b>{html.escape(name)}</b>"
+        f"{' — ' + html.escape(data['version']) if data.get('version') else ''}.\n"
+        f"{E_TIP} Hãy nhập chức năng của game (mỗi ý một dòng). Gửi <code>/cancel</code> để hủy."
+    )
+    try:
+        await message.reply_photo(photo, caption=caption, parse_mode=enums.ParseMode.HTML)
+        await status.delete()
+    except Exception:
+        await status.edit(caption, parse_mode=enums.ParseMode.HTML)
+
+
+async def _handle_features(message: Message, raw: str):
+    uid, data = _session_of(message)
+    if not data:
+        await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
+        return
+    features = split_features(raw)
+    if not features:
+        await _reply_html(message, f"{E_TIP} Hãy nhập ít nhất một chức năng, mỗi ý một dòng.")
+        return
+    channel = await _resolved_channel()
+    if not channel:
+        _sessions.pop(uid, None)
+        await _reply_html(message, f"{E_WARN} Chưa chọn kênh đăng bài. Dùng <code>/up_channel @tenkenh</code> trước nhé.")
+        return
+    status = await _reply_html(message, f"{E_LOADING} Đang đăng bài lên kênh...")
+    caption, overflow = build_channel_caption(
+        name=data.get("name") or "Ứng dụng",
+        version=data.get("version") or "",
+        seller=data.get("seller") or "",
+        store_url=data.get("store_url") or "",
+        features=features,
+        filename=data.get("filename") or "",
+        emojis=_CAPTION_EMOJI,
+    )
+    try:
+        chat, err = await _ensure_can_post(channel)
+        if err:
+            await status.edit(f"{E_ERROR} {html.escape(err)}", parse_mode=enums.ParseMode.HTML)
+            return
+        photo = io.BytesIO(data["poster"])
+        photo.name = "poster.jpg"
+        posted = await app.send_photo(
+            chat.id,
+            photo,
+            caption=caption,
+            parse_mode=enums.ParseMode.HTML,
+        )
+        if overflow:
+            await app.send_message(
+                chat.id,
+                f"{E_STAR} <b>Chức năng (tiếp)</b>\n{overflow}",
+                parse_mode=enums.ParseMode.HTML,
+                reply_to_message_id=posted.id,
+            )
+        try:
+            await app.copy_message(chat.id, data["file_chat_id"], data["file_msg_id"])
+        except Exception as e:
+            await status.edit(
+                f"{E_WARN} Đã đăng ảnh nhưng không copy được file: {html.escape(str(e))}\n"
+                f"{_post_link(chat, posted.id)}",
+                parse_mode=enums.ParseMode.HTML,
+            )
+            _sessions.pop(uid, None)
+            return
+    except Exception as e:
+        await status.edit(
+            f"{E_ERROR} Không đăng được bài: {html.escape(str(e))}",
+            parse_mode=enums.ParseMode.HTML,
+        )
+        return
+    _sessions.pop(uid, None)
+    link = _post_link(chat, posted.id)
+    when = datetime.now().strftime("%H:%M %d/%m/%Y")
+    await status.edit(
+        f"{E_SUCCESS} Đã đăng bài lên <b>{html.escape(chat.title or 'kênh')}</b> lúc {when}.\n"
+        f"{E_LINK} <a href=\"{html.escape(link, quote=True)}\">Xem bài đăng</a>",
+        parse_mode=enums.ParseMode.HTML,
+    )

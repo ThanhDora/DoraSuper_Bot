@@ -23,6 +23,7 @@ NO_DELETE_COMMANDS = {
     "kang", "unkang", "taosticker", "stickerid", "laysticker",  # stickers — cần reply
     "broadcast",  # reply để broadcast
     "summarize", "tomtat", "rewrite", "vietlai",  # ai reply
+    "up", "up_channel",  # đăng file lên kênh, cần giữ reply tới file
 }
 
 

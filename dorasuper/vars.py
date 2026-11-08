@@ -37,6 +37,14 @@ if LOG_CHANNEL := environ.get("LOG_CHANNEL", ""):
 else:
     LOGGER.error("LOG_CHANNEL variable is missing! Exiting now")
     sys.exit(1)
+_raw_up_channel = (environ.get("UP_CHANNEL") or "").strip()
+if not _raw_up_channel:
+    UP_CHANNEL = None
+else:
+    try:
+        UP_CHANNEL = int(_raw_up_channel)
+    except ValueError:
+        UP_CHANNEL = _raw_up_channel
 # Optional ENV
 LOG_GROUP_ID = environ.get("LOG_GROUP_ID")
 _raw_user_session = (environ.get("USER_SESSION") or "").strip()

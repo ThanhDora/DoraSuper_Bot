@@ -1,0 +1,20 @@
+from database import dbname
+
+_col = dbname["up_channel"]
+_KEY = "default"
+
+
+async def get_up_channel():
+    doc = await _col.find_one({"_id": _KEY})
+    if not doc:
+        return None
+    return doc.get("chat_id")
+
+
+async def set_up_channel(chat_id):
+    await _col.update_one(
+        {"_id": _KEY},
+        {"$set": {"chat_id": chat_id}},
+        upsert=True,
+    )
+    return chat_id
