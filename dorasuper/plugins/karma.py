@@ -3,7 +3,7 @@ import html
 from datetime import datetime
 
 from pyrogram import enums, filters
-from pyrogram.errors import PeerIdInvalid
+from pyrogram.errors import MessageIdInvalid, PeerIdInvalid
 from pyrogram.types import Message
 
 from database.karma_db import (
@@ -56,7 +56,12 @@ async def auto_delete_message(message, delay=120):
 
 async def _reply_html(message: Message, text: str, **kwargs):
     kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
-    return await message.reply_text(text, **kwargs)
+    try:
+        return await message.reply_text(text, **kwargs)
+    except MessageIdInvalid:
+        if getattr(message, "message_thread_id", None):
+            kwargs.setdefault("message_thread_id", message.message_thread_id)
+        return await app.send_message(message.chat.id, text, **kwargs)
 
 
 async def _apply_vote(message: Message, delta: int, template: str):
@@ -82,7 +87,7 @@ async def _apply_vote(message: Message, delta: int, template: str):
     await auto_delete_message(response_message, 120)
 
 
-@app.on_message(filters.command(_FAME_PM_COMMANDS, COMMAND_HANDLER) & filters.private)
+@app.on_message(filters.command(_FAME_PM_COMMANDS, COMMAND_HANDLER) & filters.private, group=-1)
 @capture_err
 async def fame_private(_, message: Message):
     await _reply_html(message, _GROUP_ONLY)
@@ -134,10 +139,11 @@ async def downvote(_, message):
 
 @app.on_message(
     filters.command(["thanks", "thank", "tks", "like"], COMMAND_HANDLER)
-    & filters.group
+    & ~filters.private
     & filters.incoming
     & ~filters.via_bot
     & ~filters.bot,
+    group=-1,
 )
 @capture_err
 async def thanks_cmd(_, message: Message):
@@ -157,10 +163,11 @@ async def thanks_cmd(_, message: Message):
 
 @app.on_message(
     filters.command(["unlike", "dislike"], COMMAND_HANDLER)
-    & filters.group
+    & ~filters.private
     & filters.incoming
     & ~filters.via_bot
     & ~filters.bot,
+    group=-1,
 )
 @capture_err
 async def unlike_cmd(_, message: Message):
@@ -178,7 +185,7 @@ async def unlike_cmd(_, message: Message):
     )
 
 
-@app.on_message(filters.command("fame_rank", COMMAND_HANDLER) & filters.group)
+@app.on_message(filters.command("fame_rank", COMMAND_HANDLER) & ~filters.private, group=-1)
 @capture_err
 async def command_karma(_, message):
     chat_id = message.chat.id
@@ -223,7 +230,7 @@ async def command_karma(_, message):
     await auto_delete_message(response_message, 120)
 
 
-@app.on_message(filters.command("fame_reset", COMMAND_HANDLER) & ~filters.private)
+@app.on_message(filters.command("fame_reset", COMMAND_HANDLER) & ~filters.private, group=-1)
 @adminsOnly("can_change_info")
 async def karma_reset(_, message):
     usage = f"{E_TIP} <b>Cách sử dụng:</b>\n<code>/fame_reset</code>"
@@ -235,7 +242,7 @@ async def karma_reset(_, message):
     await _reply_html(message, f"{E_SUCCESS} Tất cả điểm danh tiếng đã được đặt lại cho nhóm này.")
 
 
-@app.on_message(filters.command("fame_toggle", COMMAND_HANDLER) & ~filters.private)
+@app.on_message(filters.command("fame_toggle", COMMAND_HANDLER) & ~filters.private, group=-1)
 @adminsOnly("can_change_info")
 async def fame_toggle(_, message):
     usage = f"{E_TIP} <b>Cách sử dụng:</b>\n<code>/fame_toggle [On/Off]</code>"
@@ -256,7 +263,7 @@ async def fame_toggle(_, message):
         await _reply_html(message, usage)
 
 
-@app.on_message(filters.command("fame_set", COMMAND_HANDLER) & filters.group)
+@app.on_message(filters.command("fame_set", COMMAND_HANDLER) & ~filters.private, group=-1)
 @adminsOnly("can_change_info")
 async def set_fame(_, message):
     usage = f"{E_TIP} <b>Cách sử dụng:</b>\n<code>/fame_set [số điểm]</code>"
@@ -291,7 +298,7 @@ async def set_fame(_, message):
     await auto_delete_message(response_message, 120)
 
 
-@app.on_message(filters.command("fame", COMMAND_HANDLER) & filters.group)
+@app.on_message(filters.command("fame", COMMAND_HANDLER) & ~filters.private, group=-1)
 @capture_err
 async def fame(_, message):
     chat_id = message.chat.id

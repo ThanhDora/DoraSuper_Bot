@@ -16,6 +16,8 @@ COMMAND_ANY_RE = re.compile(r"^(" + _prefix_re + r")\s*(\S+)", re.IGNORECASE)
 
 # Lệnh không tự động xóa tin nhắn (giữ để user tham chiếu hoặc bot cần reply_to_message)
 NO_DELETE_COMMANDS = {
+    "fame", "fame_rank", "fame_reset", "fame_toggle", "fame_set",
+    "thanks", "thank", "tks", "like", "unlike", "dislike",
     "autodl", "dl", "tt", "tiktok",  # downloadsVideo
     "q", "r",  # quotly — cần reply để tạo sticker
     "kang", "unkang", "taosticker", "stickerid", "laysticker",  # stickers — cần reply
