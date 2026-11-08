@@ -1,20 +1,23 @@
 import html
 import io
+import secrets
 import time
 from datetime import datetime
 
 from pyrogram import enums, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
-from pyrogram.types import Message
+from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from database.up_channel_db import get_up_channel, set_up_channel
-from dorasuper import app
+from database.up_channel_db import get_up_channel, get_up_file, save_up_file, set_up_channel
+from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import (
-    E_DART, E_ERROR, E_FIRE, E_GEAR, E_GIFT, E_IOS, E_LINK, E_LOADING,
+    E_DART, E_DOWNLOAD, E_ERROR, E_FIRE, E_GEAR, E_GIFT, E_IOS, E_LINK, E_LOADING,
     E_LOCK, E_MENU, E_PARTY, E_PIN_LOC, E_ROCKET, E_SHIELD, E_SPARKLE,
     E_STAR, E_SUCCESS, E_TIP, E_TROPHY, E_USER, E_WARN,
 )
+from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
 from dorasuper.helper.channel_up import (
     build_channel_caption,
     is_allowed_package,
@@ -27,7 +30,7 @@ from dorasuper.vars import COMMAND_HANDLER, SUDO, UP_CHANNEL
 
 __MODULE__ = "ĐăngKênh"
 __HELP__ = f"""
-Đăng file IPA, DEB, dylib,... lên kênh Telegram kèm ảnh App Store và caption có emoji động.
+Đăng một bài (ảnh + caption + nút tải) lên kênh Telegram. Người xem bấm nút để bot gửi file trong tin nhắn riêng.
 
 <blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store, nhập chức năng, bot sẽ render ảnh và đăng lên kênh.
 /up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
@@ -88,6 +91,34 @@ def _source_file_message(message: Message):
 async def _reply_html(message: Message, text: str, **kwargs):
     kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
     return await message.reply_text(text, **kwargs)
+
+
+async def _send_photo_html(chat_id, photo, html_caption: str, **kwargs):
+    text, entities = html_to_entities(html_caption)
+    try:
+        return await app.send_photo(
+            chat_id, photo, caption=text, caption_entities=entities, **kwargs
+        )
+    except DocumentInvalid:
+        return await app.send_photo(
+            chat_id,
+            photo,
+            caption=text,
+            caption_entities=strip_custom_emoji_entities(entities),
+            **kwargs,
+        )
+
+
+def _bot_username() -> str:
+    return BOT_USERNAME or getattr(getattr(app, "me", None), "username", None) or ""
+
+
+def _download_markup(token: str) -> InlineKeyboardMarkup:
+    username = _bot_username()
+    url = f"https://t.me/{username}?start=upfile_{token}"
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton(f"{E_DOWNLOAD} Tải file", url=url)]]
+    )
 
 
 async def _resolved_channel():
@@ -186,6 +217,7 @@ async def command_up(_, message: Message):
         "started": time.time(),
         "file_chat_id": file_msg.chat.id,
         "file_msg_id": file_msg.id,
+        "file_id": file_msg.document.file_id,
         "filename": filename,
         "ask_chat_id": message.chat.id,
     }
@@ -301,7 +333,7 @@ async def _handle_features(message: Message, raw: str):
         await _reply_html(message, f"{E_WARN} Chưa chọn kênh đăng bài. Dùng <code>/up_channel @tenkenh</code> trước nhé.")
         return
     status = await _reply_html(message, f"{E_LOADING} Đang đăng bài lên kênh...")
-    caption, overflow = build_channel_caption(
+    caption, _overflow = build_channel_caption(
         name=data.get("name") or "Ứng dụng",
         version=data.get("version") or "",
         seller=data.get("seller") or "",
@@ -310,36 +342,35 @@ async def _handle_features(message: Message, raw: str):
         filename=data.get("filename") or "",
         emojis=_CAPTION_EMOJI,
     )
+    token = secrets.token_hex(8)
     try:
         chat, err = await _ensure_can_post(channel)
         if err:
             await status.edit(f"{E_ERROR} {html.escape(err)}", parse_mode=enums.ParseMode.HTML)
             return
+        if not _bot_username():
+            await status.edit(
+                f"{E_ERROR} Chưa lấy được username của bot nên không tạo được nút tải file.",
+                parse_mode=enums.ParseMode.HTML,
+            )
+            return
+        await save_up_file(token, {
+            "file_id": data.get("file_id"),
+            "file_chat_id": data.get("file_chat_id"),
+            "file_msg_id": data.get("file_msg_id"),
+            "filename": data.get("filename") or "",
+            "name": data.get("name") or "",
+            "created_by": uid,
+            "created_at": time.time(),
+        })
         photo = io.BytesIO(data["poster"])
         photo.name = "poster.jpg"
-        posted = await app.send_photo(
+        posted = await _send_photo_html(
             chat.id,
             photo,
-            caption=caption,
-            parse_mode=enums.ParseMode.HTML,
+            caption,
+            reply_markup=_download_markup(token),
         )
-        if overflow:
-            await app.send_message(
-                chat.id,
-                f"{E_STAR} <b>Chức năng (tiếp)</b>\n{overflow}",
-                parse_mode=enums.ParseMode.HTML,
-                reply_to_message_id=posted.id,
-            )
-        try:
-            await app.copy_message(chat.id, data["file_chat_id"], data["file_msg_id"])
-        except Exception as e:
-            await status.edit(
-                f"{E_WARN} Đã đăng ảnh nhưng không copy được file: {html.escape(str(e))}\n"
-                f"{_post_link(chat, posted.id)}",
-                parse_mode=enums.ParseMode.HTML,
-            )
-            _sessions.pop(uid, None)
-            return
     except Exception as e:
         await status.edit(
             f"{E_ERROR} Không đăng được bài: {html.escape(str(e))}",
@@ -354,3 +385,52 @@ async def _handle_features(message: Message, raw: str):
         f"{E_LINK} <a href=\"{html.escape(link, quote=True)}\">Xem bài đăng</a>",
         parse_mode=enums.ParseMode.HTML,
     )
+
+
+async def deliver_up_file(message: Message, payload: str):
+    token = (payload or "").lower().strip()
+    if token.startswith("upfile_"):
+        token = token[len("upfile_"):]
+    rec = await get_up_file(token)
+    if not rec or not rec.get("file_id"):
+        await _reply_html(
+            message,
+            f"{E_ERROR} Không tìm thấy file này hoặc bài đăng đã hết hiệu lực.",
+        )
+        return
+    name = rec.get("name") or "File"
+    filename = rec.get("filename") or ""
+    caption = f"{E_SUCCESS} <b>{html.escape(name)}</b>"
+    if filename:
+        caption += f"\n{E_GEAR} <code>{html.escape(filename)}</code>"
+    try:
+        await app.send_document(
+            message.chat.id,
+            rec["file_id"],
+            file_name=filename or None,
+            caption=caption,
+            parse_mode=enums.ParseMode.HTML,
+        )
+    except Exception as e:
+        try:
+            if rec.get("file_chat_id") and rec.get("file_msg_id"):
+                await app.copy_message(message.chat.id, rec["file_chat_id"], rec["file_msg_id"])
+                return
+        except Exception:
+            pass
+        await _reply_html(
+            message,
+            f"{E_ERROR} Không gửi được file: {html.escape(str(e))}",
+        )
+
+
+@app.on_message(filters.command("start", COMMAND_HANDLER) & filters.private, group=_HANDLER_GROUP)
+@capture_err
+async def start_upfile(_, message: Message):
+    parts = (message.text or "").split(maxsplit=1)
+    if len(parts) < 2:
+        return
+    payload = parts[1].lower().strip()
+    if not payload.startswith("upfile_"):
+        return
+    await deliver_up_file(message, payload)

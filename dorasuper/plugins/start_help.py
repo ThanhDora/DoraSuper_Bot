@@ -71,6 +71,8 @@ async def start(self, ctx: Message, strings):
     text_raw = (ctx.text or "").strip()
     if len(text_raw.split(None, 1)) > 1:
         name = text_raw.split(None, 1)[1].lower().strip()
+        if name.startswith("upfile_"):
+            return
         if "_" in name:
             module = name.split("_", 1)[1].strip()
             ordered = _helpable_keys_sorted()

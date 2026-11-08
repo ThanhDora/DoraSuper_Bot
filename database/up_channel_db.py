@@ -1,6 +1,7 @@
 from database import dbname
 
 _col = dbname["up_channel"]
+_files = dbname["up_files"]
 _KEY = "default"
 
 
@@ -18,3 +19,16 @@ async def set_up_channel(chat_id):
         upsert=True,
     )
     return chat_id
+
+
+async def save_up_file(token: str, data: dict):
+    payload = dict(data)
+    payload["_id"] = token
+    await _files.update_one({"_id": token}, {"$set": payload}, upsert=True)
+    return token
+
+
+async def get_up_file(token: str):
+    if not token:
+        return None
+    return await _files.find_one({"_id": token})
