@@ -173,20 +173,84 @@ async def _reply_html(message: Message, text: str, **kwargs):
     return await message.reply_text(text, **kwargs)
 
 
-async def _send_photo_html(chat_id, photo, html_caption: str, **kwargs):
+def _has_custom_emoji(msg: Message) -> bool:
+    ents = (getattr(msg, "caption_entities", None) or getattr(msg, "entities", None) or [])
+    return any(getattr(e, "type", None) == enums.MessageEntityType.CUSTOM_EMOJI for e in ents)
+
+
+async def _apply_caption_html(message: Message, html_caption: str, reply_markup=None):
+    """Gắn caption sau khi ảnh đã lên, cùng cách parse HTML với tin nhắn thường."""
+    try:
+        edited = await message.edit_caption(
+            html_caption, parse_mode=enums.ParseMode.HTML, reply_markup=reply_markup
+        )
+        if edited and _has_custom_emoji(edited):
+            return edited
+        if edited:
+            message = edited
+    except Exception:
+        pass
     text, entities = html_to_entities(html_caption)
     try:
-        return await app.send_photo(
-            chat_id, photo, caption=text, caption_entities=entities, **kwargs
+        edited = await message.edit_caption(
+            text, caption_entities=entities, reply_markup=reply_markup
         )
-    except DocumentInvalid:
-        return await app.send_photo(
-            chat_id,
-            photo,
-            caption=text,
-            caption_entities=strip_custom_emoji_entities(entities),
-            **kwargs,
+        if edited:
+            return edited
+    except Exception:
+        pass
+    return await message.edit_caption(
+        text,
+        caption_entities=strip_custom_emoji_entities(entities),
+        reply_markup=reply_markup,
+    )
+
+
+async def _send_photo_html(chat_id, photo, html_caption: str, **kwargs):
+    markup = kwargs.get("reply_markup")
+    posted = None
+    try:
+        posted = await app.send_photo(
+            chat_id, photo, caption=html_caption, parse_mode=enums.ParseMode.HTML, **kwargs
         )
+        if posted and _has_custom_emoji(posted):
+            return posted
+    except Exception:
+        posted = None
+        if hasattr(photo, "seek"):
+            try:
+                photo.seek(0)
+            except Exception:
+                pass
+    if posted is None:
+        posted = await app.send_photo(chat_id, photo, **kwargs)
+    try:
+        return await _apply_caption_html(posted, html_caption, reply_markup=markup)
+    except Exception:
+        if posted:
+            return posted
+        raise
+
+
+async def _reply_photo_html(message: Message, photo, html_caption: str, **kwargs):
+    markup = kwargs.get("reply_markup")
+    sent = None
+    try:
+        sent = await message.reply_photo(
+            photo, caption=html_caption, parse_mode=enums.ParseMode.HTML, **kwargs
+        )
+        if sent and _has_custom_emoji(sent):
+            return sent
+    except Exception:
+        sent = None
+        if hasattr(photo, "seek"):
+            try:
+                photo.seek(0)
+            except Exception:
+                pass
+    if sent is None:
+        sent = await message.reply_photo(photo, **kwargs)
+    return await _apply_caption_html(sent, html_caption, reply_markup=markup)
 
 
 def _bot_username() -> str:
@@ -398,7 +462,7 @@ async def _handle_link(message: Message, raw: str):
         f"{E_TIP} Hãy nhập chức năng của game (mỗi ý một dòng). Gửi <code>/cancel</code> để hủy."
     )
     try:
-        await message.reply_photo(photo, caption=caption, parse_mode=enums.ParseMode.HTML)
+        await _reply_photo_html(message, photo, caption)
         await status.delete()
     except Exception:
         await status.edit(caption, parse_mode=enums.ParseMode.HTML)
