@@ -16,7 +16,10 @@ from database.karma_db import (
     reset_all_karma,
 )
 from dorasuper import app
-from dorasuper.emoji import E_ERROR, E_HEART, E_LIST, E_LOADING, E_SUCCESS, E_TIP, E_WARN
+from dorasuper.emoji import (
+    E_CLOCK, E_ERROR, E_FIRE, E_GROUP, E_HEART, E_LIST, E_LOADING, E_MEDAL,
+    E_ONE, E_SPARKLE, E_STAR, E_SUCCESS, E_THREE, E_TIP, E_TROPHY, E_TWO, E_WARN,
+)
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import adminsOnly
 from dorasuper.helper.fame import is_downvote, is_upvote, mention_user
@@ -48,6 +51,16 @@ _FAME_PM_COMMANDS = [
     "fame", "fame_rank", "fame_reset", "fame_toggle", "fame_set",
     "thanks", "thank", "tks", "like", "unlike", "dislike",
 ]
+
+def _rank_badge(index: int) -> str:
+    if index == 1:
+        return f"{E_ONE} {E_TROPHY}"
+    if index == 2:
+        return f"{E_TWO} {E_MEDAL}"
+    if index == 3:
+        return f"{E_THREE} {E_STAR}"
+    return f"{E_FIRE} <b>{index}.</b>"
+
 
 async def auto_delete_message(message, delay=120):
     await asyncio.sleep(delay)
@@ -203,7 +216,11 @@ async def command_karma(_, message):
 
     msg_date = datetime.now().strftime("%H:%M %d/%m/%Y")
     title = html.escape(message.chat.title or "nhóm")
-    karma_text = f"{E_LIST} <b>Top 10 thành viên xếp hạng cao nhất nhóm {title} (Cập nhật lúc {msg_date})</b>\n\n\n"
+    karma_text = (
+        f"{E_TROPHY}{E_SPARKLE} <b>Top 10 thành viên xếp hạng cao nhất</b>\n"
+        f"{E_GROUP} Nhóm: <b>{title}</b>\n"
+        f"{E_CLOCK} Cập nhật lúc {msg_date}\n\n"
+    )
 
     karma_dicc = {}
     for item in karma:
@@ -221,7 +238,7 @@ async def command_karma(_, message):
         except PeerIdInvalid:
             user_mention = "Thành viên"
 
-        karma_text += f"👉 Top {index} là {user_mention} với tổng số điểm là {karma_count} điểm\n\n"
+        karma_text += f"{_rank_badge(index)} {user_mention} — {E_STAR} <code>{karma_count}</code> điểm\n"
 
     if not top_karma_users:
         karma_text = "Không tìm thấy điểm trong nhóm này. Có vẻ chế độ Fame chưa bật hoặc chưa có tương tác nào giữa người dùng."
