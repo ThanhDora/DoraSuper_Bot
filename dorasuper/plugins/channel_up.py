@@ -7,9 +7,12 @@ from datetime import datetime
 from pyrogram import enums, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
 from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from database.up_channel_db import get_up_channel, get_up_file, save_up_file, set_up_channel
+from database.up_channel_db import (
+    get_up_acl, get_up_channel, get_up_file, is_up_allowed,
+    save_up_file, set_up_acl, set_up_channel,
+)
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import (
@@ -17,6 +20,7 @@ from dorasuper.emoji import (
     E_LOCK, E_MENU, E_PARTY, E_PIN_LOC, E_ROCKET, E_SHIELD, E_SPARKLE,
     E_STAR, E_SUCCESS, E_TIP, E_TROPHY, E_USER, E_WARN,
 )
+from dorasuper.helper.fame import mention_user
 from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
 from dorasuper.helper.channel_up import (
     build_channel_caption,
@@ -31,6 +35,8 @@ from dorasuper.vars import COMMAND_HANDLER, SUDO, UP_CHANNEL
 __MODULE__ = "ĐăngKênh"
 __HELP__ = f"""
 Đăng một bài (ảnh + caption + nút tải) lên kênh Telegram. Người xem bấm nút để bot gửi file trong tin nhắn riêng.
+
+Chỉ admin bot và những người được ThanhDora duyệt mới dùng được /up. Người khác gửi /up sẽ chờ duyệt.
 
 <blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store, nhập chức năng, bot sẽ render ảnh và đăng lên kênh.
 /up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
@@ -64,6 +70,80 @@ _CAPTION_EMOJI = {
 def _is_sudo(message: Message) -> bool:
     user = message.from_user
     return bool(user and user.id in SUDO)
+
+
+def _is_sudo_id(user_id) -> bool:
+    return bool(user_id and int(user_id) in SUDO)
+
+
+async def _can_use_up(user_id) -> bool:
+    if _is_sudo_id(user_id):
+        return True
+    return await is_up_allowed(user_id)
+
+
+def _approval_markup(user_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [[
+            InlineKeyboardButton(f"{E_SUCCESS} Duyệt", callback_data=f"upacl_ok_{user_id}"),
+            InlineKeyboardButton(f"{E_ERROR} Từ chối", callback_data=f"upacl_no_{user_id}"),
+        ]]
+    )
+
+
+async def _notify_owners_for_access(message: Message) -> bool:
+    user = message.from_user
+    mention = mention_user(user)
+    username = f"@{user.username}" if user.username else "không có"
+    text = (
+        f"{E_WARN} <b>Yêu cầu dùng /up</b>\n"
+        f"{E_USER} {mention}\n"
+        f"Username: {html.escape(username)}\n"
+        f"ID: <code>{user.id}</code>\n\n"
+        f"Duyệt để người này được đăng bài lên kênh bằng /up."
+    )
+    sent = 0
+    for owner_id in SUDO:
+        try:
+            await app.send_message(
+                owner_id,
+                text,
+                parse_mode=enums.ParseMode.HTML,
+                reply_markup=_approval_markup(user.id),
+            )
+            sent += 1
+        except Exception:
+            continue
+    return sent > 0
+
+
+async def _request_up_access(message: Message):
+    user = message.from_user
+    existing = await get_up_acl(user.id)
+    if existing and existing.get("status") == "pending":
+        await _reply_html(
+            message,
+            f"{E_LOADING} Yêu cầu của bạn đang chờ ThanhDora duyệt. Vui lòng đợi nhé.",
+        )
+        return
+    await set_up_acl(
+        user.id,
+        "pending",
+        name=user.first_name or "",
+        username=user.username or "",
+        requested_at=time.time(),
+    )
+    sent = await _notify_owners_for_access(message)
+    if sent:
+        await _reply_html(
+            message,
+            f"{E_LOADING} Đã gửi yêu cầu dùng /up. Vui lòng đợi ThanhDora duyệt.",
+        )
+        return
+    await _reply_html(
+        message,
+        f"{E_ERROR} Không gửi được yêu cầu tới ThanhDora. Thử lại sau hoặc liên hệ trực tiếp nhé.",
+    )
 
 
 def _session_of(message: Message):
@@ -184,8 +264,10 @@ async def command_up_channel(_, message: Message):
 @app.on_message(filters.command(["up"], COMMAND_HANDLER), group=_HANDLER_GROUP)
 @capture_err
 async def command_up(_, message: Message):
-    if not _is_sudo(message):
-        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới dùng được /up.")
+    if not message.from_user:
+        return
+    if not await _can_use_up(message.from_user.id):
+        await _request_up_access(message)
         return
     channel = await _resolved_channel()
     if not channel:
@@ -255,6 +337,10 @@ def _is_up_session_text(_, __, message: Message) -> bool:
 async def channel_up_session(_, message: Message):
     uid, data = _session_of(message)
     if not data:
+        return
+    if not await _can_use_up(uid):
+        _sessions.pop(uid, None)
+        await _request_up_access(message)
         return
     step = data.get("step")
     if step == "link":
@@ -434,3 +520,48 @@ async def start_upfile(_, message: Message):
     if not payload.startswith("upfile_"):
         return
     await deliver_up_file(message, payload)
+
+
+@app.on_callback_query(filters.regex(r"^upacl_(ok|no)_(\d+)$"), group=_HANDLER_GROUP)
+@capture_err
+async def up_acl_decide(_, cq: CallbackQuery):
+    if not cq.from_user or cq.from_user.id not in SUDO:
+        await cq.answer("Chỉ ThanhDora mới duyệt được yêu cầu này.", show_alert=True)
+        return
+    match = cq.matches[0] if cq.matches else None
+    if not match:
+        await cq.answer()
+        return
+    action, target_id = match.group(1), int(match.group(2))
+    rec = await get_up_acl(target_id)
+    try:
+        target = await app.get_users(target_id)
+        mention = mention_user(target)
+    except Exception:
+        name = (rec or {}).get("name") or str(target_id)
+        mention = f'<a href="tg://user?id={target_id}">{html.escape(str(name))}</a>'
+    if action == "ok":
+        await set_up_acl(target_id, "allowed", decided_at=time.time(), decided_by=cq.from_user.id)
+        result = f"{E_SUCCESS} Đã duyệt {mention} dùng /up."
+        user_text = (
+            f"{E_SUCCESS} ThanhDora đã duyệt. Bạn có thể dùng <code>/up</code> "
+            f"(trả lời file IPA, DEB, dylib,...) để đăng bài lên kênh."
+        )
+        answer = "Đã duyệt"
+    else:
+        await set_up_acl(target_id, "denied", decided_at=time.time(), decided_by=cq.from_user.id)
+        result = f"{E_ERROR} Đã từ chối {mention} dùng /up."
+        user_text = f"{E_ERROR} ThanhDora đã từ chối quyền dùng /up."
+        answer = "Đã từ chối"
+    try:
+        await cq.edit_message_text(result, parse_mode=enums.ParseMode.HTML)
+    except Exception:
+        try:
+            await cq.message.reply_text(result, parse_mode=enums.ParseMode.HTML)
+        except Exception:
+            pass
+    await cq.answer(answer)
+    try:
+        await app.send_message(target_id, user_text, parse_mode=enums.ParseMode.HTML)
+    except Exception:
+        pass
