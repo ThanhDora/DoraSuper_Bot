@@ -237,6 +237,30 @@ def _publish(mapping: dict) -> None:
     )
 
 
+
+async def _background_scan_high(app, saved: dict, found: dict, start: int, end: int) -> None:
+    """Quét nền cửa sổ id cao (bot GetMessages) để bắt topic còn thiếu."""
+    try:
+        await _collect_topic_actions(app, start, end, found)
+        mapping = _apply(saved, found)
+        # Nếu vẫn thiếu files/pm: mở rộng thêm một lần về phía thấp hơn.
+        if any(mapping.get(k) is None for k, _ in _TOPICS_DEF):
+            extra_start = max(1, start - 8000)
+            if extra_start < start:
+                await _collect_topic_actions(app, extra_start, start - 1, found)
+                mapping = _apply(saved, found)
+        # Không create trong nền nếu đã 403 trước đó — chỉ persist những gì khớp được.
+        await _col.update_one({"_id": "log_topics"}, {"$set": {k: v for k, v in mapping.items() if v}}, upsert=True)
+        _publish(mapping)
+        missing = [k for k, v in mapping.items() if v is None]
+        if missing:
+            LOGGER.warning("LOG_TOPICS: quét xong vẫn thiếu %s — tạo topic đúng tên hoặc set LOG_TOPIC_IDS", missing)
+        else:
+            LOGGER.info("LOG_TOPICS: quét nền đủ tất cả topic")
+    except Exception as e:
+        LOGGER.warning("LOG_TOPICS: quét nền (high) lỗi: %s", e)
+
+
 async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
     try:
         await _scan_recent_history(app, found, limit=500)
@@ -282,19 +306,20 @@ async def ensure_log_topics(app) -> None:
         _publish(saved)
         return
 
+    # Publish ID đã biết ngay — tránh handler rơi General lúc đang probe.
+    if saved:
+        _publish({k: saved.get(k) for k, _ in _TOPICS_DEF})
+
     found: dict[int, str] = {}
-    # 1) History General (có thể không thấy topic khác) + watermark gợi ý.
-    newest_hist = await _scan_recent_history(app, found, limit=200)
-    hint = max([newest_hist] + list(saved.values()) + list(found.keys()) + [1])
-    # 2) Probe id cao nhất rồi quét cửa sổ gần cuối — bắt topic File mới (id == service msg).
+    hint = max(list(saved.values()) + [1])
+    # Probe id mới nhất rồi chỉ quét cửa sổ hẹp gần cuối (topic File vừa tạo).
     try:
         newest = await _probe_newest_id(app, hint)
         LOGGER.info("LOG_TOPICS: newest_msg_id≈%s (hint=%s)", newest, hint)
-        window = 2500
-        await _collect_topic_actions(app, max(1, newest - window), newest, found)
-        # Cũng quét quanh các topic id đã biết (topic create nằm đúng id đó).
+        # Topic create = service msg id; anh vừa tạo → gần cuối. Quét 800 id là đủ.
+        await _collect_topic_actions(app, max(1, newest - 800), newest, found)
         for tid in list(saved.values()):
-            await _collect_topic_actions(app, max(1, int(tid) - 5), int(tid) + 5, found)
+            await _collect_topic_actions(app, max(1, int(tid) - 2), int(tid) + 2, found)
     except Exception as e:
         LOGGER.warning("LOG_TOPICS: probe/collect lỗi: %s", e)
         newest = hint
@@ -305,7 +330,7 @@ async def ensure_log_topics(app) -> None:
     done = False
     start_hi = max(1, int(newest) - 500)
 
-    # 3) Thử tạo topic còn thiếu (thường 403 nếu bot không có quyền — bỏ qua).
+    # Không cố create pm/files nếu thiếu quyền — chỉ log 1 lần ngắn.
     for key, name in _TOPICS_DEF:
         if mapping[key] is None:
             try:
@@ -318,11 +343,11 @@ async def ensure_log_topics(app) -> None:
     await _col.update_one({"_id": "log_topics"}, {"$set": {k: v for k, v in mapping.items() if v}}, upsert=True)
     _publish(mapping)
     if any(v is None for v in mapping.values()) and not done:
-        # Quét nền từ id thấp hơn cửa sổ cao (bắt topic cũ nếu còn thiếu).
-        bg_start = max(1, start_hi - 2000)
-        LOGGER.info("LOG_TOPICS: chưa đủ, tiếp tục quét nền từ id %s", bg_start)
+        # Nền: quét lùi thêm từ newest để bắt topic ngoài cửa sổ hẹp.
+        bg_start = max(1, int(newest) - 5000)
+        LOGGER.info("LOG_TOPICS: chưa đủ, tiếp tục quét nền cửa sổ cao từ id %s", bg_start)
         saved_now = {k: v for k, v in mapping.items() if v}
-        asyncio.create_task(_background_scan(app, saved_now, found, bg_start))
+        asyncio.create_task(_background_scan_high(app, saved_now, found, bg_start, int(newest)))
 
 
 def topic_id(key: str) -> int | None:
