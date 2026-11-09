@@ -32,25 +32,6 @@ _FEATURE_RULES = (
     (re.compile(r"skin|nhân vật|nhan vat", re.I), "party"),
 )
 
-_DEFAULT_EMOJI = {
-    "trophy": "🏆",
-    "sparkle": "✨",
-    "star": "⭐",
-    "ios": "🍏",
-    "user": "👤",
-    "link": "🔗",
-    "gift": "🎁",
-    "shield": "🛡️",
-    "gear": "⚙️",
-    "rocket": "🚀",
-    "lock": "🔒",
-    "dart": "🎯",
-    "pin": "📍",
-    "crown": "👑",
-    "fire": "🔥",
-    "party": "🎉",
-}
-
 
 def file_extension(filename: str) -> str:
     name = (filename or "").strip().lower()
@@ -101,11 +82,6 @@ def feature_emoji_key(text: str) -> str:
     return "sparkle"
 
 
-def _e(emojis: dict | None, key: str) -> str:
-    table = {**_DEFAULT_EMOJI, **(emojis or {})}
-    return table.get(key) or _DEFAULT_EMOJI[key]
-
-
 def caption_visible_len(html_text: str) -> int:
     """Độ dài UTF-16 của chữ hiện ra, không tính thẻ HTML (giới hạn caption Telegram)."""
     text = re.sub(r"<[^>]+>", "", html_text or "")
@@ -113,26 +89,21 @@ def caption_visible_len(html_text: str) -> int:
 
 
 def _header_lines(
-    emojis: dict | None,
     title: str,
     version: str,
     seller: str,
-    filename: str,
     store_url: str,
     *,
-    include_filename: bool,
     include_seller: bool,
 ) -> list[str]:
-    lines = [f"{_e(emojis, 'trophy')}{_e(emojis, 'sparkle')} <b>{title}</b>"]
+    lines = [f"<b>{title}</b>"]
     if version:
-        lines.append(f"{_e(emojis, 'ios')} Phiên bản: <code>{html.escape(version)}</code>")
+        lines.append(f"iOS · <code>{html.escape(version)}</code>")
     if include_seller and seller:
-        lines.append(f"{_e(emojis, 'user')} Nhà phát hành: {html.escape(seller)}")
-    if include_filename and filename:
-        lines.append(f"{_e(emojis, 'gear')} File: <code>{html.escape(filename)}</code>")
+        lines.append(f"Người bán: {html.escape(seller)}")
     if store_url:
         safe_href = html.escape(store_url, quote=True)
-        lines.append(f"{_e(emojis, 'link')} App Store: <a href=\"{safe_href}\">Mở trên App Store</a>")
+        lines.append(f'<a href="{safe_href}">App Store</a>')
     return lines
 
 
@@ -147,22 +118,26 @@ def build_channel_caption(
     emojis: dict | None = None,
     max_len: int = 1024,
 ) -> tuple[str, str | None]:
-    """Dựng caption HTML. Trả về (caption, phần tràn nếu quá max_len của chữ hiện ra)."""
+    """Dựng caption HTML không emoji. Trả về (caption, phần tràn nếu quá max_len chữ hiện ra).
+
+    Tham số emojis giữ chữ ký cũ nhưng bị bỏ qua — kênh Telegram không hiện
+    custom emoji, nên caption chỉ dùng chữ và bullet typographic.
+    """
+    _ = emojis
     title = html.escape((name or "").strip() or "Ứng dụng")
-    feature_lines = []
-    for item in features or []:
-        key = feature_emoji_key(item)
-        feature_lines.append(f"{_e(emojis, key)} {html.escape(item)}")
+    feature_lines = [f"• {html.escape(item)}" for item in (features or []) if (item or "").strip()]
 
     def compose(include_filename: bool, include_seller: bool, feats: list[str]) -> str:
         lines = _header_lines(
-            emojis, title, version, seller, filename, store_url,
-            include_filename=include_filename, include_seller=include_seller,
+            title, version, seller, store_url, include_seller=include_seller,
         )
         if feats:
             lines.append("")
-            lines.append(f"{_e(emojis, 'star')} <b>Chức năng</b>")
+            lines.append("<b>Chức năng</b>")
             lines.extend(feats)
+        if include_filename and filename:
+            lines.append("")
+            lines.append(f"<code>{html.escape(filename)}</code>")
         return "\n".join(lines)
 
     for inc_file, inc_seller in ((True, True), (False, True), (False, False)):

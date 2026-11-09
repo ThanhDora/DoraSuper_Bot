@@ -16,9 +16,8 @@ from database.up_channel_db import (
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import (
-    E_DART, E_DOWNLOAD, E_ERROR, E_FIRE, E_GEAR, E_GIFT, E_IOS, E_LINK, E_LOADING,
-    E_LOCK, E_MENU, E_PARTY, E_PIN_LOC, E_ROCKET, E_SHIELD, E_SPARKLE,
-    E_STAR, E_SUCCESS, E_TIP, E_TROPHY, E_USER, E_WARN,
+    E_DOWNLOAD, E_ERROR, E_GEAR, E_LINK, E_LOADING,
+    E_SUCCESS, E_TIP, E_USER, E_WARN,
 )
 from dorasuper.helper.fame import mention_user
 from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
@@ -46,26 +45,6 @@ Chỉ admin bot và những người được ThanhDora duyệt mới dùng đư
 _HANDLER_GROUP = -2
 _SESSION_TTL = 15 * 60
 _sessions = {}
-
-_CAPTION_EMOJI = {
-    "trophy": E_TROPHY,
-    "sparkle": E_SPARKLE,
-    "star": E_STAR,
-    "ios": E_IOS,
-    "user": E_USER,
-    "link": E_LINK,
-    "gift": E_GIFT,
-    "shield": E_SHIELD,
-    "gear": E_GEAR,
-    "rocket": E_ROCKET,
-    "lock": E_LOCK,
-    "dart": E_DART,
-    "pin": E_PIN_LOC,
-    "crown": E_MENU,
-    "fire": E_FIRE,
-    "party": E_PARTY,
-}
-
 
 def _is_sudo(message: Message) -> bool:
     user = message.from_user
@@ -515,7 +494,6 @@ async def _handle_features(message: Message, raw: str):
         store_url=data.get("store_url") or "",
         features=features,
         filename=data.get("filename") or "",
-        emojis=_CAPTION_EMOJI,
     )
     token = secrets.token_hex(8)
     try:
