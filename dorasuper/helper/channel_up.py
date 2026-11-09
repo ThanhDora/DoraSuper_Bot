@@ -105,73 +105,25 @@ def build_download_keyboard_botapi(
     return {"inline_keyboard": rows}
 
 
-_TG_EMOJI_ID_RE = re.compile(
-    r'<(?:emoji|tg-emoji)\s+(?:id|emoji-id)\s*=\s*["\'](\d+)["\']',
-    re.I,
-)
-
-
-def icon_id_from_emoji_tag(tag: str | None) -> str | None:
-    """Lấy document id từ thẻ <tg-emoji emoji-id="..."> / legacy <emoji id>."""
-    if not tag:
-        return None
-    m = _TG_EMOJI_ID_RE.search(str(tag))
-    return m.group(1) if m else None
-
-
-def botapi_button(
-    text: str,
-    *,
-    url: str | None = None,
-    callback_data: str | None = None,
-    icon_custom_emoji_id: str | None = None,
-) -> dict:
-    """Một nút Bot API; icon_custom_emoji_id = emoji động (animated) khi Telegram chấp nhận."""
-    item: dict = {"text": text or ""}
-    if url:
-        item["url"] = url
-    elif callback_data is not None:
-        item["callback_data"] = callback_data
-    if icon_custom_emoji_id:
-        item["icon_custom_emoji_id"] = str(icon_custom_emoji_id)
-    return item
-
-
-def _copy_botapi_button(btn: dict) -> dict:
-    item = {"text": btn.get("text") or ""}
-    if btn.get("url"):
-        item["url"] = btn["url"]
-    elif btn.get("callback_data") is not None:
-        item["callback_data"] = btn["callback_data"]
-    icon = btn.get("icon_custom_emoji_id")
-    if icon:
-        item["icon_custom_emoji_id"] = str(icon)
-    return item
-
-
 def reply_markup_to_botapi(reply_markup) -> dict | None:
-    """Đổi InlineKeyboardMarkup (Pyrogram) hoặc dict sẵn sang payload reply_markup Bot API.
-
-    Giữ icon_custom_emoji_id (emoji động trên nút) — bắt buộc cho PM/group.
-    """
+    """Đổi InlineKeyboardMarkup (Pyrogram) hoặc dict sẵn sang payload reply_markup Bot API."""
     if reply_markup is None:
         return None
     if isinstance(reply_markup, dict):
-        if "inline_keyboard" not in reply_markup:
-            return None
-        rows_out = []
-        for row in reply_markup.get("inline_keyboard") or []:
-            rows_out.append([
-                _copy_botapi_button(btn) if isinstance(btn, dict) else {"text": str(btn)}
-                for btn in row
-            ])
-        return {"inline_keyboard": rows_out}
+        if "inline_keyboard" in reply_markup:
+            return reply_markup
+        return None
     rows_out = []
     for row in getattr(reply_markup, "inline_keyboard", None) or []:
         buttons = []
         for btn in row:
             if isinstance(btn, dict):
-                buttons.append(_copy_botapi_button(btn))
+                item = {"text": btn.get("text") or ""}
+                if btn.get("url"):
+                    item["url"] = btn["url"]
+                elif btn.get("callback_data") is not None:
+                    item["callback_data"] = btn["callback_data"]
+                buttons.append(item)
                 continue
             item = {"text": getattr(btn, "text", None) or ""}
             url = getattr(btn, "url", None)
@@ -180,45 +132,9 @@ def reply_markup_to_botapi(reply_markup) -> dict | None:
                 item["url"] = url
             elif cb is not None:
                 item["callback_data"] = cb
-            icon = getattr(btn, "icon_custom_emoji_id", None)
-            if icon:
-                item["icon_custom_emoji_id"] = str(icon)
             buttons.append(item)
         rows_out.append(buttons)
     return {"inline_keyboard": rows_out}
-
-
-def markup_has_button_icons(reply_markup) -> bool:
-    kb = reply_markup_to_botapi(reply_markup)
-    if not kb:
-        return False
-    return any(
-        b.get("icon_custom_emoji_id")
-        for row in kb.get("inline_keyboard") or []
-        for b in row
-    )
-
-
-def strip_button_icons_to_unicode(reply_markup, id_to_alt: dict[str, str] | None = None) -> dict | None:
-    """Fallback: bỏ icon_custom_emoji_id, prefix unicode alt nếu biết."""
-    kb = reply_markup_to_botapi(reply_markup)
-    if not kb:
-        return None
-    id_to_alt = id_to_alt or {}
-    rows = []
-    for row in kb["inline_keyboard"]:
-        new_row = []
-        for btn in row:
-            item = _copy_botapi_button(btn)
-            icon = item.pop("icon_custom_emoji_id", None)
-            if icon:
-                alt = id_to_alt.get(str(icon), "")
-                text = item.get("text") or ""
-                if alt and not text.startswith(alt):
-                    item["text"] = f"{alt} {text}".strip()
-            new_row.append(item)
-        rows.append(new_row)
-    return {"inline_keyboard": rows}
 
 
 JOINED_BUTTON_TEXT = f"✅ {JOINED_BUTTON_LABEL}"

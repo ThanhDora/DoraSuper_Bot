@@ -61,12 +61,9 @@ from dorasuper.helper.channel_up import (
     parse_up_user_ref,
     public_username_from_tme_url,
     render_up_acl_line,
-    icon_id_from_emoji_tag,
-    markup_has_button_icons,
     render_appstore_poster,
     reply_markup_to_botapi,
     should_autoban_on_leave,
-    strip_button_icons_to_unicode,
     should_clear_leave_ban_on_unban,
     split_features,
 )
@@ -114,24 +111,8 @@ async def _can_use_up(user_id) -> bool:
     return await is_up_allowed(user_id)
 
 
-def _approval_markup_botapi(user_id: int) -> dict:
-    """PM approval keyboard with animated icon_custom_emoji_id (Bot API)."""
-    return {"inline_keyboard": [[
-        {
-            "text": "Duyệt",
-            "callback_data": f"upacl_ok_{user_id}",
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_CHECK),
-        },
-        {
-            "text": "Từ chối",
-            "callback_data": f"upacl_no_{user_id}",
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_CROSS),
-        },
-    ]]}
-
-
 def _approval_markup(user_id: int) -> InlineKeyboardMarkup:
-    # Keep pyrogram form for fallbacks; Bot API path uses _approval_markup_botapi.
+    # PM: official button icons via tg-emoji tag → icon_custom_emoji_id.
     return InlineKeyboardMarkup(
         [[
             InlineKeyboardButton(f"{E_CHECK} Duyệt", callback_data=f"upacl_ok_{user_id}"),
@@ -152,26 +133,17 @@ async def _notify_owners_for_access(message: Message) -> bool:
         f"Duyệt để người này được đăng bài lên kênh bằng /up."
     )
     sent = 0
-    markup = _approval_markup_botapi(user.id)
     for owner_id in SUDO:
         try:
             with skip_autodel():
-                data = await _send_html_markup_botapi(
-                    owner_id, text, reply_markup=markup,
-                )
-                if data and data.get("ok"):
-                    sent += 1
-                    continue
-                # Fallback pyrogram (no dict markup) rồi gắn keyboard Bot API
-                msg = await app.send_message(
+                await app.send_message(
                     owner_id,
                     text,
                     parse_mode=enums.ParseMode.HTML,
                     reply_markup=_approval_markup(user.id),
                     no_autodel=True,
                 )
-                await _edit_reply_markup_via_botapi(owner_id, msg.id, markup)
-                sent += 1
+            sent += 1
         except Exception:
             continue
     return sent > 0
@@ -239,94 +211,17 @@ def _has_custom_emoji(msg: Message) -> bool:
     return any(getattr(e, "type", None) == enums.MessageEntityType.CUSTOM_EMOJI for e in ents)
 
 
-def _bot_token() -> str | None:
-    return getattr(app, "bot_token", None) or None
-
-
-def _icon_alt_map() -> dict[str, str]:
-    """Map official emoji ids → unicode alt for Bot API icon fallback."""
-    pairs = (
-        (E_DOWNLOAD, "📥"),
-        (E_MEGAPHONE, "📢"),
-        (E_MSG, "💬"),
-        (E_CHECK, "✅"),
-        (E_CROSS, "❌"),
-        (E_SUCCESS, "✅"),
-        (E_ERROR, "🔴"),
-    )
-    out: dict[str, str] = {}
-    for tag, alt in pairs:
-        eid = icon_id_from_emoji_tag(tag)
-        if eid:
-            out[eid] = alt
-    return out
-
-
-async def _botapi_call(method: str, payload: dict) -> dict | None:
-    """Gọi Bot API (không log token). Trả JSON hoặc None nếu lỗi mạng."""
-    token = _bot_token()
-    if not token:
-        return None
-    try:
-        import aiohttp
-    except ImportError:
-        return None
-    try:
-        timeout = aiohttp.ClientTimeout(total=25)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(
-                f"https://api.telegram.org/bot{token}/{method}",
-                json=payload,
-            ) as resp:
-                return await resp.json(content_type=None)
-    except Exception as e:
-        LOGGER.warning("botapi %s failed: %s", method, e)
-        return None
-
-
-def _botapi_icon_error(data: dict | None) -> bool:
-    if not data or data.get("ok"):
-        return False
-    desc = str(data.get("description") or "").upper()
-    return any(
-        tok in desc
-        for tok in (
-            "BUTTON_ICON",
-            "CUSTOM_EMOJI",
-            "EMOJI_INVALID",
-            "ICON_CUSTOM_EMOJI",
-            "BUTTON_TYPE_INVALID",
-        )
-    )
-
-
-async def _botapi_with_icon_fallback(method: str, payload: dict) -> dict | None:
-    """Gửi/edit với icon_custom_emoji_id; nếu Telegram từ chối icon → unicode fallback."""
-    data = await _botapi_call(method, payload)
-    if data and data.get("ok"):
-        return data
-    markup = payload.get("reply_markup")
-    if not markup or not markup_has_button_icons(markup):
-        return data
-    if data and not _botapi_icon_error(data):
-        # Không rõ lỗi icon — vẫn thử fallback một lần nếu description nhắc emoji/icon
-        desc = str((data or {}).get("description") or "").upper()
-        if "EMOJI" not in desc and "ICON" not in desc:
-            return data
-    LOGGER.warning(
-        "botapi %s icon rejected (%s) — falling back to unicode button labels",
-        method,
-        (data or {}).get("description"),
-    )
-    payload = dict(payload)
-    payload["reply_markup"] = strip_button_icons_to_unicode(markup, _icon_alt_map())
-    return await _botapi_call(method, payload)
-
-
 async def _edit_caption_via_botapi(
     chat_id, message_id, html_caption: str, reply_markup=None,
 ) -> bool:
-    """Gắn caption HTML (+ reply_markup) qua Bot API. Giữ icon_custom_emoji_id trên nút PM."""
+    """Gắn caption HTML (+ reply_markup) qua Bot API. Trả True khi edit ok."""
+    token = getattr(app, "bot_token", None)
+    if not token:
+        return False
+    try:
+        import aiohttp
+    except ImportError:
+        return False
     payload = {
         "chat_id": chat_id,
         "message_id": message_id,
@@ -336,43 +231,17 @@ async def _edit_caption_via_botapi(
     markup = reply_markup_to_botapi(reply_markup)
     if markup is not None:
         payload["reply_markup"] = markup
-    data = await _botapi_with_icon_fallback("editMessageCaption", payload)
-    return bool(data and data.get("ok"))
-
-
-async def _edit_reply_markup_via_botapi(chat_id, message_id, reply_markup) -> bool:
-    """Gắn/ghi đè inline keyboard qua Bot API (đường tin cậy cho emoji động trên nút)."""
-    markup = reply_markup_to_botapi(reply_markup)
-    if markup is None:
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                f"https://api.telegram.org/bot{token}/editMessageCaption",
+                json=payload,
+            ) as resp:
+                data = await resp.json(content_type=None)
+        return bool(data.get("ok"))
+    except Exception:
         return False
-    data = await _botapi_with_icon_fallback(
-        "editMessageReplyMarkup",
-        {"chat_id": chat_id, "message_id": message_id, "reply_markup": markup},
-    )
-    return bool(data and data.get("ok"))
-
-
-async def _send_html_markup_botapi(
-    chat_id,
-    html_text: str,
-    reply_markup=None,
-    *,
-    reply_to_message_id=None,
-    disable_web_page_preview: bool = True,
-) -> dict | None:
-    """sendMessage HTML + reply_markup qua Bot API (PM/group icon animated)."""
-    payload = {
-        "chat_id": chat_id,
-        "text": html_text,
-        "parse_mode": "HTML",
-        "disable_web_page_preview": disable_web_page_preview,
-    }
-    if reply_to_message_id:
-        payload["reply_to_message_id"] = reply_to_message_id
-    markup = reply_markup_to_botapi(reply_markup)
-    if markup is not None:
-        payload["reply_markup"] = markup
-    return await _botapi_with_icon_fallback("sendMessage", payload)
 
 
 def _html_without_unsupported_for_entities(html_caption: str) -> str:
@@ -455,38 +324,11 @@ def _bot_username() -> str:
     return BOT_USERNAME or getattr(getattr(app, "me", None), "username", None) or ""
 
 
-async def _post_markup_botapi(token: str) -> dict:
-    """PM delivery keyboard with animated icon_custom_emoji_id (Bot API)."""
-    username = _bot_username()
-    rows = [[{
-        "text": DOWNLOAD_BUTTON_LABEL,
-        "url": build_upfile_url(username, token),
-        "icon_custom_emoji_id": icon_id_from_emoji_tag(E_DOWNLOAD),
-    }]]
-    targets = await get_up_promo_targets()
-    link_row = []
-    if targets["channel"]["url"]:
-        link_row.append({
-            "text": CHANNEL_BUTTON_LABEL,
-            "url": targets["channel"]["url"],
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_MEGAPHONE),
-        })
-    if targets["group"]["url"]:
-        link_row.append({
-            "text": GROUP_BUTTON_LABEL,
-            "url": targets["group"]["url"],
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_MSG),
-        })
-    if link_row:
-        rows.append(link_row)
-    return {"inline_keyboard": rows}
-
-
 async def _post_markup(token: str, *, for_channel: bool = False) -> InlineKeyboardMarkup:
     """Hàng 1: Tải file. Hàng 2: Kênh | Nhóm chat (nếu đã setup).
 
-    Channel broadcast: unicode-prefixed labels (no icon_custom_emoji_id).
-    PM/groups: prefer _post_markup_botapi for animated icons.
+    Channel broadcast: unicode-prefixed labels (icon_custom_emoji_id is stripped).
+    PM/groups: official button icons via tg-emoji → icon_custom_emoji_id.
     """
     username = _bot_username()
     if for_channel:
@@ -509,34 +351,8 @@ async def _post_markup(token: str, *, for_channel: bool = False) -> InlineKeyboa
     return InlineKeyboardMarkup(rows)
 
 
-def _join_gate_markup_botapi(token: str, channel_url, group_url) -> dict:
-    """PM join prompt keyboard with animated icons via Bot API icon_custom_emoji_id."""
-    rows = []
-    link_row = []
-    if channel_url:
-        link_row.append({
-            "text": CHANNEL_BUTTON_LABEL,
-            "url": channel_url,
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_MEGAPHONE),
-        })
-    if group_url:
-        link_row.append({
-            "text": GROUP_BUTTON_LABEL,
-            "url": group_url,
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_MSG),
-        })
-    if link_row:
-        rows.append(link_row)
-    rows.append([{
-        "text": JOINED_BUTTON_LABEL,
-        "callback_data": f"upjoin_{token}",
-        "icon_custom_emoji_id": icon_id_from_emoji_tag(E_CHECK),
-    }])
-    return {"inline_keyboard": rows}
-
-
 def _join_gate_markup(token: str, channel_url, group_url) -> InlineKeyboardMarkup:
-    """Pyrogram fallback markup (icons via patched InlineKeyboardButton)."""
+    """PM join prompt: official button icons (fallback → unicode via invoke_with_fallback)."""
     rows = []
     link_row = []
     if channel_url:
@@ -1062,46 +878,41 @@ async def _send_html_text(chat_id, html_text: str):
 async def _send_document_html(
     chat_id, file_id, html_caption: str, file_name=None, reply_markup=None,
 ):
-    """Gửi document + caption HTML. Keyboard icon động gắn qua Bot API (MTProto không giữ animated)."""
-    # reply_markup may be a Bot API dict (preferred for animated icons) — pyrogram can't take that.
-    pyro_markup = None if isinstance(reply_markup, dict) else reply_markup
-    sent = None
+    """Gửi document kèm caption HTML (blockquote) + nút. Ưu tiên parse_mode, rồi Bot API edit."""
     try:
-        sent = await app.send_document(
+        return await app.send_document(
             chat_id,
             file_id,
             file_name=file_name or None,
             caption=html_caption,
             parse_mode=enums.ParseMode.HTML,
-            reply_markup=pyro_markup,
+            reply_markup=reply_markup,
         )
     except Exception:
-        sent = None
-    if sent is None:
-        sent = await app.send_document(
-            chat_id, file_id, file_name=file_name or None, reply_markup=pyro_markup,
-        )
-    # Caption HTML + animated button icons via Bot API
+        pass
+    sent = await app.send_document(
+        chat_id, file_id, file_name=file_name or None, reply_markup=reply_markup,
+    )
     if await _edit_caption_via_botapi(
         chat_id, sent.id, html_caption, reply_markup=reply_markup,
     ):
         return sent
     text, entities = html_to_entities(_html_without_unsupported_for_entities(html_caption))
     try:
-        edited = await sent.edit_caption(text, caption_entities=entities)
-        sent = edited or sent
+        edited = await sent.edit_caption(
+            text, caption_entities=entities, reply_markup=reply_markup,
+        )
+        return edited or sent
     except Exception:
         try:
             edited = await sent.edit_caption(
                 text,
                 caption_entities=strip_custom_emoji_entities(entities),
+                reply_markup=reply_markup,
             )
-            sent = edited or sent
+            return edited or sent
         except Exception:
-            pass
-    if reply_markup is not None:
-        await _edit_reply_markup_via_botapi(chat_id, sent.id, reply_markup)
-    return sent
+            return sent
 
 
 async def _member_status_in_chat(chat_id, user_id):
@@ -1226,25 +1037,12 @@ async def _send_join_gate_prompt(message: Message, token: str, gate: dict):
         "Bạn cần tham gia Kênh và Nhóm chat trước khi tải file.\n\n"
         "Hãy bấm nút bên dưới để vào, rồi chọn Đã tham gia, tải file."
     )
-    markup = _join_gate_markup_botapi(token, ch, gr)
     with skip_autodel():
-        data = await _send_html_markup_botapi(
-            message.chat.id,
+        await message.reply_text(
             text,
-            reply_markup=markup,
-            reply_to_message_id=message.id,
+            reply_markup=_join_gate_markup(token, ch, gr),
+            no_autodel=True,
         )
-        if data and data.get("ok"):
-            return
-        # Fallback: pyrogram send rồi gắn lại keyboard qua Bot API (giữ emoji động)
-        pyro_markup = _join_gate_markup(token, ch, gr)
-        try:
-            sent = await message.reply_text(
-                text, reply_markup=pyro_markup, no_autodel=True,
-            )
-        except TypeError:
-            sent = await message.reply_text(text, reply_markup=pyro_markup)
-        await _edit_reply_markup_via_botapi(message.chat.id, sent.id, markup)
 
 
 async def _deliver_up_file_content(message: Message, rec: dict, token: str):
@@ -1261,7 +1059,7 @@ async def _deliver_up_file_content_inner(message: Message, rec: dict, token: str
         store_url=rec.get("store_url") or "",
         features=normalize_stored_features(rec.get("features")),
     )
-    markup = await _post_markup_botapi(token)
+    markup = await _post_markup(token)
     try:
         await _send_document_html(
             message.chat.id,
@@ -1519,16 +1317,16 @@ async def _resolve_up_user_target(message: Message):
         return None, None, f"{E_ERROR} Không tìm user: {html.escape(str(e))}"
 
 
-def _up_list_revoke_markup(user_ids: list[int]) -> dict | None:
-    """Bot API keyboard with animated icons for /up_list revoke buttons."""
+def _up_list_revoke_markup(user_ids: list[int]) -> InlineKeyboardMarkup | None:
     rows = []
     for uid in user_ids[:20]:
-        rows.append([{
-            "text": f"Gỡ quyền {uid}",
-            "callback_data": f"upacl_rv_{uid}",
-            "icon_custom_emoji_id": icon_id_from_emoji_tag(E_CROSS),
-        }])
-    return {"inline_keyboard": rows} if rows else None
+        rows.append([
+            InlineKeyboardButton(
+                f"{E_CROSS} Gỡ quyền {uid}",
+                callback_data=f"upacl_rv_{uid}",
+            )
+        ])
+    return InlineKeyboardMarkup(rows) if rows else None
 
 
 @app.on_message(filters.command(["up_list"], COMMAND_HANDLER), group=_HANDLER_GROUP)
@@ -1579,25 +1377,19 @@ async def command_up_list(_, message: Message):
     # Telegram message limit — trim if needed
     if len(text) > 3900:
         text = text[:3900] + "\n…"
-    data = await _send_html_markup_botapi(
-        message.chat.id,
-        text,
-        reply_markup=markup,
-        reply_to_message_id=message.id,
-    )
-    if data and data.get("ok"):
-        return
-    # Pyrogram cannot take raw Bot API dict — send without icons then re-apply
     try:
-        sent = await message.reply_text(
+        await message.reply_text(
             text,
             parse_mode=enums.ParseMode.HTML,
+            reply_markup=markup,
             disable_web_page_preview=True,
         )
     except TypeError:
-        sent = await message.reply_text(text, parse_mode=enums.ParseMode.HTML)
-    if markup is not None:
-        await _edit_reply_markup_via_botapi(message.chat.id, sent.id, markup)
+        await message.reply_text(
+            text,
+            parse_mode=enums.ParseMode.HTML,
+            reply_markup=markup,
+        )
 
 
 @app.on_message(filters.command(["up_grant"], COMMAND_HANDLER), group=_HANDLER_GROUP)
