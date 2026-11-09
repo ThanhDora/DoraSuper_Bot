@@ -234,6 +234,13 @@ class AdminLogHelpersTest(unittest.TestCase):
         self.assertIn("_is_file_message", _src)
         self.assertIn("_send_payload_to_topic", _src)
         self.assertIn("UP_CHANNEL", _src)
+        # File (doc/audio/voice) must route to files BEFORE private→pm,
+        # otherwise PM files fall into General when pm topic is missing.
+        files_pos = _src.find('await _send_payload_to_topic(message, "files"')
+        pm_pos = _src.find('await _send_payload_to_topic(message, "pm"')
+        self.assertGreater(files_pos, 0)
+        self.assertGreater(pm_pos, 0)
+        self.assertLess(files_pos, pm_pos)
 
     def test_source_has_no_icon_only_standins(self):
         self.assertNotIn('content = "📷 Ảnh"', _src)

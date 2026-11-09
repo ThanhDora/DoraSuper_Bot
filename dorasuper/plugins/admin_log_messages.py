@@ -19,7 +19,7 @@ LOGGER = getLogger("DoraSuper")
 __MODULE__ = "LogAdmin"
 __HELP__ = (
     "[Nội bộ] Lệnh / ảnh / video → tab tương ứng; PM (mọi loại) → Tin nhắn riêng; "
-    "file/audio/voice trong nhóm → File."
+    "file/audio/voice (PM + nhóm) → File; PM text/khác → Tin nhắn riêng."
 )
 
 
@@ -165,6 +165,7 @@ async def _send_media_to_log(message, cap: str, topic_key: str | None = None) ->
     """
     key = topic_key or _media_topic_key(message)
     _thread = topic_id(key)
+    LOGGER.info("admin_log_messages: send key=%s thread_id=%s chat=%s", key, _thread, getattr(message.chat, "id", None))
     send_errs: list[str] = []
 
     # 1) Prefer copy
@@ -384,6 +385,10 @@ async def _send_media_to_log(message, cap: str, topic_key: str | None = None) ->
 
 async def _send_payload_to_topic(message, topic_key: str, text: str) -> None:
     """Gửi tin (media hoặc text) vào topic đã chọn."""
+    LOGGER.info(
+        "admin_log_messages: payload→%s thread_id=%s has_media=%s",
+        topic_key, topic_id(topic_key), _has_copyable_payload(message),
+    )
     if _has_copyable_payload(message):
         cap = _build_user_chat_caption(message, text)
         await _send_media_to_log(message, cap, topic_key=topic_key)
@@ -432,14 +437,20 @@ async def log_user_message_to_admin(_, message):
     is_private = bool(message.chat and message.chat.type == ChatType.PRIVATE)
 
     try:
-        # 1) Ảnh / video / video_note → tab photos|videos (PM + nhóm) — tránh trùng với pm/files
+        # 1) Ảnh / video / video_note → tab photos|videos (PM + nhóm)
         if is_photo_video:
             cap = _build_user_chat_caption(message, text)
             await _send_media_to_log(message, cap)
             return
 
-        # 2) Lệnh text → tab commands (PM + nhóm)
-        if is_cmd and not is_file:
+        # 2) Document / audio / voice → tab File (PM + nhóm). Không đẩy file PM vào tab pm
+        #    (pm chưa có topic → trước đây rơi General — anh báo "gửi vào tin nhắn chung").
+        if is_file:
+            await _send_payload_to_topic(message, "files", text)
+            return
+
+        # 3) Lệnh text → tab commands (PM + nhóm)
+        if is_cmd:
             body = _build_text_log_body(message, text)
             await _send_with_floodwait(
                 lambda: app.send_message(
@@ -451,15 +462,9 @@ async def log_user_message_to_admin(_, message):
             )
             return
 
-        # 3) Mọi tin PM còn lại (text, sticker, voice, doc, audio, …) → Tin nhắn riêng
-        #    Lệnh kèm file trong PM: ưu tiên pm (đã return ở trên nếu chỉ lệnh text)
+        # 4) PM còn lại (text thường, sticker, …) → Tin nhắn riêng
         if is_private:
             await _send_payload_to_topic(message, "pm", text)
-            return
-
-        # 4) File / audio / voice trong nhóm → tab File
-        if is_file:
-            await _send_payload_to_topic(message, "files", text)
             return
     except (BadRequest, Forbidden) as e:
         if "MESSAGE_ID_INVALID" not in str(e):
