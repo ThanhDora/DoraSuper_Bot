@@ -25,6 +25,50 @@ def premium_enabled():
     return os.environ.get("USE_PREMIUM_EMOJI", "true").strip().lower() in ("1", "true", "yes")
 
 
+_ICON_ALT_CACHE = None
+
+
+def _icon_alt_map():
+    """Map official custom-emoji document ids -> unicode alt (from dorasuper.emoji)."""
+    global _ICON_ALT_CACHE
+    if _ICON_ALT_CACHE is not None:
+        return _ICON_ALT_CACHE
+    mapping = {}
+    try:
+        import dorasuper.emoji as em
+        for name in dir(em):
+            if not name.startswith("E_"):
+                continue
+            val = getattr(em, name, None)
+            if not isinstance(val, str):
+                continue
+            for m in EMOJI_TAG.finditer(val):
+                mapping[str(m["id"])] = m["alt"]
+    except Exception:
+        pass
+    _ICON_ALT_CACHE = mapping
+    return mapping
+
+
+def alt_for_icon(icon_id):
+    if icon_id is None:
+        return None
+    return _icon_alt_map().get(str(icon_id))
+
+
+def with_unicode_fallback(text, alt):
+    """Prefix unicode alt when icon is stripped so the button still shows an emoji."""
+    label = (text or "").strip()
+    a = (alt or "").strip()
+    if not a:
+        return label
+    if not label:
+        return a
+    if label.startswith(a):
+        return label
+    return f"{a} {label}"
+
+
 def to_html(text):
     """Canonicalize both input forms without changing ids or fallback text."""
     return EMOJI_TAG.sub(
@@ -68,7 +112,12 @@ def plain_markup(markup):
         new_row = []
         for button in row:
             button = copy(button)
+            alt = getattr(button, "_dora_icon_alt", None) or alt_for_icon(
+                getattr(button, "icon_custom_emoji_id", None)
+            )
             button.icon_custom_emoji_id = None
+            if alt:
+                button.text = with_unicode_fallback(getattr(button, "text", None) or "", alt)
             new_row.append(button)
         result.inline_keyboard.append(new_row)
     return result
@@ -98,7 +147,14 @@ def _plain_request(value):
         return value
     result = value
     if getattr(value, "style", None) is not None:
+        icon = getattr(value.style, "icon", None)
         result = without_style(value)
+        alt = alt_for_icon(icon)
+        if alt and hasattr(result, "text"):
+            new_text = with_unicode_fallback(getattr(result, "text", None) or "", alt)
+            if new_text != getattr(result, "text", None):
+                result = copy(result)
+                result.text = new_text
     for key in value.__slots__:
         if key == "style":
             continue
@@ -144,11 +200,21 @@ def install():
 
     @wraps(init)
     def button_init(self, text, *args, icon_custom_emoji_id=None, **kwargs):
-        label, extracted = split_button(text)
+        raw_text = str(text)
+        match = EMOJI_TAG.search(raw_text)
+        label, extracted = split_button(raw_text)
         init(self, label, *args, **kwargs)
-        self.icon_custom_emoji_id = str(icon_custom_emoji_id or extracted) if (
+        alt = match["alt"] if match else None
+        icon_id = str(icon_custom_emoji_id or extracted) if (
             premium_enabled() and (icon_custom_emoji_id or extracted)
         ) else None
+        if icon_id and alt is None:
+            alt = alt_for_icon(icon_id)
+        self.icon_custom_emoji_id = icon_id
+        self._dora_icon_alt = alt
+        # When premium icons are off, keep a unicode-prefixed label.
+        if not icon_id and alt:
+            self.text = with_unicode_fallback(label, alt)
 
     @wraps(write)
     async def button_write(self, client):

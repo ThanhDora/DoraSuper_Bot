@@ -12,9 +12,15 @@ ALLOWED_EXTENSIONS = {
     ".ipa", ".tipa", ".deb", ".dylib", ".zip", ".7z", ".rar", ".tar", ".gz", ".xz",
 }
 
-DOWNLOAD_BUTTON_TEXT = "Tải file"
-CHANNEL_BUTTON_TEXT = "Kênh"
-GROUP_BUTTON_TEXT = "Nhóm chat"
+DOWNLOAD_BUTTON_LABEL = "Tải file"
+CHANNEL_BUTTON_LABEL = "Kênh"
+GROUP_BUTTON_LABEL = "Nhóm chat"
+JOINED_BUTTON_LABEL = "Đã tham gia, tải file"
+
+# Channel / Bot API: unicode prefix (icon_custom_emoji_id is stripped on broadcast channels).
+DOWNLOAD_BUTTON_TEXT = f"📥 {DOWNLOAD_BUTTON_LABEL}"
+CHANNEL_BUTTON_TEXT = f"📢 {CHANNEL_BUTTON_LABEL}"
+GROUP_BUTTON_TEXT = f"💬 {GROUP_BUTTON_LABEL}"
 
 _CLEAR_LINK_WORDS = frozenset({
     "off", "clear", "none", "xoa", "xoá", "xóa", "huy", "huỷ", "hủy",
@@ -131,7 +137,7 @@ def reply_markup_to_botapi(reply_markup) -> dict | None:
     return {"inline_keyboard": rows_out}
 
 
-JOINED_BUTTON_TEXT = "Đã tham gia, tải file"
+JOINED_BUTTON_TEXT = f"✅ {JOINED_BUTTON_LABEL}"
 BLOCKQUOTE_FEATURES_OPEN = "<blockquote expandable>"
 
 

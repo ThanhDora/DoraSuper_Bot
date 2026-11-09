@@ -29,20 +29,22 @@ from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from logging import getLogger
 from dorasuper.emoji import (
-    E_ERROR, E_LINK, E_LOADING,
-    E_SUCCESS, E_TIP, E_USER, E_WARN,
+    E_CHECK, E_CROSS, E_DOWNLOAD, E_ERROR, E_LINK, E_LOADING,
+    E_MEGAPHONE, E_MSG, E_SUCCESS, E_TIP, E_USER, E_WARN,
 )
 from dorasuper.helper.fame import mention_user
 from dorasuper.helper.autodel import skip_autodel
 from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
 from dorasuper.helper.channel_up import (
+    CHANNEL_BUTTON_LABEL,
     CHANNEL_BUTTON_TEXT,
+    DOWNLOAD_BUTTON_LABEL,
     DOWNLOAD_BUTTON_TEXT,
+    GROUP_BUTTON_LABEL,
     GROUP_BUTTON_TEXT,
-    JOINED_BUTTON_TEXT,
+    JOINED_BUTTON_LABEL,
     build_channel_caption,
     build_delivery_captions,
-    build_join_gate_keyboard_botapi,
     build_upfile_url,
     is_allowed_package,
     is_appstore_url,
@@ -110,10 +112,11 @@ async def _can_use_up(user_id) -> bool:
 
 
 def _approval_markup(user_id: int) -> InlineKeyboardMarkup:
+    # PM: official button icons via tg-emoji tag → icon_custom_emoji_id.
     return InlineKeyboardMarkup(
         [[
-            InlineKeyboardButton(f"{E_SUCCESS} Duyệt", callback_data=f"upacl_ok_{user_id}"),
-            InlineKeyboardButton(f"{E_ERROR} Từ chối", callback_data=f"upacl_no_{user_id}"),
+            InlineKeyboardButton(f"{E_CHECK} Duyệt", callback_data=f"upacl_ok_{user_id}"),
+            InlineKeyboardButton(f"{E_CROSS} Từ chối", callback_data=f"upacl_no_{user_id}"),
         ]]
     )
 
@@ -321,32 +324,53 @@ def _bot_username() -> str:
     return BOT_USERNAME or getattr(getattr(app, "me", None), "username", None) or ""
 
 
-async def _post_markup(token: str) -> InlineKeyboardMarkup:
-    """Hàng 1: Tải file. Hàng 2: Kênh | Nhóm chat (nếu đã setup). Chữ nút plain text."""
+async def _post_markup(token: str, *, for_channel: bool = False) -> InlineKeyboardMarkup:
+    """Hàng 1: Tải file. Hàng 2: Kênh | Nhóm chat (nếu đã setup).
+
+    Channel broadcast: unicode-prefixed labels (icon_custom_emoji_id is stripped).
+    PM/groups: official button icons via tg-emoji → icon_custom_emoji_id.
+    """
     username = _bot_username()
-    rows = [[InlineKeyboardButton(DOWNLOAD_BUTTON_TEXT, url=build_upfile_url(username, token))]]
+    if for_channel:
+        dl = DOWNLOAD_BUTTON_TEXT
+        ch = CHANNEL_BUTTON_TEXT
+        gr = GROUP_BUTTON_TEXT
+    else:
+        dl = f"{E_DOWNLOAD} {DOWNLOAD_BUTTON_LABEL}"
+        ch = f"{E_MEGAPHONE} {CHANNEL_BUTTON_LABEL}"
+        gr = f"{E_MSG} {GROUP_BUTTON_LABEL}"
+    rows = [[InlineKeyboardButton(dl, url=build_upfile_url(username, token))]]
     targets = await get_up_promo_targets()
     link_row = []
     if targets["channel"]["url"]:
-        link_row.append(InlineKeyboardButton(CHANNEL_BUTTON_TEXT, url=targets["channel"]["url"]))
+        link_row.append(InlineKeyboardButton(ch, url=targets["channel"]["url"]))
     if targets["group"]["url"]:
-        link_row.append(InlineKeyboardButton(GROUP_BUTTON_TEXT, url=targets["group"]["url"]))
+        link_row.append(InlineKeyboardButton(gr, url=targets["group"]["url"]))
     if link_row:
         rows.append(link_row)
     return InlineKeyboardMarkup(rows)
 
 
 def _join_gate_markup(token: str, channel_url, group_url) -> InlineKeyboardMarkup:
-    kb = build_join_gate_keyboard_botapi(token, channel_url=channel_url, group_url=group_url)
+    """PM join prompt: official button icons (fallback → unicode via invoke_with_fallback)."""
     rows = []
-    for row in kb["inline_keyboard"]:
-        buttons = []
-        for btn in row:
-            if btn.get("url"):
-                buttons.append(InlineKeyboardButton(btn["text"], url=btn["url"]))
-            else:
-                buttons.append(InlineKeyboardButton(btn["text"], callback_data=btn["callback_data"]))
-        rows.append(buttons)
+    link_row = []
+    if channel_url:
+        link_row.append(
+            InlineKeyboardButton(f"{E_MEGAPHONE} {CHANNEL_BUTTON_LABEL}", url=channel_url)
+        )
+    if group_url:
+        link_row.append(
+            InlineKeyboardButton(f"{E_MSG} {GROUP_BUTTON_LABEL}", url=group_url)
+        )
+    if link_row:
+        rows.append(link_row)
+    rows.append([
+        InlineKeyboardButton(
+            f"{E_CHECK} {JOINED_BUTTON_LABEL}",
+            callback_data=f"upjoin_{token}",
+        )
+    ])
     return InlineKeyboardMarkup(rows)
 
 
@@ -818,7 +842,7 @@ async def _handle_features(message: Message, raw: str):
             chat.id,
             photo,
             caption,
-            reply_markup=await _post_markup(token),
+            reply_markup=await _post_markup(token, for_channel=True),
         )
     except Exception as e:
         await status.edit(
@@ -1298,7 +1322,7 @@ def _up_list_revoke_markup(user_ids: list[int]) -> InlineKeyboardMarkup | None:
     for uid in user_ids[:20]:
         rows.append([
             InlineKeyboardButton(
-                f"Gỡ quyền {uid}",
+                f"{E_CROSS} Gỡ quyền {uid}",
                 callback_data=f"upacl_rv_{uid}",
             )
         ])

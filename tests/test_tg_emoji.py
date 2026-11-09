@@ -183,6 +183,8 @@ class EmojiTests(unittest.IsolatedAsyncioTestCase):
         plain = plain_markup(m)
         self.assertIsNone(plain.inline_keyboard[0][0].icon_custom_emoji_id)
         self.assertEqual(b.icon_custom_emoji_id, '123')
+        self.assertEqual(b.text, 'B')  # icon applied → no unicode prefix
+        self.assertEqual(plain.inline_keyboard[0][0].text, '👍 B')  # fallback unicode
         self.assertEqual(plain.inline_keyboard[0][0].callback_data, 'payload')
 
     def test_idempotent(self):
