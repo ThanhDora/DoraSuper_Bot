@@ -22,6 +22,40 @@ async def set_up_channel(chat_id):
     return chat_id
 
 
+async def get_up_promo_links():
+    """Trả (link_channel, link_group); mỗi cái là URL https hoặc None."""
+    doc = await _col.find_one({"_id": _KEY})
+    if not doc:
+        return None, None
+    channel = (doc.get("link_channel") or "").strip() or None
+    group = (doc.get("link_group") or "").strip() or None
+    return channel, group
+
+
+async def set_up_link_channel(url):
+    if url:
+        await _col.update_one(
+            {"_id": _KEY}, {"$set": {"link_channel": url}}, upsert=True,
+        )
+    else:
+        await _col.update_one(
+            {"_id": _KEY}, {"$unset": {"link_channel": ""}}, upsert=True,
+        )
+    return url
+
+
+async def set_up_link_group(url):
+    if url:
+        await _col.update_one(
+            {"_id": _KEY}, {"$set": {"link_group": url}}, upsert=True,
+        )
+    else:
+        await _col.update_one(
+            {"_id": _KEY}, {"$unset": {"link_group": ""}}, upsert=True,
+        )
+    return url
+
+
 async def save_up_file(token: str, data: dict):
     payload = dict(data)
     payload["_id"] = token

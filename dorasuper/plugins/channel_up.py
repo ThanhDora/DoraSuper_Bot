@@ -11,8 +11,8 @@ from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
 from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from database.up_channel_db import (
-    get_up_acl, get_up_channel, get_up_file, is_up_allowed,
-    save_up_file, set_up_acl, set_up_channel,
+    get_up_acl, get_up_channel, get_up_file, get_up_promo_links, is_up_allowed,
+    save_up_file, set_up_acl, set_up_channel, set_up_link_channel, set_up_link_group,
 )
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
@@ -23,14 +23,18 @@ from dorasuper.emoji import (
 from dorasuper.helper.fame import mention_user
 from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
 from dorasuper.helper.channel_up import (
+    CHANNEL_BUTTON_TEXT,
     DOWNLOAD_BUTTON_TEXT,
+    GROUP_BUTTON_TEXT,
     build_channel_caption,
     build_delivery_captions,
     build_upfile_url,
     is_allowed_package,
     is_appstore_url,
+    is_clear_link_arg,
     lookup_appstore,
     normalize_stored_features,
+    normalize_telegram_link,
     render_appstore_poster,
     reply_markup_to_botapi,
     split_features,
@@ -45,6 +49,8 @@ Chỉ admin bot và những người được ThanhDora duyệt mới dùng đư
 
 <blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store, nhập chức năng, bot sẽ render ảnh và đăng lên kênh.
 /up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
+/up_link_channel [@kenh | https://t.me/...] – Đặt nút Kênh dưới bài /up (không arg xem hiện tại; off/xóa để gỡ).
+/up_link_group [@nhom | https://t.me/...] – Đặt nút Nhóm chat dưới bài /up (không arg xem hiện tại; off/xóa để gỡ).
 /cancel – Hủy phiên /up đang nhập.</blockquote>
 """
 
@@ -276,13 +282,19 @@ def _bot_username() -> str:
     return BOT_USERNAME or getattr(getattr(app, "me", None), "username", None) or ""
 
 
-def _download_markup(token: str) -> InlineKeyboardMarkup:
+async def _post_markup(token: str) -> InlineKeyboardMarkup:
+    """Hàng 1: Tải file. Hàng 2: Kênh | Nhóm chat (nếu đã setup). Chữ nút plain text."""
     username = _bot_username()
-    url = build_upfile_url(username, token)
-    # Chữ nút phải plain text — không dùng <tg-emoji> (vượt 64 ký tự / không parse HTML).
-    return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(DOWNLOAD_BUTTON_TEXT, url=url)]]
-    )
+    rows = [[InlineKeyboardButton(DOWNLOAD_BUTTON_TEXT, url=build_upfile_url(username, token))]]
+    channel_url, group_url = await get_up_promo_links()
+    link_row = []
+    if channel_url:
+        link_row.append(InlineKeyboardButton(CHANNEL_BUTTON_TEXT, url=channel_url))
+    if group_url:
+        link_row.append(InlineKeyboardButton(GROUP_BUTTON_TEXT, url=group_url))
+    if link_row:
+        rows.append(link_row)
+    return InlineKeyboardMarkup(rows)
 
 
 async def _resolved_channel():
@@ -343,6 +355,68 @@ async def command_up_channel(_, message: Message):
     await set_up_channel(chat.id)
     title = html.escape(chat.title or str(chat.id))
     await _reply_html(message, f"{E_SUCCESS} Đã đặt kênh đăng bài: <b>{title}</b> (<code>{chat.id}</code>).")
+
+
+async def _handle_promo_link_command(message: Message, kind: str):
+    """kind: channel | group. Đặt / xem / xóa link nút dưới bài /up."""
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới đặt được link Kênh / Nhóm chat.")
+        return
+    args = (message.text or "").split(maxsplit=1)
+    raw = args[1].strip() if len(args) > 1 else ""
+    cur_channel, cur_group = await get_up_promo_links()
+    current = cur_channel if kind == "channel" else cur_group
+    label = "Kênh" if kind == "channel" else "Nhóm chat"
+    cmd = "/up_link_channel" if kind == "channel" else "/up_link_group"
+    if not raw:
+        if current:
+            await _reply_html(
+                message,
+                f"{E_TIP} Link nút <b>{label}</b> hiện tại:\n<code>{html.escape(current)}</code>\n"
+                f"Đổi bằng <code>{cmd} @ten</code> hoặc gỡ bằng <code>{cmd} off</code>.",
+            )
+        else:
+            await _reply_html(
+                message,
+                f"{E_TIP} Chưa đặt link nút <b>{label}</b>.\n"
+                f"Dùng <code>{cmd} @ten</code> hoặc <code>{cmd} https://t.me/...</code>.",
+            )
+        return
+    if is_clear_link_arg(raw):
+        if kind == "channel":
+            await set_up_link_channel(None)
+        else:
+            await set_up_link_group(None)
+        await _reply_html(message, f"{E_SUCCESS} Đã gỡ nút <b>{label}</b> khỏi bài /up.")
+        return
+    url = normalize_telegram_link(raw)
+    if not url:
+        await _reply_html(
+            message,
+            f"{E_ERROR} Link không hợp lệ. Hãy gửi <code>@ten</code>, "
+            f"<code>https://t.me/ten</code> hoặc invite <code>https://t.me/+...</code>.",
+        )
+        return
+    if kind == "channel":
+        await set_up_link_channel(url)
+    else:
+        await set_up_link_group(url)
+    await _reply_html(
+        message,
+        f"{E_SUCCESS} Đã đặt nút <b>{label}</b>: <code>{html.escape(url)}</code>",
+    )
+
+
+@app.on_message(filters.command(["up_link_channel"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_link_channel(_, message: Message):
+    await _handle_promo_link_command(message, "channel")
+
+
+@app.on_message(filters.command(["up_link_group"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_link_group(_, message: Message):
+    await _handle_promo_link_command(message, "group")
 
 
 @app.on_message(filters.command(["up"], COMMAND_HANDLER), group=_HANDLER_GROUP)
@@ -544,7 +618,7 @@ async def _handle_features(message: Message, raw: str):
             chat.id,
             photo,
             caption,
-            reply_markup=_download_markup(token),
+            reply_markup=await _post_markup(token),
         )
     except Exception as e:
         await status.edit(
@@ -576,8 +650,10 @@ async def _send_html_text(chat_id, html_text: str):
             )
 
 
-async def _send_document_html(chat_id, file_id, html_caption: str, file_name=None):
-    """Gửi document kèm caption HTML (blockquote). Ưu tiên parse_mode, rồi Bot API edit."""
+async def _send_document_html(
+    chat_id, file_id, html_caption: str, file_name=None, reply_markup=None,
+):
+    """Gửi document kèm caption HTML (blockquote) + nút. Ưu tiên parse_mode, rồi Bot API edit."""
     try:
         return await app.send_document(
             chat_id,
@@ -585,20 +661,29 @@ async def _send_document_html(chat_id, file_id, html_caption: str, file_name=Non
             file_name=file_name or None,
             caption=html_caption,
             parse_mode=enums.ParseMode.HTML,
+            reply_markup=reply_markup,
         )
     except Exception:
         pass
-    sent = await app.send_document(chat_id, file_id, file_name=file_name or None)
-    if await _edit_caption_via_botapi(chat_id, sent.id, html_caption):
+    sent = await app.send_document(
+        chat_id, file_id, file_name=file_name or None, reply_markup=reply_markup,
+    )
+    if await _edit_caption_via_botapi(
+        chat_id, sent.id, html_caption, reply_markup=reply_markup,
+    ):
         return sent
     text, entities = html_to_entities(_html_without_unsupported_for_entities(html_caption))
     try:
-        edited = await sent.edit_caption(text, caption_entities=entities)
+        edited = await sent.edit_caption(
+            text, caption_entities=entities, reply_markup=reply_markup,
+        )
         return edited or sent
     except Exception:
         try:
             edited = await sent.edit_caption(
-                text, caption_entities=strip_custom_emoji_entities(entities),
+                text,
+                caption_entities=strip_custom_emoji_entities(entities),
+                reply_markup=reply_markup,
             )
             return edited or sent
         except Exception:
@@ -624,12 +709,14 @@ async def deliver_up_file(message: Message, payload: str):
         store_url=rec.get("store_url") or "",
         features=normalize_stored_features(rec.get("features")),
     )
+    markup = await _post_markup(token)
     try:
         await _send_document_html(
             message.chat.id,
             rec["file_id"],
             caption,
             file_name=filename or None,
+            reply_markup=markup,
         )
     except Exception as e:
         try:

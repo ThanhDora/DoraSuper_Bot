@@ -13,6 +13,12 @@ ALLOWED_EXTENSIONS = {
 }
 
 DOWNLOAD_BUTTON_TEXT = "Tải file"
+CHANNEL_BUTTON_TEXT = "Kênh"
+GROUP_BUTTON_TEXT = "Nhóm chat"
+
+_CLEAR_LINK_WORDS = frozenset({
+    "off", "clear", "none", "xoa", "xoá", "xóa", "huy", "huỷ", "hủy",
+})
 
 
 def build_upfile_url(bot_username: str, token: str) -> str:
@@ -21,13 +27,76 @@ def build_upfile_url(bot_username: str, token: str) -> str:
     return f"https://t.me/{user}?start=upfile_{tok}"
 
 
-def build_download_keyboard_botapi(bot_username: str, token: str) -> dict:
-    """Inline keyboard JSON cho Bot API: một nút Tải file (chữ thường, không emoji)."""
-    return {
-        "inline_keyboard": [[
-            {"text": DOWNLOAD_BUTTON_TEXT, "url": build_upfile_url(bot_username, token)},
-        ]]
-    }
+def is_clear_link_arg(raw: str) -> bool:
+    text = (raw or "").strip().lower()
+    return text in _CLEAR_LINK_WORDS
+
+
+def normalize_telegram_link(raw: str) -> str | None:
+    """Chuẩn hóa @user / t.me/... / invite thành https://t.me/... ; None nếu không hợp lệ."""
+    text = (raw or "").strip()
+    if not text:
+        return None
+    if is_clear_link_arg(text):
+        return None
+    if text.startswith("<") and text.endswith(">"):
+        text = text[1:-1].strip()
+    lower = text.lower()
+    if lower.startswith("http://"):
+        text = "https://" + text[7:]
+        lower = text.lower()
+    if text.startswith("@"):
+        user = text[1:].strip()
+        if not re.fullmatch(r"[A-Za-z0-9_]{4,}", user):
+            return None
+        return f"https://t.me/{user}"
+    if lower.startswith("tg://resolve"):
+        m = re.search(r"[?&]domain=([A-Za-z0-9_]+)", text, re.I)
+        if not m:
+            return None
+        return f"https://t.me/{m.group(1)}"
+    if lower.startswith("t.me/") or lower.startswith("telegram.me/"):
+        text = "https://" + text
+        lower = text.lower()
+    if not (lower.startswith("https://t.me/") or lower.startswith("https://telegram.me/")):
+        # Bare username without @
+        if re.fullmatch(r"[A-Za-z0-9_]{4,}", text):
+            return f"https://t.me/{text}"
+        return None
+    # Force https://t.me/
+    path = text.split("://", 1)[1]
+    path = path.split("/", 1)[1] if "/" in path else ""
+    path = path.strip()
+    if not path:
+        return None
+    # invite (+xxx or joinchat/xxx) or username(/...)
+    if path.startswith("+") or path.lower().startswith("joinchat/"):
+        return f"https://t.me/{path.split('?', 1)[0].split('#', 1)[0]}"
+    user = path.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
+    if not re.fullmatch(r"[A-Za-z0-9_]{4,}", user):
+        return None
+    return f"https://t.me/{user}"
+
+
+def build_download_keyboard_botapi(
+    bot_username: str,
+    token: str,
+    *,
+    channel_url: str | None = None,
+    group_url: str | None = None,
+) -> dict:
+    """Inline keyboard Bot API: hàng 1 Tải file; hàng 2 Kênh | Nhóm chat (nếu có)."""
+    rows = [[
+        {"text": DOWNLOAD_BUTTON_TEXT, "url": build_upfile_url(bot_username, token)},
+    ]]
+    link_row = []
+    if channel_url:
+        link_row.append({"text": CHANNEL_BUTTON_TEXT, "url": channel_url})
+    if group_url:
+        link_row.append({"text": GROUP_BUTTON_TEXT, "url": group_url})
+    if link_row:
+        rows.append(link_row)
+    return {"inline_keyboard": rows}
 
 
 def reply_markup_to_botapi(reply_markup) -> dict | None:

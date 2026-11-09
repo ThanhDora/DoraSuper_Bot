@@ -317,6 +317,52 @@ def test_download_keyboard_botapi():
     )
 
 
+def test_download_keyboard_with_promo_links():
+    kb = cu.build_download_keyboard_botapi(
+        "DoraSuper_Bot",
+        "tok",
+        channel_url="https://t.me/MyChannel",
+        group_url="https://t.me/+AbCdEf",
+    )
+    rows = kb["inline_keyboard"]
+    assert len(rows) == 2
+    assert rows[0] == [{"text": "Tải file", "url": "https://t.me/DoraSuper_Bot?start=upfile_tok"}]
+    assert rows[1] == [
+        {"text": "Kênh", "url": "https://t.me/MyChannel"},
+        {"text": "Nhóm chat", "url": "https://t.me/+AbCdEf"},
+    ]
+    for btn in rows[0] + rows[1]:
+        assert len(btn["text"]) <= 64
+        assert "<tg-emoji" not in btn["text"]
+    # Only channel
+    kb2 = cu.build_download_keyboard_botapi(
+        "Bot", "t", channel_url="https://t.me/c", group_url=None,
+    )
+    assert len(kb2["inline_keyboard"]) == 2
+    assert kb2["inline_keyboard"][1] == [{"text": "Kênh", "url": "https://t.me/c"}]
+    # Neither -> single row
+    kb3 = cu.build_download_keyboard_botapi("Bot", "t")
+    assert len(kb3["inline_keyboard"]) == 1
+
+
+def test_normalize_telegram_link():
+    assert cu.normalize_telegram_link("@MyChannel") == "https://t.me/MyChannel"
+    assert cu.normalize_telegram_link("MyChannel") == "https://t.me/MyChannel"
+    assert cu.normalize_telegram_link("https://t.me/MyChannel") == "https://t.me/MyChannel"
+    assert cu.normalize_telegram_link("t.me/MyChannel") == "https://t.me/MyChannel"
+    assert cu.normalize_telegram_link("http://t.me/MyChannel") == "https://t.me/MyChannel"
+    assert cu.normalize_telegram_link("https://t.me/+InviteHash") == "https://t.me/+InviteHash"
+    assert cu.normalize_telegram_link("https://t.me/joinchat/AAAA") == "https://t.me/joinchat/AAAA"
+    assert cu.normalize_telegram_link("tg://resolve?domain=MyChannel") == "https://t.me/MyChannel"
+    assert cu.normalize_telegram_link("https://example.com/x") is None
+    assert cu.normalize_telegram_link("") is None
+    assert cu.normalize_telegram_link("ab") is None  # too short username
+    assert cu.is_clear_link_arg("off")
+    assert cu.is_clear_link_arg("xóa")
+    assert cu.is_clear_link_arg("XOA")
+    assert not cu.is_clear_link_arg("@channel")
+
+
 def test_reply_markup_to_botapi_from_dict():
     src = cu.build_download_keyboard_botapi("BotName", "tok123")
     assert cu.reply_markup_to_botapi(src) == src
@@ -335,7 +381,18 @@ class _FakeMarkup:
         self.inline_keyboard = rows
 
 
+def test_reply_markup_to_botapi_keeps_all_rows():
+    src = cu.build_download_keyboard_botapi(
+        "Bot", "tok",
+        channel_url="https://t.me/c",
+        group_url="https://t.me/g",
+    )
+    assert cu.reply_markup_to_botapi(src) == src
+    assert len(src["inline_keyboard"]) == 2
+
+
 def test_reply_markup_to_botapi_from_pyrogram_like():
+
     markup = _FakeMarkup([[_FakeBtn("Tải file", url="https://t.me/x?start=upfile_1")]])
     assert cu.reply_markup_to_botapi(markup) == {
         "inline_keyboard": [[{"text": "Tải file", "url": "https://t.me/x?start=upfile_1"}]]
