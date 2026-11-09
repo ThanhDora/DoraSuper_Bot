@@ -299,6 +299,67 @@ def test_normalize_stored_features():
     assert cu.normalize_stored_features(None) == []
 
 
+
+def test_membership_is_joined():
+    assert cu.membership_is_joined("owner")
+    assert cu.membership_is_joined("administrator")
+    assert cu.membership_is_joined("member")
+    assert cu.membership_is_joined("restricted", True)
+    assert not cu.membership_is_joined("restricted", False)
+    assert not cu.membership_is_joined("left")
+    assert not cu.membership_is_joined("banned")
+    assert cu.membership_is_banned("banned")
+    assert not cu.membership_is_banned("member")
+
+
+def test_should_autoban_on_leave():
+    assert cu.should_autoban_on_leave(old_status="member", new_status="left")
+    assert cu.should_autoban_on_leave(old_status="restricted", new_status="left")
+    assert not cu.should_autoban_on_leave(old_status="member", new_status="banned")
+    assert not cu.should_autoban_on_leave(
+        old_status="member", new_status="left", left_by_admin=True,
+    )
+    assert not cu.should_autoban_on_leave(
+        old_status="member", new_status="left", user_is_sudo=True,
+    )
+    assert not cu.should_autoban_on_leave(
+        old_status="member", new_status="left", user_is_bot=True,
+    )
+    assert cu.should_clear_leave_ban_on_unban(old_status="banned", new_status="left")
+    assert cu.should_clear_leave_ban_on_unban(old_status="banned", new_status="member")
+    assert not cu.should_clear_leave_ban_on_unban(old_status="member", new_status="left")
+
+
+def test_parse_promo_link_args():
+    assert cu.parse_promo_link_args("")["action"] == "show"
+    assert cu.parse_promo_link_args("off")["action"] == "clear"
+    assert cu.parse_promo_link_args("here")["action"] == "here"
+    p = cu.parse_promo_link_args("@MyChannel")
+    assert p["action"] == "set" and p["url"] == "https://t.me/MyChannel"
+    p2 = cu.parse_promo_link_args("https://t.me/+AbC -100123456")
+    assert p2["action"] == "set"
+    assert p2["url"] == "https://t.me/+AbC"
+    assert p2["chat_id"] == -100123456
+    p3 = cu.parse_promo_link_args("-100999")
+    assert p3["action"] == "set" and p3["chat_id"] == -100999
+
+
+def test_build_join_gate_keyboard_botapi():
+    kb = cu.build_join_gate_keyboard_botapi(
+        "deadbeef",
+        channel_url="https://t.me/c",
+        group_url="https://t.me/g",
+    )
+    rows = kb["inline_keyboard"]
+    assert rows[0] == [
+        {"text": "Kênh", "url": "https://t.me/c"},
+        {"text": "Nhóm chat", "url": "https://t.me/g"},
+    ]
+    assert rows[1] == [{"text": "Đã tham gia, tải file", "callback_data": "upjoin_deadbeef"}]
+    # no download URL that would bypass the gate
+    assert all("upfile_" not in (b.get("url") or "") for row in rows for b in row)
+
+
 def test_download_keyboard_botapi():
     kb = cu.build_download_keyboard_botapi("DoraSuper_Bot", "deadbeef")
     assert kb == {

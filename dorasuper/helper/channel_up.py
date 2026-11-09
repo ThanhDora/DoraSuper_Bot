@@ -130,6 +130,109 @@ def reply_markup_to_botapi(reply_markup) -> dict | None:
         rows_out.append(buttons)
     return {"inline_keyboard": rows_out}
 
+
+JOINED_BUTTON_TEXT = "Đã tham gia, tải file"
+
+
+def _status_name(status) -> str:
+    if status is None:
+        return ""
+    if hasattr(status, "name"):
+        return str(status.name).lower()
+    text = str(status)
+    if "." in text:
+        text = text.rsplit(".", 1)[-1]
+    return text.lower()
+
+
+def membership_is_joined(status, is_member=None) -> bool:
+    """True nếu được coi là đang trong chat (OWNER/ADMIN/MEMBER/RESTRICTED+is_member)."""
+    name = _status_name(status)
+    if name in ("owner", "administrator", "member"):
+        return True
+    if name == "restricted":
+        return bool(is_member)
+    return False
+
+
+def membership_is_banned(status) -> bool:
+    name = _status_name(status)
+    return name in ("banned", "kicked")
+
+
+def should_autoban_on_leave(
+    *,
+    old_status,
+    new_status,
+    user_is_bot: bool = False,
+    user_is_sudo: bool = False,
+    left_by_admin: bool = False,
+) -> bool:
+    """True khi user tự rời (MEMBER/RESTRICTED -> LEFT), không phải admin kick / bot / sudo."""
+    if user_is_bot or user_is_sudo or left_by_admin:
+        return False
+    old_name = _status_name(old_status)
+    new_name = _status_name(new_status)
+    if new_name != "left":
+        return False
+    return old_name in ("member", "restricted")
+
+
+def should_clear_leave_ban_on_unban(*, old_status, new_status) -> bool:
+    """Admin unban: BANNED -> LEFT (chưa vào lại) hoặc -> MEMBER."""
+    old_name = _status_name(old_status)
+    new_name = _status_name(new_status)
+    if old_name not in ("banned", "kicked"):
+        return False
+    return new_name in ("left", "member", "restricted", "administrator", "owner")
+
+
+def parse_promo_link_args(raw: str) -> dict:
+    """Parse arg của /up_link_*: action show|clear|here|set; url; chat_id."""
+    text = (raw or "").strip()
+    if not text:
+        return {"action": "show", "url": None, "chat_id": None}
+    if is_clear_link_arg(text):
+        return {"action": "clear", "url": None, "chat_id": None}
+    lower = text.lower()
+    if lower in ("here", "đây", "day"):
+        return {"action": "here", "url": None, "chat_id": None}
+    parts = text.split()
+    chat_id = None
+    url_part = text
+    if len(parts) >= 2:
+        # last token may be chat id
+        maybe = parts[-1]
+        if re.fullmatch(r"-?\d{6,}", maybe):
+            chat_id = int(maybe)
+            url_part = " ".join(parts[:-1]).strip() or None
+    if url_part and re.fullmatch(r"-?\d{6,}", url_part.strip()):
+        return {"action": "set", "url": None, "chat_id": int(url_part.strip())}
+    url = normalize_telegram_link(url_part) if url_part else None
+    if url or chat_id is not None:
+        return {"action": "set", "url": url, "chat_id": chat_id}
+    return {"action": "invalid", "url": None, "chat_id": None}
+
+
+def build_join_gate_keyboard_botapi(
+    token: str,
+    *,
+    channel_url: str | None = None,
+    group_url: str | None = None,
+) -> dict:
+    """Nút join + callback xác nhận tải (không có URL Tải file để tránh bypass)."""
+    rows = []
+    link_row = []
+    if channel_url:
+        link_row.append({"text": CHANNEL_BUTTON_TEXT, "url": channel_url})
+    if group_url:
+        link_row.append({"text": GROUP_BUTTON_TEXT, "url": group_url})
+    if link_row:
+        rows.append(link_row)
+    rows.append([{"text": JOINED_BUTTON_TEXT, "callback_data": f"upjoin_{token}"}])
+    return {"inline_keyboard": rows}
+
+
 APPSTORE_ID_RE = re.compile(
     r"(?:(?:apps|itunes)\.apple\.com/.+?/id|(?:apps|itunes)\.apple\.com/app/id)(\d+)"
     r"|[?&]id=(\d+)"

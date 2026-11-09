@@ -8,14 +8,19 @@ from datetime import datetime
 from pyrogram import enums, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
 from pyrogram.errors.exceptions.bad_request_400 import DocumentInvalid
-from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import (
+    CallbackQuery, ChatMemberUpdated, InlineKeyboardButton, InlineKeyboardMarkup, Message,
+)
 
 from database.up_channel_db import (
-    get_up_acl, get_up_channel, get_up_file, get_up_promo_links, is_up_allowed,
-    save_up_file, set_up_acl, set_up_channel, set_up_link_channel, set_up_link_group,
+    clear_leave_ban, get_leave_ban, get_up_acl, get_up_channel, get_up_file,
+    get_up_promo_links, get_up_promo_targets, is_up_allowed, list_leave_bans,
+    save_leave_ban, save_up_file, set_up_acl, set_up_channel,
+    set_up_link_channel, set_up_link_group,
 )
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
+from logging import getLogger
 from dorasuper.emoji import (
     E_ERROR, E_LINK, E_LOADING,
     E_SUCCESS, E_TIP, E_USER, E_WARN,
@@ -26,20 +31,28 @@ from dorasuper.helper.channel_up import (
     CHANNEL_BUTTON_TEXT,
     DOWNLOAD_BUTTON_TEXT,
     GROUP_BUTTON_TEXT,
+    JOINED_BUTTON_TEXT,
     build_channel_caption,
     build_delivery_captions,
+    build_join_gate_keyboard_botapi,
     build_upfile_url,
     is_allowed_package,
     is_appstore_url,
-    is_clear_link_arg,
     lookup_appstore,
+    membership_is_banned,
+    membership_is_joined,
     normalize_stored_features,
     normalize_telegram_link,
+    parse_promo_link_args,
     render_appstore_poster,
     reply_markup_to_botapi,
+    should_autoban_on_leave,
+    should_clear_leave_ban_on_unban,
     split_features,
 )
-from dorasuper.vars import COMMAND_HANDLER, SUDO, UP_CHANNEL
+from dorasuper.vars import COMMAND_HANDLER, LOG_CHANNEL, SUDO, UP_CHANNEL
+
+LOGGER = getLogger("DoraSuper")
 
 __MODULE__ = "ĐăngKênh"
 __HELP__ = f"""
@@ -49,14 +62,19 @@ Chỉ admin bot và những người được ThanhDora duyệt mới dùng đư
 
 <blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store, nhập chức năng, bot sẽ render ảnh và đăng lên kênh.
 /up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
-/up_link_channel [@kenh | https://t.me/...] – Đặt nút Kênh dưới bài /up (không arg xem hiện tại; off/xóa để gỡ).
-/up_link_group [@nhom | https://t.me/...] – Đặt nút Nhóm chat dưới bài /up (không arg xem hiện tại; off/xóa để gỡ).
-/cancel – Hủy phiên /up đang nhập.</blockquote>
+/up_link_channel [@kenh | https://t.me/... | -100... | here] – Đặt nút + chat_id Kênh (off/xóa để gỡ). Bot cần admin có quyền ban.
+/up_link_group [@nhom | https://t.me/... | -100... | here] – Đặt nút + chat_id Nhóm chat (off/xóa để gỡ).
+/up_unban &lt;id|@user&gt; – Gỡ ban tự động (kênh + nhóm) cho người bị ban vì rời.
+/up_banlist – Xem danh sách đã bị ban tự động vì rời kênh/nhóm.
+/cancel – Hủy phiên /up đang nhập.
+
+Tải file qua nút trên kênh: người dùng phải đang trong Kênh và Nhóm chat. Tự rời sẽ bị ban khỏi cả hai tới khi admin /up_unban.</blockquote>
 """
 
 _HANDLER_GROUP = -2
 _SESSION_TTL = 15 * 60
 _sessions = {}
+_nocheck_warned = set()
 
 def _is_sudo(message: Message) -> bool:
     user = message.from_user
@@ -286,15 +304,94 @@ async def _post_markup(token: str) -> InlineKeyboardMarkup:
     """Hàng 1: Tải file. Hàng 2: Kênh | Nhóm chat (nếu đã setup). Chữ nút plain text."""
     username = _bot_username()
     rows = [[InlineKeyboardButton(DOWNLOAD_BUTTON_TEXT, url=build_upfile_url(username, token))]]
-    channel_url, group_url = await get_up_promo_links()
+    targets = await get_up_promo_targets()
     link_row = []
-    if channel_url:
-        link_row.append(InlineKeyboardButton(CHANNEL_BUTTON_TEXT, url=channel_url))
-    if group_url:
-        link_row.append(InlineKeyboardButton(GROUP_BUTTON_TEXT, url=group_url))
+    if targets["channel"]["url"]:
+        link_row.append(InlineKeyboardButton(CHANNEL_BUTTON_TEXT, url=targets["channel"]["url"]))
+    if targets["group"]["url"]:
+        link_row.append(InlineKeyboardButton(GROUP_BUTTON_TEXT, url=targets["group"]["url"]))
     if link_row:
         rows.append(link_row)
     return InlineKeyboardMarkup(rows)
+
+
+def _join_gate_markup(token: str, channel_url, group_url) -> InlineKeyboardMarkup:
+    kb = build_join_gate_keyboard_botapi(token, channel_url=channel_url, group_url=group_url)
+    rows = []
+    for row in kb["inline_keyboard"]:
+        buttons = []
+        for btn in row:
+            if btn.get("url"):
+                buttons.append(InlineKeyboardButton(btn["text"], url=btn["url"]))
+            else:
+                buttons.append(InlineKeyboardButton(btn["text"], callback_data=btn["callback_data"]))
+        rows.append(buttons)
+    return InlineKeyboardMarkup(rows)
+
+
+async def _log_up(text: str):
+    LOGGER.info("%s", text)
+    if not LOG_CHANNEL:
+        return
+    try:
+        await app.send_message(LOG_CHANNEL, text, parse_mode=enums.ParseMode.HTML)
+    except Exception as e:
+        LOGGER.warning("up log send failed: %s", e)
+
+
+async def _bot_rights_in_chat(chat_id):
+    """Trả (ok, status_text, can_ban)."""
+    try:
+        me = await app.get_chat_member(chat_id, "me")
+    except Exception as e:
+        return False, f"không đọc được quyền bot ({e})", False
+    status = me.status
+    if status == ChatMemberStatus.OWNER:
+        return True, "owner", True
+    if status == ChatMemberStatus.ADMINISTRATOR:
+        priv = me.privileges
+        can_ban = bool(priv and getattr(priv, "can_restrict_members", False))
+        return True, "admin", can_ban
+    return False, str(getattr(status, "name", status)), False
+
+
+async def _resolve_promo_chat(url=None, chat_id=None, here_chat=None):
+    """Resolve chat object + url từ url/chat_id/here."""
+    chat = None
+    err = None
+    if here_chat is not None:
+        try:
+            chat = await app.get_chat(here_chat)
+        except Exception as e:
+            return None, url, f"Không mở được chat hiện tại: {e}"
+    elif chat_id is not None:
+        try:
+            chat = await app.get_chat(int(chat_id))
+        except Exception as e:
+            return None, url, f"Không mở được chat_id {chat_id}: {e}"
+    if chat is None and url:
+        # public @username / t.me/user
+        target = url
+        if "t.me/+" in url or "joinchat/" in url.lower():
+            # invite — try get_chat(url) anyway; may fail
+            target = url
+        else:
+            m = re.search(r"t\.me/([A-Za-z0-9_]+)", url)
+            if m:
+                target = m.group(1)
+        try:
+            chat = await app.get_chat(target)
+        except Exception as e:
+            err = f"Chưa resolve được chat từ link (cần thêm chat_id hoặc dùng here): {e}"
+    final_url = url
+    if chat is not None:
+        if not final_url:
+            if getattr(chat, "username", None):
+                final_url = f"https://t.me/{chat.username}"
+            elif getattr(chat, "invite_link", None):
+                final_url = chat.invite_link
+        return chat, final_url, err
+    return None, final_url, err
 
 
 async def _resolved_channel():
@@ -358,52 +455,134 @@ async def command_up_channel(_, message: Message):
 
 
 async def _handle_promo_link_command(message: Message, kind: str):
-    """kind: channel | group. Đặt / xem / xóa link nút dưới bài /up."""
+    """kind: channel | group. Đặt / xem / xóa link + chat_id nút dưới bài /up."""
     if not _is_sudo(message):
         await _reply_html(message, f"{E_WARN} Chỉ admin bot mới đặt được link Kênh / Nhóm chat.")
         return
     args = (message.text or "").split(maxsplit=1)
     raw = args[1].strip() if len(args) > 1 else ""
-    cur_channel, cur_group = await get_up_promo_links()
-    current = cur_channel if kind == "channel" else cur_group
+    targets = await get_up_promo_targets()
+    current = targets[kind]
     label = "Kênh" if kind == "channel" else "Nhóm chat"
     cmd = "/up_link_channel" if kind == "channel" else "/up_link_group"
-    if not raw:
-        if current:
+    parsed = parse_promo_link_args(raw)
+
+    if parsed["action"] == "show":
+        if current["url"] or current["chat_id"]:
             await _reply_html(
                 message,
-                f"{E_TIP} Link nút <b>{label}</b> hiện tại:\n<code>{html.escape(current)}</code>\n"
-                f"Đổi bằng <code>{cmd} @ten</code> hoặc gỡ bằng <code>{cmd} off</code>.",
+                f"{E_TIP} Nút <b>{label}</b>:\n"
+                f"Link: <code>{html.escape(current['url'] or '—')}</code>\n"
+                f"chat_id: <code>{html.escape(str(current['chat_id'] or '—'))}</code>\n"
+                f"Đổi bằng <code>{cmd} @ten</code> / <code>{cmd} here</code> / "
+                f"<code>{cmd} https://t.me/+... -100...</code>; gỡ bằng <code>{cmd} off</code>.",
             )
         else:
             await _reply_html(
                 message,
-                f"{E_TIP} Chưa đặt link nút <b>{label}</b>.\n"
-                f"Dùng <code>{cmd} @ten</code> hoặc <code>{cmd} https://t.me/...</code>.",
+                f"{E_TIP} Chưa đặt nút <b>{label}</b>.\n"
+                f"Dùng <code>{cmd} @ten</code>, <code>{cmd} here</code> (trong nhóm/kênh), "
+                f"hoặc <code>{cmd} https://t.me/+invite -100id</code>.",
             )
         return
-    if is_clear_link_arg(raw):
+
+    if parsed["action"] == "clear":
         if kind == "channel":
             await set_up_link_channel(None)
         else:
             await set_up_link_group(None)
         await _reply_html(message, f"{E_SUCCESS} Đã gỡ nút <b>{label}</b> khỏi bài /up.")
         return
-    url = normalize_telegram_link(raw)
-    if not url:
+
+    if parsed["action"] == "invalid":
         await _reply_html(
             message,
-            f"{E_ERROR} Link không hợp lệ. Hãy gửi <code>@ten</code>, "
-            f"<code>https://t.me/ten</code> hoặc invite <code>https://t.me/+...</code>.",
+            f"{E_ERROR} Không hiểu tham số. Thử <code>@ten</code>, <code>here</code>, "
+            f"<code>-100...</code> hoặc invite kèm chat_id.",
         )
         return
+
+    here_chat = None
+    if parsed["action"] == "here":
+        if message.chat and message.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP, ChatType.CHANNEL):
+            here_chat = message.chat.id
+        else:
+            await _reply_html(
+                message,
+                f"{E_ERROR} Gửi <code>{cmd} here</code> ngay trong nhóm/kênh cần gắn.",
+            )
+            return
+
+    chat, final_url, resolve_err = await _resolve_promo_chat(
+        url=parsed.get("url"),
+        chat_id=parsed.get("chat_id"),
+        here_chat=here_chat,
+    )
+    if chat is None and not final_url:
+        await _reply_html(
+            message,
+            f"{E_ERROR} {html.escape(resolve_err or 'Thiếu link hoặc chat_id.')}",
+        )
+        return
+    if chat is None and final_url and parsed.get("chat_id") is None:
+        # store URL only; warn
+        if kind == "channel":
+            await set_up_link_channel(final_url, None)
+        else:
+            await set_up_link_group(final_url, None)
+        await _reply_html(
+            message,
+            f"{E_WARN} Đã lưu link <b>{label}</b>: <code>{html.escape(final_url)}</code>\n"
+            f"Chưa có <code>chat_id</code> nên bot chưa kiểm tra join/ban được. "
+            f"Thêm bằng <code>{cmd} {html.escape(final_url)} -100...</code> hoặc "
+            f"<code>{cmd} here</code> trong chat đó.\n"
+            f"{html.escape(resolve_err or '')}",
+        )
+        return
+    if chat is None and parsed.get("chat_id") is not None and final_url:
+        # keep url + raw chat_id even if get_chat failed
+        cid = int(parsed["chat_id"])
+        if kind == "channel":
+            await set_up_link_channel(final_url, cid)
+        else:
+            await set_up_link_group(final_url, cid)
+        await _reply_html(
+            message,
+            f"{E_WARN} Đã lưu link + chat_id <code>{cid}</code> nhưng bot chưa mở được chat "
+            f"({html.escape(resolve_err or 'lỗi')}). Kiểm tra bot đã vào chat chưa.",
+        )
+        return
+    if chat is None:
+        await _reply_html(message, f"{E_ERROR} {html.escape(resolve_err or 'Không resolve được chat.')}")
+        return
+
+    if not final_url:
+        await _reply_html(
+            message,
+            f"{E_ERROR} Có chat_id nhưng chưa có URL công khai. Gửi kèm link invite "
+            f"<code>{cmd} https://t.me/+... {chat.id}</code>.",
+        )
+        return
+
+    ok, status_txt, can_ban = await _bot_rights_in_chat(chat.id)
     if kind == "channel":
-        await set_up_link_channel(url)
+        await set_up_link_channel(final_url, chat.id)
     else:
-        await set_up_link_group(url)
+        await set_up_link_group(final_url, chat.id)
+    rights = (
+        f"Bot: <b>{html.escape(status_txt)}</b>; quyền ban: "
+        f"<b>{'có' if can_ban else 'không'}</b>"
+    )
+    if not ok or not can_ban:
+        rights += (
+            f"\n{E_WARN} Hãy cấp bot quyền admin (cấm thành viên) trong chat này "
+            f"để kiểm tra join và tự ban khi rời."
+        )
+    title = html.escape(chat.title or str(chat.id))
     await _reply_html(
         message,
-        f"{E_SUCCESS} Đã đặt nút <b>{label}</b>: <code>{html.escape(url)}</code>",
+        f"{E_SUCCESS} Đã đặt nút <b>{label}</b>: <code>{html.escape(final_url)}</code>\n"
+        f"Chat: <b>{title}</b> (<code>{chat.id}</code>)\n{rights}",
     )
 
 
@@ -690,17 +869,79 @@ async def _send_document_html(
             return sent
 
 
-async def deliver_up_file(message: Message, payload: str):
-    token = (payload or "").lower().strip()
-    if token.startswith("upfile_"):
-        token = token[len("upfile_"):]
-    rec = await get_up_file(token)
-    if not rec or not rec.get("file_id"):
-        await _reply_html(
-            message,
-            f"{E_ERROR} Không tìm thấy file này hoặc bài đăng đã hết hiệu lực.",
-        )
-        return
+async def _member_status_in_chat(chat_id, user_id):
+    """Trả (joined: bool|None, banned: bool, raw_status). joined=None nếu không check được."""
+    try:
+        mem = await app.get_chat_member(chat_id, user_id)
+    except Exception as e:
+        LOGGER.warning("get_chat_member chat=%s user=%s: %s", chat_id, user_id, e)
+        return None, False, None
+    status = mem.status
+    is_member = getattr(mem, "is_member", None)
+    if membership_is_banned(status):
+        return False, True, status
+    return membership_is_joined(status, is_member), False, status
+
+
+async def _evaluate_join_gate(user_id: int):
+    """Trả dict: ok, banned, missing(list), targets, checkable_count."""
+    targets = await get_up_promo_targets()
+    missing = []
+    banned = False
+    checkable = 0
+    for kind in ("channel", "group"):
+        t = targets[kind]
+        cid = t.get("chat_id")
+        if not cid:
+            if t.get("url"):
+                key = f"{kind}:{t['url']}"
+                if key not in _nocheck_warned:
+                    _nocheck_warned.add(key)
+                    await _log_up(
+                        f"{E_WARN} /up: đã có link <b>{kind}</b> nhưng chưa có chat_id — "
+                        f"bỏ qua kiểm tra join cho mục này. Dùng /up_link_{kind} here hoặc kèm -100id."
+                    )
+            continue
+        checkable += 1
+        joined, is_ban, _ = await _member_status_in_chat(cid, user_id)
+        if joined is None:
+            key = f"fail:{kind}:{cid}"
+            if key not in _nocheck_warned:
+                _nocheck_warned.add(key)
+                await _log_up(
+                    f"{E_WARN} /up: không kiểm tra được thành viên trong <code>{cid}</code> "
+                    f"({kind}). Bỏ qua mục này. Kiểm tra bot còn admin không."
+                )
+            continue
+        if is_ban:
+            banned = True
+        elif not joined:
+            missing.append(kind)
+    if banned:
+        return {"ok": False, "banned": True, "missing": missing, "targets": targets, "checkable": checkable}
+    # Nếu không có mục nào checkable → cho tải (không chặn oan) nhưng đã warn LOG
+    if checkable == 0:
+        return {"ok": True, "banned": False, "missing": [], "targets": targets, "checkable": 0}
+    if missing:
+        return {"ok": False, "banned": False, "missing": missing, "targets": targets, "checkable": checkable}
+    return {"ok": True, "banned": False, "missing": [], "targets": targets, "checkable": checkable}
+
+
+async def _send_join_gate_prompt(message: Message, token: str, gate: dict):
+    targets = gate["targets"]
+    ch = targets["channel"]["url"]
+    gr = targets["group"]["url"]
+    text = (
+        "Bạn cần tham gia Kênh và Nhóm chat trước khi tải file.\n\n"
+        "Hãy bấm nút bên dưới để vào, rồi chọn Đã tham gia, tải file."
+    )
+    await message.reply_text(
+        text,
+        reply_markup=_join_gate_markup(token, ch, gr),
+    )
+
+
+async def _deliver_up_file_content(message: Message, rec: dict, token: str):
     filename = rec.get("filename") or ""
     caption, followup = build_delivery_captions(
         name=rec.get("name") or "",
@@ -727,19 +968,47 @@ async def deliver_up_file(message: Message, payload: str):
                         await _send_html_text(message.chat.id, followup)
                     except Exception:
                         pass
-                return
+                return True
         except Exception:
             pass
         await _reply_html(
             message,
             f"{E_ERROR} Không gửi được file: {html.escape(str(e))}",
         )
-        return
+        return False
     if followup:
         try:
             await _send_html_text(message.chat.id, followup)
         except Exception:
             pass
+    return True
+
+
+async def deliver_up_file(message: Message, payload: str):
+    token = (payload or "").lower().strip()
+    if token.startswith("upfile_"):
+        token = token[len("upfile_"):]
+    rec = await get_up_file(token)
+    if not rec or not rec.get("file_id"):
+        await _reply_html(
+            message,
+            f"{E_ERROR} Không tìm thấy file này hoặc bài đăng đã hết hiệu lực.",
+        )
+        return
+    user = message.from_user
+    if user and not _is_sudo_id(user.id):
+        # đã từng bị auto-ban vì rời
+        ban_rec = await get_leave_ban(user.id)
+        gate = await _evaluate_join_gate(user.id)
+        if gate["banned"] or ban_rec:
+            await message.reply_text(
+                "Bạn đã bị cấm vì rời Kênh/Nhóm chat. Liên hệ admin để được mở lại."
+            )
+            return
+        if not gate["ok"]:
+            await _send_join_gate_prompt(message, token, gate)
+            return
+    await _deliver_up_file_content(message, rec, token)
 
 
 @app.on_message(filters.command("start", COMMAND_HANDLER) & filters.private, group=_HANDLER_GROUP)
@@ -752,6 +1021,193 @@ async def start_upfile(_, message: Message):
     if not payload.startswith("upfile_"):
         return
     await deliver_up_file(message, payload)
+
+
+
+@app.on_callback_query(filters.regex(r"^upjoin_([0-9a-fA-F]+)$"), group=_HANDLER_GROUP)
+@capture_err
+async def upjoin_recheck(_, cq: CallbackQuery):
+    if not cq.from_user:
+        await cq.answer()
+        return
+    token = cq.matches[0].group(1).lower()
+    rec = await get_up_file(token)
+    if not rec or not rec.get("file_id"):
+        await cq.answer("File không còn hiệu lực.", show_alert=True)
+        return
+    if _is_sudo_id(cq.from_user.id):
+        await cq.answer("Đang gửi file...")
+        # synthesize a message-like object for delivery chat
+        class _M:
+            pass
+        m = cq.message
+        await _deliver_up_file_content(m, rec, token)
+        return
+    ban_rec = await get_leave_ban(cq.from_user.id)
+    gate = await _evaluate_join_gate(cq.from_user.id)
+    if gate["banned"] or ban_rec:
+        await cq.answer("Bạn đã bị cấm vì rời Kênh/Nhóm. Liên hệ admin.", show_alert=True)
+        try:
+            await cq.message.edit_text(
+                "Bạn đã bị cấm vì rời Kênh/Nhóm chat. Liên hệ admin để được mở lại."
+            )
+        except Exception:
+            pass
+        return
+    if not gate["ok"]:
+        await cq.answer("Bạn chưa tham gia đủ Kênh và Nhóm chat.", show_alert=True)
+        return
+    await cq.answer("Đã xác nhận. Đang gửi file...")
+    await _deliver_up_file_content(cq.message, rec, token)
+
+
+@app.on_chat_member_updated(group=0)
+async def up_leave_autoban(_, update: ChatMemberUpdated):
+    """Tự ban khi user tự rời Kênh/Nhóm promo; xóa record khi admin unban."""
+    try:
+        targets = await get_up_promo_targets()
+    except Exception:
+        return
+    watch = {
+        targets["channel"]["chat_id"],
+        targets["group"]["chat_id"],
+    }
+    watch.discard(None)
+    if not watch or update.chat.id not in watch:
+        return
+
+    old = update.old_chat_member
+    new = update.new_chat_member
+    old_status = old.status if old else None
+    new_status = new.status if new else None
+    user = None
+    if new and new.user:
+        user = new.user
+    elif old and old.user:
+        user = old.user
+    if not user or user.is_bot:
+        return
+    if _is_sudo_id(user.id):
+        return
+
+    # Admin unban detection: BANNED -> LEFT/MEMBER
+    if old and new and should_clear_leave_ban_on_unban(old_status=old_status, new_status=new_status):
+        # only clear if an admin performed it (from_user is admin)
+        actor = update.from_user
+        if actor and actor.id != user.id:
+            await clear_leave_ban(user.id)
+            await _log_up(
+                f"{E_SUCCESS} /up: đã xóa record auto-ban của <code>{user.id}</code> "
+                f"(admin unban trong {html.escape(update.chat.title or str(update.chat.id))})."
+            )
+        return
+
+    # Voluntary leave: new LEFT or missing new with old MEMBER
+    left_by_admin = bool(update.from_user and update.from_user.id != user.id)
+    effective_new = new_status
+    if new is None and old is not None:
+        effective_new = ChatMemberStatus.LEFT
+    if not should_autoban_on_leave(
+        old_status=old_status,
+        new_status=effective_new,
+        user_is_bot=bool(user.is_bot),
+        user_is_sudo=_is_sudo_id(user.id),
+        left_by_admin=left_by_admin,
+    ):
+        return
+
+    name = (user.first_name or "") + ((" " + user.last_name) if user.last_name else "")
+    left_chat = update.chat.id
+    banned_ok = []
+    for cid in list(watch):
+        try:
+            await app.ban_chat_member(cid, user.id)
+            banned_ok.append(str(cid))
+        except Exception as e:
+            LOGGER.warning("up autoban fail chat=%s user=%s: %s", cid, user.id, e)
+    await save_leave_ban(user.id, {
+        "name": name,
+        "username": user.username or "",
+        "left_chat_id": left_chat,
+        "banned_chats": banned_ok,
+        "banned_at": time.time(),
+    })
+    await _log_up(
+        f"{E_WARN} /up auto-ban: <a href=\"tg://user?id={user.id}\">{html.escape(name or str(user.id))}</a> "
+        f"(<code>{user.id}</code>) rời <code>{left_chat}</code> — "
+        f"đã ban: {html.escape(', '.join(banned_ok) or 'không thành công')}."
+    )
+
+
+@app.on_message(filters.command(["up_unban"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_unban(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới /up_unban được.")
+        return
+    target = None
+    args = (message.text or "").split(maxsplit=1)
+    if message.reply_to_message and message.reply_to_message.from_user:
+        target = message.reply_to_message.from_user.id
+    elif len(args) > 1:
+        raw = args[1].strip()
+        if raw.isdigit() or (raw.startswith("-") and raw[1:].isdigit()):
+            target = int(raw)
+        else:
+            try:
+                user = await app.get_users(raw)
+                target = user.id
+            except Exception as e:
+                await _reply_html(message, f"{E_ERROR} Không tìm user: {html.escape(str(e))}")
+                return
+    if not target:
+        await _reply_html(
+            message,
+            f"{E_TIP} Dùng <code>/up_unban &lt;user_id|@user&gt;</code> hoặc trả lời tin của họ.",
+        )
+        return
+    targets = await get_up_promo_targets()
+    results = []
+    for kind in ("channel", "group"):
+        cid = targets[kind]["chat_id"]
+        if not cid:
+            results.append(f"{kind}: chưa cấu hình")
+            continue
+        try:
+            await app.unban_chat_member(cid, target)
+            results.append(f"{kind}: đã unban")
+        except Exception as e:
+            results.append(f"{kind}: lỗi {e}")
+    await clear_leave_ban(target)
+    await _reply_html(
+        message,
+        f"{E_SUCCESS} Đã xử lý unban <code>{target}</code>:\n"
+        + "\n".join(html.escape(r) for r in results),
+    )
+
+
+@app.on_message(filters.command(["up_banlist"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_banlist(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới xem /up_banlist.")
+        return
+    rows = await list_leave_bans(40)
+    if not rows:
+        await _reply_html(message, f"{E_TIP} Chưa có ai bị auto-ban vì rời Kênh/Nhóm.")
+        return
+    lines = [f"{E_TIP} <b>Danh sách auto-ban /up</b> ({len(rows)}):"]
+    for rec in rows:
+        uid = rec.get("user_id") or rec.get("_id")
+        name = html.escape(str(rec.get("name") or ""))
+        when = rec.get("banned_at")
+        try:
+            when_s = datetime.fromtimestamp(float(when)).strftime("%d/%m %H:%M") if when else "?"
+        except Exception:
+            when_s = "?"
+        left = rec.get("left_chat_id") or "?"
+        lines.append(f"• <code>{uid}</code> {name} — rời <code>{left}</code> lúc {when_s}")
+    await _reply_html(message, "\n".join(lines))
 
 
 @app.on_callback_query(filters.regex(r"^upacl_(ok|no)_(\d+)$"), group=_HANDLER_GROUP)
