@@ -1,21 +1,26 @@
-# Gửi vào LOG_CHANNEL khi user dùng lệnh (/, !) hoặc gửi video/ảnh — User và Chat mỗi cái 1 dòng
+# Gửi vào LOG_CHANNEL khi user dùng lệnh, gửi ảnh/video, nhắn PM, hoặc gửi file trong nhóm.
+# User + Chat mỗi cái 1 dòng. Không chặn handler khác (group=1, không StopPropagation).
 
+import asyncio
 import html
 import os
 from logging import getLogger
 
 from pyrogram import filters
 from pyrogram.enums import ChatType, ParseMode
-from pyrogram.errors import BadRequest, Forbidden
+from pyrogram.errors import BadRequest, FloodWait, Forbidden
 
 from dorasuper import app
 from dorasuper.emoji import E_MSG, E_USER
-from dorasuper.vars import LOG_CHANNEL, COMMAND_HANDLER, SUDO
+from dorasuper.vars import COMMAND_HANDLER, LOG_CHANNEL, SUDO, UP_CHANNEL
 from dorasuper.log_topics import topic_id
 
 LOGGER = getLogger("DoraSuper")
 __MODULE__ = "LogAdmin"
-__HELP__ = """[Nội bộ] Gửi lệnh (/, !) hoặc video/ảnh → log vào LOG_CHANNEL (User + Chat mỗi cái 1 dòng)."""
+__HELP__ = (
+    "[Nội bộ] Lệnh / ảnh / video → tab tương ứng; PM (mọi loại) → Tin nhắn riêng; "
+    "file/audio/voice trong nhóm → File."
+)
 
 
 def _is_command_message(text: str) -> bool:
@@ -26,13 +31,40 @@ def _is_command_message(text: str) -> bool:
     prefixes = tuple(COMMAND_HANDLER) if COMMAND_HANDLER else ("/", "!")
     if not t.startswith(prefixes):
         return False
-    # Có ít nhất 1 ký tự sau prefix (tên lệnh)
     return len(t) > 1 and (t[1].isalnum() or t[1] in ("_",))
 
 
 def _is_media_message(message) -> bool:
-    """True nếu tin có ảnh / video / video_note cần chuyển file thật vào log."""
-    return bool(getattr(message, "photo", None) or getattr(message, "video", None) or getattr(message, "video_note", None))
+    """True nếu tin có ảnh / video / video_note (đã có tab riêng — tránh trùng)."""
+    return bool(
+        getattr(message, "photo", None)
+        or getattr(message, "video", None)
+        or getattr(message, "video_note", None)
+    )
+
+
+def _is_file_message(message) -> bool:
+    """True nếu tin có document / audio / voice (file nhóm → tab File)."""
+    return bool(
+        getattr(message, "document", None)
+        or getattr(message, "audio", None)
+        or getattr(message, "voice", None)
+    )
+
+
+def _has_copyable_payload(message) -> bool:
+    """True nếu tin mang media/file có thể copy sang LOG (không chỉ text)."""
+    return bool(
+        getattr(message, "photo", None)
+        or getattr(message, "video", None)
+        or getattr(message, "video_note", None)
+        or getattr(message, "document", None)
+        or getattr(message, "audio", None)
+        or getattr(message, "voice", None)
+        or getattr(message, "animation", None)
+        or getattr(message, "sticker", None)
+        or getattr(message, "video_note", None)
+    )
 
 
 def _media_topic_key(message) -> str:
@@ -61,88 +93,219 @@ def _build_user_chat_caption(message, text: str) -> str:
         f"{E_MSG} <b>Chat:</b> {chat_info}"
     )
     if text:
-        # Caption media giới hạn 1024; giữ an toàn bằng cách cắt ngắn
         extra = html.escape(text)
         remaining = 950 - len(cap)
         if remaining > 20:
             extra = extra[:remaining]
             cap += f"\n\n<blockquote>{extra}</blockquote>"
-    # Soft cap for Telegram caption limit
     if len(cap) > 1024:
         cap = cap[:1021] + "..."
     return cap
 
 
-async def _send_media_to_log(message, cap: str) -> None:
-    """Gửi ảnh/video thật vào LOG_CHANNEL topic phù hợp.
+def _build_text_log_body(message, text: str) -> str:
+    """Body HTML đầy đủ cho tin text-only (hoặc fallback khi không copy được media)."""
+    user = message.from_user
+    name = (user.first_name or "") + (" " + (user.last_name or "")).strip()
+    name = html.escape(name) or "N/A"
+    username = (user.username and f"@{user.username}") or "—"
+    uid = user.id
+    if message.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+        chat_name = html.escape(message.chat.title or "Nhóm")
+        chat_info = f"{chat_name} (<code>{message.chat.id}</code>)"
+    else:
+        chat_info = "Riêng tư (PM)"
+    content = html.escape(text) if text else "(không có nội dung)"
+    body = (
+        f"{E_USER} <b>User:</b> {name} | {username} | <code>{uid}</code>\n"
+        f"{E_MSG} <b>Chat:</b> {chat_info}\n\n"
+        f"<blockquote>{content}</blockquote>"
+    )
+    if len(body) > 4000:
+        body = body[:3997] + "..."
+    return body
 
-    Thứ tự: message.copy → send_photo/send_video(file_id) → download + upload.
-    Không bao giờ thay media bằng text-only "📷 Ảnh" / "🎬 Video".
+
+async def _resolve_up_channel_id():
+    """Kênh đích /up — bỏ qua log từ đó. Ưu tiên DB, fallback UP_CHANNEL env."""
+    try:
+        from database.up_channel_db import get_up_channel
+        saved = await get_up_channel()
+        if saved is not None:
+            return int(saved)
+    except Exception:
+        pass
+    if UP_CHANNEL is None:
+        return None
+    try:
+        return int(UP_CHANNEL)
+    except (TypeError, ValueError):
+        return None
+
+
+async def _send_with_floodwait(coro_factory, *, attempts: int = 3):
+    """Chạy coroutine; tôn trọng FloodWait ngắn, không để exception lan ra handler khác."""
+    last = None
+    for _ in range(attempts):
+        try:
+            return await coro_factory()
+        except FloodWait as e:
+            last = e
+            wait = int(getattr(e, "value", 1) or 1)
+            await asyncio.sleep(min(wait, 25) + 1)
+    if last:
+        raise last
+
+
+async def _send_media_to_log(message, cap: str, topic_key: str | None = None) -> None:
+    """Gửi media/file thật vào LOG_CHANNEL topic phù hợp.
+
+    Thứ tự: message.copy → send_* (file_id) → download + upload.
+    topic_key mặc định theo ảnh/video; truyền 'files' / 'pm' khi cần.
     """
-    _thread = topic_id(_media_topic_key(message))
+    key = topic_key or _media_topic_key(message)
+    _thread = topic_id(key)
     send_errs: list[str] = []
 
-    # 1) Prefer copy (giữ nguyên file, kèm caption)
+    # 1) Prefer copy
     try:
-        await message.copy(
-            LOG_CHANNEL,
-            caption=cap,
-            parse_mode=ParseMode.HTML,
-            message_thread_id=_thread,
+        await _send_with_floodwait(
+            lambda: message.copy(
+                LOG_CHANNEL,
+                caption=cap,
+                parse_mode=ParseMode.HTML,
+                message_thread_id=_thread,
+            )
         )
         return
     except (BadRequest, Forbidden) as e:
         send_errs.append(f"copy+caption: {e}")
         try:
-            await message.copy(LOG_CHANNEL, message_thread_id=_thread)
+            await _send_with_floodwait(
+                lambda: message.copy(LOG_CHANNEL, message_thread_id=_thread)
+            )
             return
         except (BadRequest, Forbidden) as e2:
             send_errs.append(f"copy: {e2}")
+    except FloodWait as e:
+        send_errs.append(f"copy FloodWait: {e}")
 
     # 2) Same-bot file_id reuse
     try:
         if message.photo:
-            file_id = message.photo.file_id
-            await app.send_photo(
-                LOG_CHANNEL,
-                photo=file_id,
-                caption=cap,
-                parse_mode=ParseMode.HTML,
-                message_thread_id=_thread,
+            await _send_with_floodwait(
+                lambda: app.send_photo(
+                    LOG_CHANNEL,
+                    photo=message.photo.file_id,
+                    caption=cap,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=_thread,
+                )
             )
             return
         if message.video:
-            file_id = message.video.file_id
-            await app.send_video(
-                LOG_CHANNEL,
-                video=file_id,
-                caption=cap,
-                parse_mode=ParseMode.HTML,
-                message_thread_id=_thread,
+            await _send_with_floodwait(
+                lambda: app.send_video(
+                    LOG_CHANNEL,
+                    video=message.video.file_id,
+                    caption=cap,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=_thread,
+                )
             )
             return
         if message.video_note:
-            # video_note không có caption trên Telegram; gửi note rồi caption riêng nếu cần
-            await app.send_video_note(
-                LOG_CHANNEL,
-                video_note=message.video_note.file_id,
-                message_thread_id=_thread,
+            await _send_with_floodwait(
+                lambda: app.send_video_note(
+                    LOG_CHANNEL,
+                    video_note=message.video_note.file_id,
+                    message_thread_id=_thread,
+                )
             )
             if cap:
                 try:
-                    await app.send_message(
-                        LOG_CHANNEL,
-                        cap,
-                        parse_mode=ParseMode.HTML,
-                        message_thread_id=_thread,
+                    await _send_with_floodwait(
+                        lambda: app.send_message(
+                            LOG_CHANNEL,
+                            cap,
+                            parse_mode=ParseMode.HTML,
+                            message_thread_id=_thread,
+                        )
                     )
-                except (BadRequest, Forbidden):
+                except (BadRequest, Forbidden, FloodWait):
+                    pass
+            return
+        if message.document:
+            await _send_with_floodwait(
+                lambda: app.send_document(
+                    LOG_CHANNEL,
+                    document=message.document.file_id,
+                    caption=cap,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=_thread,
+                )
+            )
+            return
+        if message.audio:
+            await _send_with_floodwait(
+                lambda: app.send_audio(
+                    LOG_CHANNEL,
+                    audio=message.audio.file_id,
+                    caption=cap,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=_thread,
+                )
+            )
+            return
+        if message.voice:
+            await _send_with_floodwait(
+                lambda: app.send_voice(
+                    LOG_CHANNEL,
+                    voice=message.voice.file_id,
+                    caption=cap,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=_thread,
+                )
+            )
+            return
+        if message.animation:
+            await _send_with_floodwait(
+                lambda: app.send_animation(
+                    LOG_CHANNEL,
+                    animation=message.animation.file_id,
+                    caption=cap,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=_thread,
+                )
+            )
+            return
+        if message.sticker:
+            await _send_with_floodwait(
+                lambda: app.send_sticker(
+                    LOG_CHANNEL,
+                    sticker=message.sticker.file_id,
+                    message_thread_id=_thread,
+                )
+            )
+            if cap:
+                try:
+                    await _send_with_floodwait(
+                        lambda: app.send_message(
+                            LOG_CHANNEL,
+                            cap,
+                            parse_mode=ParseMode.HTML,
+                            message_thread_id=_thread,
+                        )
+                    )
+                except (BadRequest, Forbidden, FloodWait):
                     pass
             return
     except (BadRequest, Forbidden) as e:
         send_errs.append(f"file_id: {e}")
+    except FloodWait as e:
+        send_errs.append(f"file_id FloodWait: {e}")
 
-    # 3) Last resort: download then upload
+    # 3) Last resort: download then upload (chỉ các loại phổ biến)
     path = None
     try:
         path = await message.download()
@@ -150,38 +313,60 @@ async def _send_media_to_log(message, cap: str) -> None:
             raise RuntimeError("download returned empty path")
         if message.photo:
             await app.send_photo(
-                LOG_CHANNEL,
-                photo=path,
-                caption=cap,
-                parse_mode=ParseMode.HTML,
-                message_thread_id=_thread,
+                LOG_CHANNEL, photo=path, caption=cap,
+                parse_mode=ParseMode.HTML, message_thread_id=_thread,
             )
         elif message.video:
             await app.send_video(
-                LOG_CHANNEL,
-                video=path,
-                caption=cap,
-                parse_mode=ParseMode.HTML,
-                message_thread_id=_thread,
+                LOG_CHANNEL, video=path, caption=cap,
+                parse_mode=ParseMode.HTML, message_thread_id=_thread,
             )
         elif message.video_note:
             await app.send_video_note(
-                LOG_CHANNEL,
-                video_note=path,
-                message_thread_id=_thread,
+                LOG_CHANNEL, video_note=path, message_thread_id=_thread,
             )
             if cap:
                 try:
                     await app.send_message(
-                        LOG_CHANNEL,
-                        cap,
-                        parse_mode=ParseMode.HTML,
+                        LOG_CHANNEL, cap, parse_mode=ParseMode.HTML,
+                        message_thread_id=_thread,
+                    )
+                except (BadRequest, Forbidden):
+                    pass
+        elif message.document:
+            await app.send_document(
+                LOG_CHANNEL, document=path, caption=cap,
+                parse_mode=ParseMode.HTML, message_thread_id=_thread,
+            )
+        elif message.audio:
+            await app.send_audio(
+                LOG_CHANNEL, audio=path, caption=cap,
+                parse_mode=ParseMode.HTML, message_thread_id=_thread,
+            )
+        elif message.voice:
+            await app.send_voice(
+                LOG_CHANNEL, voice=path, caption=cap,
+                parse_mode=ParseMode.HTML, message_thread_id=_thread,
+            )
+        elif message.animation:
+            await app.send_animation(
+                LOG_CHANNEL, animation=path, caption=cap,
+                parse_mode=ParseMode.HTML, message_thread_id=_thread,
+            )
+        elif message.sticker:
+            await app.send_sticker(
+                LOG_CHANNEL, sticker=path, message_thread_id=_thread,
+            )
+            if cap:
+                try:
+                    await app.send_message(
+                        LOG_CHANNEL, cap, parse_mode=ParseMode.HTML,
                         message_thread_id=_thread,
                     )
                 except (BadRequest, Forbidden):
                     pass
         else:
-            raise RuntimeError("no photo/video/video_note after download")
+            raise RuntimeError("no supported media after download")
         return
     except Exception as e:
         send_errs.append(f"download_upload: {e}")
@@ -197,6 +382,23 @@ async def _send_media_to_log(message, cap: str) -> None:
                 pass
 
 
+async def _send_payload_to_topic(message, topic_key: str, text: str) -> None:
+    """Gửi tin (media hoặc text) vào topic đã chọn."""
+    if _has_copyable_payload(message):
+        cap = _build_user_chat_caption(message, text)
+        await _send_media_to_log(message, cap, topic_key=topic_key)
+        return
+    body = _build_text_log_body(message, text)
+    await _send_with_floodwait(
+        lambda: app.send_message(
+            LOG_CHANNEL,
+            body,
+            parse_mode=ParseMode.HTML,
+            message_thread_id=topic_id(topic_key),
+        )
+    )
+
+
 @app.on_message(
     filters.incoming
     & ~filters.service
@@ -204,7 +406,7 @@ async def _send_media_to_log(message, cap: str) -> None:
     group=1,
 )
 async def log_user_message_to_admin(_, message):
-    """Gửi vào LOG_CHANNEL khi user dùng lệnh hoặc gửi video/ảnh. User và Chat mỗi cái 1 dòng."""
+    """Log lệnh / ảnh-video / PM / file nhóm vào LOG_CHANNEL. Không StopPropagation."""
     if not LOG_CHANNEL:
         return
     if message.chat and message.chat.id == LOG_CHANNEL:
@@ -215,44 +417,54 @@ async def log_user_message_to_admin(_, message):
         return
     if message.from_user.id in SUDO:
         return
+
+    try:
+        up_id = await _resolve_up_channel_id()
+        if up_id is not None and message.chat and message.chat.id == up_id:
+            return
+    except Exception:
+        pass
+
     text = (message.text or message.caption or "").strip()
     is_cmd = _is_command_message(text)
-    is_media = _is_media_message(message)
-    if not is_cmd and not is_media:
-        return
+    is_photo_video = _is_media_message(message)
+    is_file = _is_file_message(message)
+    is_private = bool(message.chat and message.chat.type == ChatType.PRIVATE)
+
     try:
-        if is_media:
+        # 1) Ảnh / video / video_note → tab photos|videos (PM + nhóm) — tránh trùng với pm/files
+        if is_photo_video:
             cap = _build_user_chat_caption(message, text)
             await _send_media_to_log(message, cap)
             return
 
-        # Chỉ còn lệnh không kèm media → text vào tab commands
-        content = html.escape(text) if text else "(không có nội dung)"
-        user = message.from_user
-        name = (user.first_name or "") + (" " + (user.last_name or "")).strip()
-        name = html.escape(name) or "N/A"
-        username = (user.username and f"@{user.username}") or "—"
-        uid = user.id
-        if message.chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
-            chat_name = html.escape(message.chat.title or "Nhóm")
-            chat_info = f"{chat_name} (<code>{message.chat.id}</code>)"
-        else:
-            chat_info = "Riêng tư (PM)"
+        # 2) Lệnh text → tab commands (PM + nhóm)
+        if is_cmd and not is_file:
+            body = _build_text_log_body(message, text)
+            await _send_with_floodwait(
+                lambda: app.send_message(
+                    LOG_CHANNEL,
+                    body,
+                    parse_mode=ParseMode.HTML,
+                    message_thread_id=topic_id("commands"),
+                )
+            )
+            return
 
-        body = (
-            f"{E_USER} <b>User:</b> {name} | {username} | <code>{uid}</code>\n"
-            f"{E_MSG} <b>Chat:</b> {chat_info}\n\n"
-            f"<blockquote>{content}</blockquote>"
-        )
-        await app.send_message(
-            LOG_CHANNEL,
-            body,
-            parse_mode=ParseMode.HTML,
-            message_thread_id=topic_id("commands"),
-        )
+        # 3) Mọi tin PM còn lại (text, sticker, voice, doc, audio, …) → Tin nhắn riêng
+        #    Lệnh kèm file trong PM: ưu tiên pm (đã return ở trên nếu chỉ lệnh text)
+        if is_private:
+            await _send_payload_to_topic(message, "pm", text)
+            return
+
+        # 4) File / audio / voice trong nhóm → tab File
+        if is_file:
+            await _send_payload_to_topic(message, "files", text)
+            return
     except (BadRequest, Forbidden) as e:
-        # MessageIdInvalid có thể xảy ra nếu tin đã bị xóa (vd: delete_command_msg) trước khi gửi
         if "MESSAGE_ID_INVALID" not in str(e):
             LOGGER.warning("admin_log_messages BadRequest/Forbidden: %s", e)
+    except FloodWait as e:
+        LOGGER.warning("admin_log_messages FloodWait: %ss", getattr(e, "value", "?"))
     except Exception as e:
         LOGGER.exception("admin_log_messages: %s", e)

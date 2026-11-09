@@ -28,6 +28,23 @@ class _FakeVideoNote:
     file_id = "vnote-file-id"
 
 
+class _FakeDocument:
+    file_id = "doc-file-id"
+    file_name = "app.ipa"
+
+
+class _FakeAudio:
+    file_id = "audio-file-id"
+
+
+class _FakeVoice:
+    file_id = "voice-file-id"
+
+
+class _FakeSticker:
+    file_id = "sticker-file-id"
+
+
 class _FakeUser:
     def __init__(self, first_name="A", last_name="", username=None, uid=1, is_bot=False):
         self.first_name = first_name
@@ -45,12 +62,32 @@ class _FakeChat:
 
 
 class _FakeMessage:
-    def __init__(self, *, text=None, caption=None, photo=None, video=None, video_note=None, chat=None, from_user=None):
+    def __init__(
+        self,
+        *,
+        text=None,
+        caption=None,
+        photo=None,
+        video=None,
+        video_note=None,
+        document=None,
+        audio=None,
+        voice=None,
+        animation=None,
+        sticker=None,
+        chat=None,
+        from_user=None,
+    ):
         self.text = text
         self.caption = caption
         self.photo = photo
         self.video = video
         self.video_note = video_note
+        self.document = document
+        self.audio = audio
+        self.voice = voice
+        self.animation = animation
+        self.sticker = sticker
         self.chat = chat
         self.from_user = from_user
 
@@ -60,8 +97,11 @@ _tree = ast.parse(_src)
 _keep_names = {
     "_is_command_message",
     "_is_media_message",
+    "_is_file_message",
+    "_has_copyable_payload",
     "_media_topic_key",
     "_build_user_chat_caption",
+    "_build_text_log_body",
 }
 _body = []
 for node in _tree.body:
@@ -147,10 +187,60 @@ class AdminLogHelpersTest(unittest.TestCase):
         self.assertIn("hello &lt;world&gt;", cap)
         self.assertLessEqual(len(cap), 1024)
 
+
+    def test_file_detection(self):
+        doc = _FakeMessage(document=_FakeDocument(), chat=_FakeChat(_ChatType.SUPERGROUP, title="G"), from_user=_FakeUser())
+        self.assertTrue(mod._is_file_message(doc))
+        self.assertFalse(mod._is_media_message(doc))
+        self.assertTrue(mod._has_copyable_payload(doc))
+
+        audio = _FakeMessage(audio=_FakeAudio(), chat=_FakeChat(_ChatType.SUPERGROUP), from_user=_FakeUser())
+        self.assertTrue(mod._is_file_message(audio))
+
+        voice = _FakeMessage(voice=_FakeVoice(), chat=_FakeChat(_ChatType.PRIVATE), from_user=_FakeUser())
+        self.assertTrue(mod._is_file_message(voice))
+
+        sticker = _FakeMessage(sticker=_FakeSticker(), chat=_FakeChat(_ChatType.PRIVATE), from_user=_FakeUser())
+        self.assertFalse(mod._is_file_message(sticker))
+        self.assertTrue(mod._has_copyable_payload(sticker))
+
+        plain = _FakeMessage(text="hi", chat=_FakeChat(_ChatType.PRIVATE), from_user=_FakeUser())
+        self.assertFalse(mod._is_file_message(plain))
+        self.assertFalse(mod._has_copyable_payload(plain))
+
+    def test_text_log_body_pm_and_group(self):
+        pm = _FakeMessage(
+            text="xin chào <b>",
+            chat=_FakeChat(_ChatType.PRIVATE, cid=9),
+            from_user=_FakeUser(first_name="Lan", username="lan", uid=5),
+        )
+        body = mod._build_text_log_body(pm, pm.text)
+        self.assertIn("Riêng tư (PM)", body)
+        self.assertIn("Lan", body)
+        self.assertIn("xin chào &lt;b&gt;", body)
+
+        grp = _FakeMessage(
+            text="file note",
+            chat=_FakeChat(_ChatType.SUPERGROUP, title="Dev", cid=-1001),
+            from_user=_FakeUser(first_name="Nam", uid=8),
+        )
+        body2 = mod._build_text_log_body(grp, grp.text)
+        self.assertIn("Dev", body2)
+        self.assertIn("-1001", body2)
+
+    def test_source_routes_pm_and_files(self):
+        self.assertIn('"pm"', _src)
+        self.assertIn('"files"', _src)
+        self.assertIn("_is_file_message", _src)
+        self.assertIn("_send_payload_to_topic", _src)
+        self.assertIn("UP_CHANNEL", _src)
+
     def test_source_has_no_icon_only_standins(self):
         self.assertNotIn('content = "📷 Ảnh"', _src)
         self.assertNotIn('content = "🎬 Video"', _src)
         self.assertIn("_send_media_to_log", _src)
+        self.assertIn("send_document", _src)
+        self.assertIn("FloodWait", _src)
         self.assertIn("send_photo", _src)
         self.assertIn("send_video", _src)
         self.assertIn("Forbidden", _src)

@@ -19,6 +19,8 @@ LOG_TOPIC_IDS: dict[str, int | None] = {
     "commands": None,
     "photos": None,
     "videos": None,
+    "files": None,
+    "pm": None,
     "new_groups": None,
     "errors": None,
 }
@@ -28,6 +30,8 @@ _TOPICS_DEF = [
     ("commands",   "📋 Lệnh"),
     ("photos",     "📷 Ảnh"),
     ("videos",     "🎬 Video"),
+    ("files",      "File"),
+    ("pm",         "Tin nhắn riêng"),
     ("new_groups", "🆕 Nhóm Mới"),
     ("errors",     "⚠️ Lỗi & Admin"),
 ]
@@ -38,6 +42,8 @@ _TOPIC_KEYWORDS = {
     "commands":   ("lệnh", "command"),
     "photos":     ("ảnh", "photo"),
     "videos":     ("video",),
+    "files":      ("file", "tài liệu", "document"),
+    "pm":         ("tin nhắn riêng", "nhắn riêng", "private", "pm"),
     "new_groups": ("nhóm mới", "new group"),
     "errors":     ("lỗi", "error"),
 }
@@ -135,8 +141,9 @@ def _publish(mapping: dict) -> None:
     for k, v in mapping.items():
         LOG_TOPIC_IDS[k] = v
     LOGGER.info(
-        "LOG_TOPICS: commands=%s, photos=%s, videos=%s, new_groups=%s, errors=%s",
+        "LOG_TOPICS: commands=%s, photos=%s, videos=%s, files=%s, pm=%s, new_groups=%s, errors=%s",
         LOG_TOPIC_IDS["commands"], LOG_TOPIC_IDS["photos"], LOG_TOPIC_IDS["videos"],
+        LOG_TOPIC_IDS["files"], LOG_TOPIC_IDS["pm"],
         LOG_TOPIC_IDS["new_groups"], LOG_TOPIC_IDS["errors"],
     )
 
