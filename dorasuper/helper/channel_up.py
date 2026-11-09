@@ -633,7 +633,7 @@ async def lookup_appstore(url: str) -> dict | None:
     track_id = parse_appstore_track_id(url)
     if not track_id:
         return None
-    from dorasuper.helper import rename_utils as ru
+    from dorasuper.helper import itunes_utils as ru
 
     if not getattr(ru, "aiohttp", None):
         return None
