@@ -55,5 +55,6 @@ async def remove_pending_delete(chat_id: int, message_id: int):
 
 
 async def list_pending_deletes(limit: int = 500):
-    cursor = _pending.find().sort("delete_at", 1).limit(max(1, int(limit)))
-    return await cursor.to_list(length=max(1, int(limit)))
+    lim = max(1, int(limit))
+    cursor = _pending.find().sort([("delete_at", 1)]).limit(lim)
+    return await cursor.to_list(length=lim)
