@@ -237,6 +237,68 @@ def test_caption_escapes_ampersand_features():
 
 
 
+
+def test_build_delivery_captions_full():
+    features = [
+        "Bất tử & Đầy năng lượng (HP/MP)",
+        "Hồi chiêu kỹ năng (No Cooldown)",
+        "Mod menu",
+    ]
+    caption, followup = cu.build_delivery_captions(
+        name="Clash of Clans",
+        version="16.0.1",
+        bundle_id="com.supercell.magic",
+        store_url="https://apps.apple.com/app/id529479190",
+        features=features,
+    )
+    assert followup is None
+    assert "<b>Clash of Clans</b>" in caption
+    assert "Bundle · <code>com.supercell.magic</code>" in caption
+    assert "<blockquote>" in caption
+    assert "Bất tử &amp; Đầy năng lượng (HP/MP)" in caption
+    assert "Người bán" not in caption
+    assert ".ipa" not in caption
+    for item in features:
+        assert htmllib.escape(item, quote=False) in caption
+    assert cu.caption_visible_len(caption) <= 1024
+
+
+def test_build_delivery_captions_old_record_fallback():
+    caption, followup = cu.build_delivery_captions(name="Old Game")
+    assert followup is None
+    assert caption == "<b>Old Game</b>"
+    caption2, followup2 = cu.build_delivery_captions(name="")
+    assert caption2 == "<b>File</b>"
+    assert followup2 is None
+
+
+def test_build_delivery_captions_overflow_followup():
+    features = [f"Tính năng số {i} " + ("x" * 80) for i in range(40)]
+    caption, followup = cu.build_delivery_captions(
+        name="Game",
+        version="1.0",
+        bundle_id="com.example.app",
+        store_url="https://apps.apple.com/app/id1",
+        features=features,
+        caption_max=400,
+        text_max=4096,
+    )
+    assert followup is not None
+    assert cu.caption_visible_len(caption) <= 400
+    assert cu.caption_visible_len(followup) <= 4096
+    assert "<blockquote>" in followup
+    # Full follow-up should keep more features than the short caption.
+    assert followup.count("•") >= caption.count("•")
+    for item in features:
+        assert htmllib.escape(item, quote=False) in followup
+
+
+def test_normalize_stored_features():
+    assert cu.normalize_stored_features(["A", " B ", "", None]) == ["A", "B"]
+    assert cu.normalize_stored_features("- A\n• B\n") == ["A", "B"]
+    assert cu.normalize_stored_features(None) == []
+
+
 def test_download_keyboard_botapi():
     kb = cu.build_download_keyboard_botapi("DoraSuper_Bot", "deadbeef")
     assert kb == {

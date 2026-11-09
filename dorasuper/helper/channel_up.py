@@ -211,6 +211,63 @@ def build_channel_caption(
     return caption, overflow
 
 
+
+def build_delivery_captions(
+    *,
+    name: str = "",
+    version: str = "",
+    bundle_id: str = "",
+    store_url: str = "",
+    features: list[str] | None = None,
+    caption_max: int = 1024,
+    text_max: int = 4096,
+) -> tuple[str, str | None]:
+    """Caption gửi kèm file (≤ caption_max) và follow-up text nếu bị cắt (≤ text_max).
+
+    Follow-up là bản đầy đủ thông tin + chức năng để không mất nội dung.
+    Bản ghi cũ thiếu meta → chỉ trả title đậm, không follow-up.
+    """
+    feats = [f for f in (features or []) if (f or "").strip()]
+    has_meta = bool((version or "").strip() or (bundle_id or "").strip() or (store_url or "").strip() or feats)
+    if not has_meta:
+        title = html.escape((name or "").strip() or "File")
+        return f"<b>{title}</b>", None
+
+    file_caption, overflow = build_channel_caption(
+        name=name or "Ứng dụng",
+        version=version or "",
+        bundle_id=bundle_id or "",
+        store_url=store_url or "",
+        features=feats,
+        max_len=caption_max,
+    )
+    if not overflow:
+        return file_caption, None
+    full, _ = build_channel_caption(
+        name=name or "Ứng dụng",
+        version=version or "",
+        bundle_id=bundle_id or "",
+        store_url=store_url or "",
+        features=feats,
+        max_len=text_max,
+    )
+    return file_caption, full
+
+
+def normalize_stored_features(raw) -> list[str]:
+    """Đọc features từ Mongo (list hoặc chuỗi nhiều dòng)."""
+    if raw is None:
+        return []
+    if isinstance(raw, list):
+        out = []
+        for item in raw:
+            piece = str(item or "").strip()
+            if piece:
+                out.append(piece)
+        return out
+    return split_features(str(raw))
+
+
 def _load_title_font(size: int):
     for path in (
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",

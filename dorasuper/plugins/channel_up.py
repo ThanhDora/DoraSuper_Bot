@@ -17,7 +17,7 @@ from database.up_channel_db import (
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import (
-    E_ERROR, E_GEAR, E_LINK, E_LOADING,
+    E_ERROR, E_LINK, E_LOADING,
     E_SUCCESS, E_TIP, E_USER, E_WARN,
 )
 from dorasuper.helper.fame import mention_user
@@ -25,10 +25,12 @@ from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_
 from dorasuper.helper.channel_up import (
     DOWNLOAD_BUTTON_TEXT,
     build_channel_caption,
+    build_delivery_captions,
     build_upfile_url,
     is_allowed_package,
     is_appstore_url,
     lookup_appstore,
+    normalize_stored_features,
     render_appstore_poster,
     reply_markup_to_botapi,
     split_features,
@@ -529,6 +531,10 @@ async def _handle_features(message: Message, raw: str):
             "file_msg_id": data.get("file_msg_id"),
             "filename": data.get("filename") or "",
             "name": data.get("name") or "",
+            "version": data.get("version") or "",
+            "bundle_id": data.get("bundle_id") or "",
+            "store_url": data.get("store_url") or "",
+            "features": list(features),
             "created_by": uid,
             "created_at": time.time(),
         })
@@ -556,6 +562,49 @@ async def _handle_features(message: Message, raw: str):
     )
 
 
+async def _send_html_text(chat_id, html_text: str):
+    """Gửi tin nhắn HTML; gỡ blockquote trước khi fallback entity để khỏi lộ thẻ thô."""
+    try:
+        return await app.send_message(chat_id, html_text, parse_mode=enums.ParseMode.HTML)
+    except Exception:
+        text, entities = html_to_entities(_html_without_unsupported_for_entities(html_text))
+        try:
+            return await app.send_message(chat_id, text, entities=entities)
+        except Exception:
+            return await app.send_message(
+                chat_id, text, entities=strip_custom_emoji_entities(entities),
+            )
+
+
+async def _send_document_html(chat_id, file_id, html_caption: str, file_name=None):
+    """Gửi document kèm caption HTML (blockquote). Ưu tiên parse_mode, rồi Bot API edit."""
+    try:
+        return await app.send_document(
+            chat_id,
+            file_id,
+            file_name=file_name or None,
+            caption=html_caption,
+            parse_mode=enums.ParseMode.HTML,
+        )
+    except Exception:
+        pass
+    sent = await app.send_document(chat_id, file_id, file_name=file_name or None)
+    if await _edit_caption_via_botapi(chat_id, sent.id, html_caption):
+        return sent
+    text, entities = html_to_entities(_html_without_unsupported_for_entities(html_caption))
+    try:
+        edited = await sent.edit_caption(text, caption_entities=entities)
+        return edited or sent
+    except Exception:
+        try:
+            edited = await sent.edit_caption(
+                text, caption_entities=strip_custom_emoji_entities(entities),
+            )
+            return edited or sent
+        except Exception:
+            return sent
+
+
 async def deliver_up_file(message: Message, payload: str):
     token = (payload or "").lower().strip()
     if token.startswith("upfile_"):
@@ -567,23 +616,30 @@ async def deliver_up_file(message: Message, payload: str):
             f"{E_ERROR} Không tìm thấy file này hoặc bài đăng đã hết hiệu lực.",
         )
         return
-    name = rec.get("name") or "File"
     filename = rec.get("filename") or ""
-    caption = f"{E_SUCCESS} <b>{html.escape(name)}</b>"
-    if filename:
-        caption += f"\n{E_GEAR} <code>{html.escape(filename)}</code>"
+    caption, followup = build_delivery_captions(
+        name=rec.get("name") or "",
+        version=rec.get("version") or "",
+        bundle_id=rec.get("bundle_id") or "",
+        store_url=rec.get("store_url") or "",
+        features=normalize_stored_features(rec.get("features")),
+    )
     try:
-        await app.send_document(
+        await _send_document_html(
             message.chat.id,
             rec["file_id"],
+            caption,
             file_name=filename or None,
-            caption=caption,
-            parse_mode=enums.ParseMode.HTML,
         )
     except Exception as e:
         try:
             if rec.get("file_chat_id") and rec.get("file_msg_id"):
                 await app.copy_message(message.chat.id, rec["file_chat_id"], rec["file_msg_id"])
+                if followup:
+                    try:
+                        await _send_html_text(message.chat.id, followup)
+                    except Exception:
+                        pass
                 return
         except Exception:
             pass
@@ -591,6 +647,12 @@ async def deliver_up_file(message: Message, payload: str):
             message,
             f"{E_ERROR} Không gửi được file: {html.escape(str(e))}",
         )
+        return
+    if followup:
+        try:
+            await _send_html_text(message.chat.id, followup)
+        except Exception:
+            pass
 
 
 @app.on_message(filters.command("start", COMMAND_HANDLER) & filters.private, group=_HANDLER_GROUP)
