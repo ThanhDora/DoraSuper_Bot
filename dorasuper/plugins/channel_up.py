@@ -26,6 +26,7 @@ from dorasuper.emoji import (
     E_SUCCESS, E_TIP, E_USER, E_WARN,
 )
 from dorasuper.helper.fame import mention_user
+from dorasuper.helper.autodel import skip_autodel
 from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
 from dorasuper.helper.channel_up import (
     CHANNEL_BUTTON_TEXT,
@@ -114,12 +115,14 @@ async def _notify_owners_for_access(message: Message) -> bool:
     sent = 0
     for owner_id in SUDO:
         try:
-            await app.send_message(
-                owner_id,
-                text,
-                parse_mode=enums.ParseMode.HTML,
-                reply_markup=_approval_markup(user.id),
-            )
+            with skip_autodel():
+                await app.send_message(
+                    owner_id,
+                    text,
+                    parse_mode=enums.ParseMode.HTML,
+                    reply_markup=_approval_markup(user.id),
+                    no_autodel=True,
+                )
             sent += 1
         except Exception:
             continue
@@ -179,7 +182,8 @@ def _source_file_message(message: Message):
 
 async def _reply_html(message: Message, text: str, **kwargs):
     kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
-    return await message.reply_text(text, **kwargs)
+    with skip_autodel():
+        return await message.reply_text(text, **kwargs)
 
 
 def _has_custom_emoji(msg: Message) -> bool:
@@ -935,13 +939,20 @@ async def _send_join_gate_prompt(message: Message, token: str, gate: dict):
         "Bạn cần tham gia Kênh và Nhóm chat trước khi tải file.\n\n"
         "Hãy bấm nút bên dưới để vào, rồi chọn Đã tham gia, tải file."
     )
-    await message.reply_text(
-        text,
-        reply_markup=_join_gate_markup(token, ch, gr),
-    )
+    with skip_autodel():
+        await message.reply_text(
+            text,
+            reply_markup=_join_gate_markup(token, ch, gr),
+            no_autodel=True,
+        )
 
 
 async def _deliver_up_file_content(message: Message, rec: dict, token: str):
+    with skip_autodel():
+        return await _deliver_up_file_content_inner(message, rec, token)
+
+
+async def _deliver_up_file_content_inner(message: Message, rec: dict, token: str):
     filename = rec.get("filename") or ""
     caption, followup = build_delivery_captions(
         name=rec.get("name") or "",
@@ -1250,6 +1261,9 @@ async def up_acl_decide(_, cq: CallbackQuery):
             pass
     await cq.answer(answer)
     try:
-        await app.send_message(target_id, user_text, parse_mode=enums.ParseMode.HTML)
+        with skip_autodel():
+            await app.send_message(
+                target_id, user_text, parse_mode=enums.ParseMode.HTML, no_autodel=True,
+            )
     except Exception:
         pass

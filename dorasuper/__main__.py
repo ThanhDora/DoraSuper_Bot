@@ -23,6 +23,7 @@ from dorasuper.emoji import E_BOT, E_ROCKET, E_SUCCESS, E_VIP
 from dorasuper.plugins import ALL_MODULES
 from dorasuper.vars import SUDO, USER_SESSION
 from utils import auto_clean
+from dorasuper.helper.autodel import install_autodel_hooks, resume_pending_deletes
 
 LOGGER = getLogger("DoraSuper")
 # Run Bot
@@ -103,6 +104,12 @@ async def start_bot():
                     )
             except Exception as e:
                 LOGGER.error(f"Failed to handle restart.pickle: {str(e)}")
+
+        try:
+            install_autodel_hooks(app)
+            asyncio.create_task(resume_pending_deletes(app))
+        except Exception as e:
+            LOGGER.error(f"Failed to start autodel: {str(e)}")
 
         try:
             asyncio.create_task(auto_clean())
