@@ -58,6 +58,51 @@ async def _get_raw_messages(app, channel, ids):
     return [m for m in r.messages if not isinstance(m, raw.types.MessageEmpty)]
 
 
+
+async def _list_forum_topics(app) -> dict[int, str]:
+    """Lấy toàn bộ forum topic (id → title) qua channels.GetForumTopics — nhanh, không cần quét tin."""
+    from pyrogram import raw
+    from pyrogram.errors import FloodWait
+    import asyncio
+    peer = await app.resolve_peer(LOG_CHANNEL)
+    channel = raw.types.InputChannel(channel_id=peer.channel_id, access_hash=peer.access_hash)
+    found: dict[int, str] = {}
+    offset_topic, offset_id, offset_date = 0, 0, 0
+    for _ in range(20):  # tối đa ~2000 topic
+        try:
+            r = await app.invoke(
+                raw.functions.channels.GetForumTopics(
+                    channel=channel,
+                    offset_date=offset_date,
+                    offset_id=offset_id,
+                    offset_topic=offset_topic,
+                    limit=100,
+                    q="",
+                ),
+                sleep_threshold=0,
+            )
+        except FloodWait as e:
+            await asyncio.sleep(min(int(getattr(e, "value", 5) or 5), 15) + 1)
+            continue
+        topics = getattr(r, "topics", None) or []
+        if not topics:
+            break
+        for t in topics:
+            # ForumTopic / ForumTopicDeleted
+            tid = getattr(t, "id", None)
+            title = getattr(t, "title", None)
+            if tid is not None and title:
+                found[int(tid)] = str(title)
+        last = topics[-1]
+        offset_topic = int(getattr(last, "id", 0) or 0)
+        offset_id = int(getattr(last, "top_message", 0) or 0)
+        d = getattr(last, "date", None)
+        offset_date = int(d) if isinstance(d, int) else 0
+        if len(topics) < 100:
+            break
+    return found
+
+
 async def _scan_range(app, start: int, deadline: float | None, found: dict, batch: int = 200) -> tuple[int, bool]:
     """Quét tin theo ID (raw GetMessages, 200 ID/lần). Tin dịch vụ 'tạo topic' có id == thread_id.
     Trả về (id kế tiếp cần quét, đã hết tin chưa). deadline=None → chạy nền, tôn trọng FloodWait."""
@@ -150,6 +195,15 @@ def _publish(mapping: dict) -> None:
 
 async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
     try:
+        try:
+            found.update(await _list_forum_topics(app))
+        except Exception as e:
+            LOGGER.warning("LOG_TOPICS: GetForumTopics (nền) lỗi: %s", e)
+        mapping = _apply(saved, found)
+        if all(mapping.get(k) for k, _ in _TOPICS_DEF):
+            await _col.update_one({"_id": "log_topics"}, {"$set": {k: v for k, v in mapping.items() if v}}, upsert=True)
+            _publish(mapping)
+            return
         nxt, done = await _scan_range(app, start, None, found)
         mapping = _apply(saved, found)
         # Sau khi quét xong (hoặc hết tin), tạo topic còn thiếu (vd: File, Tin nhắn riêng).
@@ -172,7 +226,7 @@ async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
 
 
 async def ensure_log_topics(app) -> None:
-    """Xác định thread_id các tab log: config.env > Mongo > quét tin 'tạo topic' (≤10s, phần còn lại chạy nền) > tạo mới."""
+    """Xác định thread_id các tab log: config.env > Mongo > GetForumTopics > quét tin > tạo mới."""
     import asyncio
     import os
     import time
@@ -188,15 +242,24 @@ async def ensure_log_topics(app) -> None:
         return
 
     found: dict[int, str] = {}
-    nxt, done = 1, False
+    # 1) API forum topics — bắt topic anh mới tạo (File) ngay, không phụ thuộc quét id thấp.
     try:
-        nxt, done = await _scan_range(app, 1, time.monotonic() + 10, found)
+        listed = await _list_forum_topics(app)
+        found.update(listed)
+        LOGGER.info("LOG_TOPICS: GetForumTopics trả về %s topic", len(listed))
     except Exception as e:
-        LOGGER.warning("LOG_TOPICS: quét nhanh lỗi: %s", e)
-    mapping = _apply(saved, found)
+        LOGGER.warning("LOG_TOPICS: GetForumTopics lỗi: %s", e)
 
-    # Tạo ngay topic còn thiếu (vd: File, Tin nhắn riêng). Không chờ quét hết kênh —
-    # các topic cũ đã có trong Mongo; topic mới sẽ không xuất hiện trong lịch sử.
+    mapping = _apply(saved, found)
+    nxt, done = 1, False
+    if any(v is None for v in mapping.values()):
+        try:
+            nxt, done = await _scan_range(app, 1, time.monotonic() + 8, found)
+            mapping = _apply(saved, found)
+        except Exception as e:
+            LOGGER.warning("LOG_TOPICS: quét nhanh lỗi: %s", e)
+
+    # Chỉ thử tạo topic còn thiếu (bot có thể không có quyền → bỏ qua).
     for key, name in _TOPICS_DEF:
         if mapping[key] is None:
             try:
