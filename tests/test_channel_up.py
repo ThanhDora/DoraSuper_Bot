@@ -88,11 +88,36 @@ def test_build_channel_caption():
     assert "Người bán" not in caption
     assert "Supercell" not in caption
     assert "Clash.ipa" not in caption
-    assert "<blockquote><b>Chức năng</b>\n• Vô hạn tiền\n• Bất tử</blockquote>" in caption
+    assert "<blockquote expandable><b>Chức năng</b>\n• Vô hạn tiền\n• Bất tử</blockquote>" in caption
     assert "App Store" in caption
     assert "tg-emoji" not in caption
     assert _EMOJI_RE.search(caption) is None
     assert "&lt;" not in caption
+
+
+
+
+def test_features_use_expandable_blockquote():
+    caption, _ = cu.build_channel_caption(name="Game", features=["Một", "Hai"])
+    assert "<blockquote expandable>" in caption
+    assert caption.count("<blockquote") == 1
+    assert "</blockquote>" in caption
+    # plain <blockquote> without expandable must not appear for features
+    assert "<blockquote>" not in caption.replace("<blockquote expandable>", "")
+    # visible len ignores expandable attribute / tags
+    assert cu.caption_visible_len(caption) == cu.caption_visible_len(
+        caption.replace("<blockquote expandable>", "").replace("</blockquote>", "")
+    )
+
+
+def test_html_strip_blockquote_expandable_attr():
+    # mirrors plugin fallback regex
+    import re
+    sample = "<b>X</b>\n<blockquote expandable><b>Chức năng</b>\n• a &amp; b</blockquote>"
+    stripped = re.sub(r"</?blockquote\b[^>]*>", "", sample, flags=re.I)
+    assert "blockquote" not in stripped.lower()
+    assert "Chức năng" in stripped
+    assert cu.caption_visible_len(sample) < len(sample)
 
 
 def test_caption_escapes_html():
@@ -101,7 +126,7 @@ def test_caption_escapes_html():
     assert "&lt;script&gt;" in caption
     assert "&lt;b&gt;" in caption
     assert "com.&lt;x&gt;" in caption
-    assert "<blockquote>" in caption
+    assert "<blockquote expandable>" in caption
 
 
 def test_caption_omits_missing_fields():
@@ -165,7 +190,7 @@ def test_caption_keeps_all_features_no_emoji():
     assert "VeryLongFileNameOfThePackage.ipa" not in caption
     assert "Some Publisher" not in caption
     assert "Bundle · <code>com.example.verylongbundlename.app</code>" in caption
-    assert "<blockquote>" in caption and "</blockquote>" in caption
+    assert "<blockquote expandable>" in caption and "</blockquote>" in caption
     assert "tg-emoji" not in caption
     assert _EMOJI_RE.search(caption) is None
     assert cu.caption_visible_len(caption) <= 1024
@@ -189,7 +214,7 @@ def test_caption_trim_drops_bundle_before_features():
     assert cu.caption_visible_len(caption) <= 90
     assert "com.verylong.bundle.identifier.name.xxxxxxxx" not in caption
     assert "SellerIgnored" not in caption
-    assert "<blockquote>" in caption
+    assert "<blockquote expandable>" in caption
 
 
 
@@ -216,7 +241,7 @@ def test_caption_escapes_ampersand_features():
         filename="Game.ipa",
     )
     assert overflow is None
-    assert "<blockquote>" in caption and "</blockquote>" in caption
+    assert "<blockquote expandable>" in caption and "</blockquote>" in caption
     assert "<b>Chức năng</b>" in caption
     for item in features:
         assert htmllib.escape(item, quote=False) in caption
@@ -254,7 +279,7 @@ def test_build_delivery_captions_full():
     assert followup is None
     assert "<b>Clash of Clans</b>" in caption
     assert "Bundle · <code>com.supercell.magic</code>" in caption
-    assert "<blockquote>" in caption
+    assert "<blockquote expandable>" in caption
     assert "Bất tử &amp; Đầy năng lượng (HP/MP)" in caption
     assert "Người bán" not in caption
     assert ".ipa" not in caption
@@ -286,7 +311,7 @@ def test_build_delivery_captions_overflow_followup():
     assert followup is not None
     assert cu.caption_visible_len(caption) <= 400
     assert cu.caption_visible_len(followup) <= 4096
-    assert "<blockquote>" in followup
+    assert "<blockquote expandable>" in followup
     # Full follow-up should keep more features than the short caption.
     assert followup.count("•") >= caption.count("•")
     for item in features:

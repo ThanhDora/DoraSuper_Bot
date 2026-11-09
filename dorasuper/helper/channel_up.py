@@ -132,6 +132,7 @@ def reply_markup_to_botapi(reply_markup) -> dict | None:
 
 
 JOINED_BUTTON_TEXT = "Đã tham gia, tải file"
+BLOCKQUOTE_FEATURES_OPEN = "<blockquote expandable>"
 
 
 def _status_name(status) -> str:
@@ -447,7 +448,7 @@ def build_channel_caption(
     """Dựng caption HTML không emoji. Trả về (caption, phần tràn nếu quá max_len chữ hiện ra).
 
     Tham số emojis, filename và seller giữ chữ ký cũ nhưng bị bỏ qua. Hiện
-    Bundle ID thay cho người bán; chức năng bọc trong <blockquote>.
+    Bundle ID thay cho người bán; chức năng bọc trong <blockquote expandable> (Telegram ẩn bớt khi dài).
     Mọi chữ người dùng (tên, version, bundle, feature) đều html.escape
     (& → &amp;) để Telegram parse HTML / blockquote không lỗi.
     """
@@ -466,7 +467,7 @@ def build_channel_caption(
         if feats:
             quote = ["<b>Chức năng</b>", *feats]
             lines.append("")
-            lines.append("<blockquote>" + "\n".join(quote) + "</blockquote>")
+            lines.append(BLOCKQUOTE_FEATURES_OPEN + "\n".join(quote) + "</blockquote>")
         return "\n".join(lines)
 
     for include_bundle in (True, False):

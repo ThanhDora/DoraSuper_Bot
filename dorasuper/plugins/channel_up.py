@@ -235,7 +235,7 @@ def _html_without_unsupported_for_entities(html_caption: str) -> str:
 
 
 async def _apply_caption_html(message: Message, html_caption: str, reply_markup=None):
-    """Gắn caption HTML sau khi ảnh đã lên. Ưu tiên Bot API / parse_mode HTML (giữ blockquote)."""
+    """Gắn caption HTML sau khi ảnh đã lên. Ưu tiên Bot API HTML (giữ blockquote expandable)."""
     chat_id = message.chat.id if message.chat else None
     if chat_id and await _edit_caption_via_botapi(
         chat_id, message.id, html_caption, reply_markup=reply_markup,
