@@ -12,7 +12,6 @@ spec = importlib.util.spec_from_file_location(
 cu = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cu)
 
-# Typical emoji / pictograph ranges that must not appear in channel captions.
 _EMOJI_RE = re.compile(
     "["
     "\U0001F300-\U0001F5FF"
@@ -84,10 +83,8 @@ def test_build_channel_caption():
     assert "<b>Clash of Clans</b>" in caption
     assert "iOS · <code>16.0.1</code>" in caption
     assert "Người bán: Supercell" in caption
-    assert "Clash.ipa" in caption
-    assert "• Vô hạn tiền" in caption
-    assert "• Bất tử" in caption
-    assert "<b>Chức năng</b>" in caption
+    assert "Clash.ipa" not in caption
+    assert "<blockquote><b>Chức năng</b>\n• Vô hạn tiền\n• Bất tử</blockquote>" in caption
     assert "App Store" in caption
     assert "tg-emoji" not in caption
     assert "Mở trên App Store" not in caption
@@ -100,6 +97,8 @@ def test_caption_escapes_html():
     assert "<script>" not in caption
     assert "&lt;script&gt;" in caption
     assert "&lt;b&gt;" in caption
+    assert "<blockquote>" in caption
+    assert "</blockquote>" in caption
 
 
 def test_caption_omits_missing_fields():
@@ -108,6 +107,7 @@ def test_caption_omits_missing_fields():
     assert "Người bán" not in caption
     assert "Chức năng" not in caption
     assert "App Store" not in caption
+    assert "blockquote" not in caption
 
 
 def test_caption_overflow():
@@ -144,22 +144,23 @@ def test_caption_keeps_all_features_no_emoji():
         store_url=long_url,
         features=features,
         filename="VeryLongFileNameOfThePackage.ipa",
-        emojis={"trophy": '<tg-emoji emoji-id="1">🏆</tg-emoji>'},  # ignored
+        emojis={"trophy": '<tg-emoji emoji-id="1">🏆</tg-emoji>'},
     )
     assert overflow is None
     for item in features:
         assert item in caption
         assert f"• {item}" in caption
-    assert "VeryLongFileNameOfThePackage.ipa" in caption
+    assert "VeryLongFileNameOfThePackage.ipa" not in caption
+    assert "<blockquote>" in caption and "</blockquote>" in caption
+    assert caption.index("<blockquote>") < caption.index("<b>Chức năng</b>")
+    assert caption.index("<b>Chức năng</b>") < caption.index("</blockquote>")
     assert "tg-emoji" not in caption
     assert _EMOJI_RE.search(caption) is None
     assert cu.caption_visible_len(caption) <= 1024
-    # Trim order: with enough room filename and seller stay
     assert "Người bán: Some Publisher" in caption
 
 
-def test_caption_trim_drops_filename_then_seller():
-    # Force trim by tiny max_len relative to content, but leave room for features.
+def test_caption_trim_drops_seller_before_features():
     features = ["Tính năng A", "Tính năng B"]
     caption, overflow = cu.build_channel_caption(
         name="Game",
@@ -168,14 +169,16 @@ def test_caption_trim_drops_filename_then_seller():
         store_url="https://apps.apple.com/app/id1",
         features=features,
         filename="SuperLongPackageFileNameThatTakesSpace.ipa",
-        max_len=120,
+        max_len=90,
     )
     assert overflow is None
     for item in features:
         assert item in caption
-    assert cu.caption_visible_len(caption) <= 120
-    # With max_len=120, filename and possibly seller may be dropped first.
+    assert cu.caption_visible_len(caption) <= 90
     assert "SuperLongPackageFileNameThatTakesSpace.ipa" not in caption
+    # Seller is dropped before features when space is tight.
+    assert "SellerNameVeryLongXXXXXXXX" not in caption
+    assert "<blockquote>" in caption
 
 
 def test_render_appstore_poster():

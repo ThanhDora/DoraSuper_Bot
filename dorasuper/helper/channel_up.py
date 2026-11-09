@@ -120,40 +120,38 @@ def build_channel_caption(
 ) -> tuple[str, str | None]:
     """Dựng caption HTML không emoji. Trả về (caption, phần tràn nếu quá max_len chữ hiện ra).
 
-    Tham số emojis giữ chữ ký cũ nhưng bị bỏ qua — kênh Telegram không hiện
-    custom emoji, nên caption chỉ dùng chữ và bullet typographic.
+    Tham số emojis và filename giữ chữ ký cũ nhưng bị bỏ qua — kênh Telegram
+    không hiện custom emoji; tên file không đưa vào caption. Chức năng bọc
+    trong <blockquote>.
     """
-    _ = emojis
+    _ = emojis, filename
     title = html.escape((name or "").strip() or "Ứng dụng")
     feature_lines = [f"• {html.escape(item)}" for item in (features or []) if (item or "").strip()]
 
-    def compose(include_filename: bool, include_seller: bool, feats: list[str]) -> str:
+    def compose(include_seller: bool, feats: list[str]) -> str:
         lines = _header_lines(
             title, version, seller, store_url, include_seller=include_seller,
         )
         if feats:
+            quote = ["<b>Chức năng</b>", *feats]
             lines.append("")
-            lines.append("<b>Chức năng</b>")
-            lines.extend(feats)
-        if include_filename and filename:
-            lines.append("")
-            lines.append(f"<code>{html.escape(filename)}</code>")
+            lines.append("<blockquote>" + "\n".join(quote) + "</blockquote>")
         return "\n".join(lines)
 
-    for inc_file, inc_seller in ((True, True), (False, True), (False, False)):
-        caption = compose(inc_file, inc_seller, feature_lines)
+    for include_seller in (True, False):
+        caption = compose(include_seller, feature_lines)
         if caption_visible_len(caption) <= max_len:
             return caption, None
 
     kept: list[str] = []
     overflow_rows: list[str] = []
     for row in feature_lines:
-        trial = compose(False, False, kept + [row])
+        trial = compose(False, kept + [row])
         if caption_visible_len(trial) > max_len:
             overflow_rows = feature_lines[len(kept):]
             break
         kept.append(row)
-    caption = compose(False, False, kept)
+    caption = compose(False, kept)
     overflow = "\n".join(overflow_rows) if overflow_rows else None
     return caption, overflow
 
