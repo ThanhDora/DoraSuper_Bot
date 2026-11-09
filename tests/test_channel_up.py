@@ -75,6 +75,7 @@ def test_build_channel_caption():
         name="Clash of Clans",
         version="16.0.1",
         seller="Supercell",
+        bundle_id="com.supercell.magic",
         store_url="https://apps.apple.com/app/id529479190",
         features=["Vô hạn tiền", "Bất tử"],
         filename="Clash.ipa",
@@ -82,32 +83,41 @@ def test_build_channel_caption():
     assert overflow is None
     assert "<b>Clash of Clans</b>" in caption
     assert "iOS · <code>16.0.1</code>" in caption
-    assert "Người bán: Supercell" in caption
+    assert "Bundle · <code>com.supercell.magic</code>" in caption
+    assert "Người bán" not in caption
+    assert "Supercell" not in caption
     assert "Clash.ipa" not in caption
     assert "<blockquote><b>Chức năng</b>\n• Vô hạn tiền\n• Bất tử</blockquote>" in caption
     assert "App Store" in caption
     assert "tg-emoji" not in caption
-    assert "Mở trên App Store" not in caption
     assert _EMOJI_RE.search(caption) is None
     assert "&lt;" not in caption
 
 
 def test_caption_escapes_html():
-    caption, _ = cu.build_channel_caption(name="<script>", features=["a <b> c"])
+    caption, _ = cu.build_channel_caption(name="<script>", features=["a <b> c"], bundle_id="com.<x>")
     assert "<script>" not in caption
     assert "&lt;script&gt;" in caption
     assert "&lt;b&gt;" in caption
+    assert "com.&lt;x&gt;" in caption
     assert "<blockquote>" in caption
-    assert "</blockquote>" in caption
 
 
 def test_caption_omits_missing_fields():
     caption, _ = cu.build_channel_caption(name="Game")
     assert "iOS" not in caption
+    assert "Bundle" not in caption
     assert "Người bán" not in caption
     assert "Chức năng" not in caption
     assert "App Store" not in caption
     assert "blockquote" not in caption
+
+
+def test_caption_omits_seller_even_if_passed():
+    caption, _ = cu.build_channel_caption(name="Game", seller="Someone", version="1.0")
+    assert "Someone" not in caption
+    assert "Người bán" not in caption
+    assert "Bundle" not in caption
 
 
 def test_caption_overflow():
@@ -141,6 +151,7 @@ def test_caption_keeps_all_features_no_emoji():
         name="Game Name",
         version="1.2.3",
         seller="Some Publisher",
+        bundle_id="com.example.verylongbundlename.app",
         store_url=long_url,
         features=features,
         filename="VeryLongFileNameOfThePackage.ipa",
@@ -151,21 +162,21 @@ def test_caption_keeps_all_features_no_emoji():
         assert item in caption
         assert f"• {item}" in caption
     assert "VeryLongFileNameOfThePackage.ipa" not in caption
+    assert "Some Publisher" not in caption
+    assert "Bundle · <code>com.example.verylongbundlename.app</code>" in caption
     assert "<blockquote>" in caption and "</blockquote>" in caption
-    assert caption.index("<blockquote>") < caption.index("<b>Chức năng</b>")
-    assert caption.index("<b>Chức năng</b>") < caption.index("</blockquote>")
     assert "tg-emoji" not in caption
     assert _EMOJI_RE.search(caption) is None
     assert cu.caption_visible_len(caption) <= 1024
-    assert "Người bán: Some Publisher" in caption
 
 
-def test_caption_trim_drops_seller_before_features():
+def test_caption_trim_drops_bundle_before_features():
     features = ["Tính năng A", "Tính năng B"]
     caption, overflow = cu.build_channel_caption(
         name="Game",
         version="1.0",
-        seller="SellerNameVeryLongXXXXXXXX",
+        seller="SellerIgnored",
+        bundle_id="com.verylong.bundle.identifier.name.xxxxxxxx",
         store_url="https://apps.apple.com/app/id1",
         features=features,
         filename="SuperLongPackageFileNameThatTakesSpace.ipa",
@@ -175,9 +186,8 @@ def test_caption_trim_drops_seller_before_features():
     for item in features:
         assert item in caption
     assert cu.caption_visible_len(caption) <= 90
-    assert "SuperLongPackageFileNameThatTakesSpace.ipa" not in caption
-    # Seller is dropped before features when space is tight.
-    assert "SellerNameVeryLongXXXXXXXX" not in caption
+    assert "com.verylong.bundle.identifier.name.xxxxxxxx" not in caption
+    assert "SellerIgnored" not in caption
     assert "<blockquote>" in caption
 
 

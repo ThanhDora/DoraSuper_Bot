@@ -454,6 +454,7 @@ async def _handle_link(message: Message, raw: str):
             "name": name,
             "version": info.get("version") or "",
             "seller": info.get("seller_name") or "",
+            "bundle_id": info.get("bundle_id") or "",
             "poster": poster,
         }
     )
@@ -491,6 +492,7 @@ async def _handle_features(message: Message, raw: str):
         name=data.get("name") or "Ứng dụng",
         version=data.get("version") or "",
         seller=data.get("seller") or "",
+        bundle_id=data.get("bundle_id") or "",
         store_url=data.get("store_url") or "",
         features=features,
         filename=data.get("filename") or "",

@@ -91,16 +91,16 @@ def caption_visible_len(html_text: str) -> int:
 def _header_lines(
     title: str,
     version: str,
-    seller: str,
+    bundle_id: str,
     store_url: str,
     *,
-    include_seller: bool,
+    include_bundle: bool,
 ) -> list[str]:
     lines = [f"<b>{title}</b>"]
     if version:
         lines.append(f"iOS · <code>{html.escape(version)}</code>")
-    if include_seller and seller:
-        lines.append(f"Người bán: {html.escape(seller)}")
+    if include_bundle and bundle_id:
+        lines.append(f"Bundle · <code>{html.escape(bundle_id)}</code>")
     if store_url:
         safe_href = html.escape(store_url, quote=True)
         lines.append(f'<a href="{safe_href}">App Store</a>')
@@ -112,6 +112,7 @@ def build_channel_caption(
     name: str,
     version: str = "",
     seller: str = "",
+    bundle_id: str = "",
     store_url: str = "",
     features: list[str] | None = None,
     filename: str = "",
@@ -120,17 +121,16 @@ def build_channel_caption(
 ) -> tuple[str, str | None]:
     """Dựng caption HTML không emoji. Trả về (caption, phần tràn nếu quá max_len chữ hiện ra).
 
-    Tham số emojis và filename giữ chữ ký cũ nhưng bị bỏ qua — kênh Telegram
-    không hiện custom emoji; tên file không đưa vào caption. Chức năng bọc
-    trong <blockquote>.
+    Tham số emojis, filename và seller giữ chữ ký cũ nhưng bị bỏ qua. Hiện
+    Bundle ID thay cho người bán; chức năng bọc trong <blockquote>.
     """
-    _ = emojis, filename
+    _ = emojis, filename, seller
     title = html.escape((name or "").strip() or "Ứng dụng")
     feature_lines = [f"• {html.escape(item)}" for item in (features or []) if (item or "").strip()]
 
-    def compose(include_seller: bool, feats: list[str]) -> str:
+    def compose(include_bundle: bool, feats: list[str]) -> str:
         lines = _header_lines(
-            title, version, seller, store_url, include_seller=include_seller,
+            title, version, bundle_id, store_url, include_bundle=include_bundle,
         )
         if feats:
             quote = ["<b>Chức năng</b>", *feats]
@@ -138,8 +138,8 @@ def build_channel_caption(
             lines.append("<blockquote>" + "\n".join(quote) + "</blockquote>")
         return "\n".join(lines)
 
-    for include_seller in (True, False):
-        caption = compose(include_seller, feature_lines)
+    for include_bundle in (True, False):
+        caption = compose(include_bundle, feature_lines)
         if caption_visible_len(caption) <= max_len:
             return caption, None
 
