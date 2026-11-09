@@ -54,7 +54,7 @@ MEDIA = {
 }
 
 # Nút hỗ trợ
-BUTTON = [[InlineKeyboardButton("Ủng Hộ", url="https://thanhdora3605.dev")]]
+BUTTON = [[InlineKeyboardButton("Ủng Hộ", url="https://thanhdora.github.io/")]]
 
 # Hàm chung để xử lý các lệnh
 async def handle_fun_command(ctx, command, caption_template, emoji):

@@ -315,7 +315,7 @@ async def upload(bot, message):
                                     InlineKeyboardButton("qua OTA", url=install_url),
                                 ],
                                 [
-                                    InlineKeyboardButton("Ủng hộ DoraSuper", url="https://thanhdora3605.dev")
+                                    InlineKeyboardButton("Ủng hộ DoraSuper", url="https://thanhdora.github.io/")
                                 ]
                             ]
                         )

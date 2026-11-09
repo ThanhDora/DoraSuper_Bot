@@ -249,21 +249,23 @@ async def delete_logs(_, ctx: Message, strings):
 
 DONATE_MOMO_URL = "https://me.momo.vn/ThanhDora"
 DONATE_PAYPAL_URL = "https://paypal.me/thanhdora"
+DONATE_PAGE_URL = "https://thanhdora.github.io/"
 
 
 @app.on_message(filters.command(["donate"], COMMAND_HANDLER))
 async def donate(self: Client, ctx: Message):
-    return  # Tính năng tắt
     try:
         caption = (
             f"{E_HEART} Xin chào! Nếu bạn thấy bot này hữu ích, hãy ủng hộ để bot chạy ổn định.\n\n"
             f"{E_GIFT} <b>Phương thức ủng hộ:</b>\n"
+            "• <b>Trang ủng hộ</b>: https://thanhdora.github.io/\n"
             "• <b>Momo</b> (LE VAN THANH DAT) – bấm nút bên dưới\n"
             "• <b>Ngân hàng</b> Vietcombank: <code>ThanhDora</code> (LE VAN THANH DAT)\n"
             "• <b>PayPal</b> – bấm nút bên dưới"
         )
         reply_markup = InlineKeyboardMarkup(
             [
+                [InlineKeyboardButton("Ủng hộ", url=DONATE_PAGE_URL)],
                 [
                     InlineKeyboardButton("Momo", url=DONATE_MOMO_URL),
                     InlineKeyboardButton("PayPal", url=DONATE_PAYPAL_URL),
