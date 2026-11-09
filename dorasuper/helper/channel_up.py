@@ -123,10 +123,16 @@ def build_channel_caption(
 
     Tham số emojis, filename và seller giữ chữ ký cũ nhưng bị bỏ qua. Hiện
     Bundle ID thay cho người bán; chức năng bọc trong <blockquote>.
+    Mọi chữ người dùng (tên, version, bundle, feature) đều html.escape
+    (& → &amp;) để Telegram parse HTML / blockquote không lỗi.
     """
     _ = emojis, filename, seller
     title = html.escape((name or "").strip() or "Ứng dụng")
-    feature_lines = [f"• {html.escape(item)}" for item in (features or []) if (item or "").strip()]
+    feature_lines = [
+        f"• {html.escape(item, quote=False)}"
+        for item in (features or [])
+        if (item or "").strip()
+    ]
 
     def compose(include_bundle: bool, feats: list[str]) -> str:
         lines = _header_lines(

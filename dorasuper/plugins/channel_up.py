@@ -1,4 +1,5 @@
 import html
+import re
 import io
 import secrets
 import time
@@ -158,7 +159,7 @@ def _has_custom_emoji(msg: Message) -> bool:
 
 
 async def _edit_caption_via_botapi(chat_id, message_id, html_caption: str) -> bool:
-    """Gắn caption HTML qua Bot API để giữ <tg-emoji>, tránh lớp MTProto gỡ custom emoji."""
+    """Gắn caption HTML qua Bot API (blockquote, link, code...). Trả True khi edit ok."""
     token = getattr(app, "bot_token", None)
     if not token:
         return False
@@ -180,16 +181,19 @@ async def _edit_caption_via_botapi(chat_id, message_id, html_caption: str) -> bo
                 json=payload,
             ) as resp:
                 data = await resp.json(content_type=None)
-        if not data.get("ok"):
-            return False
-        ents = (data.get("result") or {}).get("caption_entities") or []
-        return any((e or {}).get("type") == "custom_emoji" for e in ents)
+        return bool(data.get("ok"))
     except Exception:
         return False
 
 
+def _html_without_unsupported_for_entities(html_caption: str) -> str:
+    """html_to_entities không hiểu blockquote — gỡ thẻ để khỏi hiện chữ thô nếu phải fallback."""
+    text = re.sub(r"</?blockquote\b[^>]*>", "", html_caption or "", flags=re.I)
+    return text
+
+
 async def _apply_caption_html(message: Message, html_caption: str, reply_markup=None):
-    """Gắn caption sau khi ảnh đã lên."""
+    """Gắn caption HTML sau khi ảnh đã lên. Ưu tiên Bot API / parse_mode HTML (giữ blockquote)."""
     chat_id = message.chat.id if message.chat else None
     if chat_id and await _edit_caption_via_botapi(chat_id, message.id, html_caption):
         try:
@@ -203,13 +207,12 @@ async def _apply_caption_html(message: Message, html_caption: str, reply_markup=
         edited = await message.edit_caption(
             html_caption, parse_mode=enums.ParseMode.HTML, reply_markup=reply_markup
         )
-        if edited and _has_custom_emoji(edited):
-            return edited
         if edited:
-            message = edited
+            return edited
     except Exception:
         pass
-    text, entities = html_to_entities(html_caption)
+    # Fallback entity path không hỗ trợ blockquote — gỡ thẻ để khỏi lộ chữ <blockquote>.
+    text, entities = html_to_entities(_html_without_unsupported_for_entities(html_caption))
     try:
         edited = await message.edit_caption(
             text, caption_entities=entities, reply_markup=reply_markup
@@ -243,7 +246,7 @@ async def _reply_photo_html(message: Message, photo, html_caption: str, **kwargs
         sent = await message.reply_photo(
             photo, caption=html_caption, parse_mode=enums.ParseMode.HTML, **kwargs
         )
-        if sent and _has_custom_emoji(sent):
+        if sent:
             return sent
     except Exception:
         sent = None

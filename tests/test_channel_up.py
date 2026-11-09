@@ -1,5 +1,6 @@
 import importlib.util
 import pathlib
+import html as htmllib
 import re
 from io import BytesIO
 
@@ -95,7 +96,7 @@ def test_build_channel_caption():
 
 
 def test_caption_escapes_html():
-    caption, _ = cu.build_channel_caption(name="<script>", features=["a <b> c"], bundle_id="com.<x>")
+    caption, _ = cu.build_channel_caption(name="<script>", features=["a <b> c & d"], bundle_id="com.<x>")
     assert "<script>" not in caption
     assert "&lt;script&gt;" in caption
     assert "&lt;b&gt;" in caption
@@ -189,6 +190,50 @@ def test_caption_trim_drops_bundle_before_features():
     assert "com.verylong.bundle.identifier.name.xxxxxxxx" not in caption
     assert "SellerIgnored" not in caption
     assert "<blockquote>" in caption
+
+
+
+def test_caption_escapes_ampersand_features():
+    """Regression: raw & in features must be &amp; so Telegram keeps <blockquote>."""
+    features = [
+        "Bất tử & Đầy năng lượng (HP/MP)",
+        "Hồi chiêu kỹ năng (No Cooldown)",
+        "Mở khóa 60 FPS & Hiển thị thông số trận đấu",
+        "Tùy chỉnh tốc độ trận đấu (1.0x - 5.0x)",
+        "Tùy chỉnh hệ số sát thương (1.0x - 10.0x)",
+        "Bạo kích 100% & Xuyên giáp, kháng phép",
+        "Né đòn tuyệt đối & Bách phát bách trúng",
+        "Miễn nhiễm khống chế & Tự hóa giải Debuff",
+        "Tăng tốc đánh & Tốc độ xuất chiêu (HAST x3)",
+        "Hạ máu địch còn 1 HP & Phá lá chắn",
+    ]
+    caption, overflow = cu.build_channel_caption(
+        name="Game",
+        version="1.0.0",
+        bundle_id="com.example.game",
+        store_url="https://apps.apple.com/app/id1",
+        features=features,
+        filename="Game.ipa",
+    )
+    assert overflow is None
+    assert "<blockquote>" in caption and "</blockquote>" in caption
+    assert "<b>Chức năng</b>" in caption
+    for item in features:
+        assert htmllib.escape(item, quote=False) in caption
+        assert f"• {htmllib.escape(item, quote=False)}" in caption
+    # No raw & outside of HTML entities in the feature section
+    body = caption
+    # Remove legitimate entities / tags then ensure no bare &
+    stripped = re.sub(r"&(?:amp|lt|gt|quot|#\d+|#x[0-9a-fA-F]+);", "", body)
+    stripped = re.sub(r"<[^>]+>", "", stripped)
+    assert "&" not in stripped
+    assert "Bất tử &amp; Đầy năng lượng (HP/MP)" in caption
+    visible = htmllib.unescape(re.sub(r"<[^>]+>", "", caption))
+    assert "Bất tử & Đầy năng lượng (HP/MP)" in visible
+    for item in features:
+        assert item in visible
+    assert cu.caption_visible_len(caption) <= 1024
+    assert "Game.ipa" not in caption
 
 
 def test_render_appstore_poster():
