@@ -612,15 +612,18 @@ def test_channel_button_texts_use_unicode_not_tg_emoji():
         cu.CHANNEL_BUTTON_TEXT,
         cu.GROUP_BUTTON_TEXT,
         cu.JOINED_BUTTON_TEXT,
+        cu.APPROVE_BUTTON_TEXT,
+        cu.REJECT_BUTTON_TEXT,
+        cu.REVOKE_BUTTON_TEXT,
     ):
         assert "<tg-emoji" not in label
+        assert "icon_custom_emoji" not in label
         assert len(label) <= 64
-    assert cu.DOWNLOAD_BUTTON_TEXT.startswith("📥")
-    assert cu.CHANNEL_BUTTON_TEXT.startswith("📢")
-    assert cu.GROUP_BUTTON_TEXT.startswith("💬")
-    assert cu.JOINED_BUTTON_TEXT.startswith("✅")
-    assert cu.DOWNLOAD_BUTTON_LABEL == "Tải file"
-    assert cu.CHANNEL_BUTTON_LABEL == "Kênh"
-    assert cu.GROUP_BUTTON_LABEL == "Nhóm chat"
-    assert cu.JOINED_BUTTON_LABEL == "Đã tham gia, tải file"
+    assert cu.DOWNLOAD_BUTTON_TEXT == "📥 Tải file"
+    assert cu.CHANNEL_BUTTON_TEXT == "📢 Kênh"
+    assert cu.GROUP_BUTTON_TEXT == "💬 Nhóm chat"
+    assert cu.JOINED_BUTTON_TEXT == "✅ Đã tham gia, tải file"
+    assert cu.APPROVE_BUTTON_TEXT == "✅ Duyệt"
+    assert cu.REJECT_BUTTON_TEXT == "❌ Từ chối"
+    assert cu.REVOKE_BUTTON_TEXT == "❌ Gỡ quyền"
 

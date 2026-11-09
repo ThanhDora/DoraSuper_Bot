@@ -16,11 +16,17 @@ DOWNLOAD_BUTTON_LABEL = "Tải file"
 CHANNEL_BUTTON_LABEL = "Kênh"
 GROUP_BUTTON_LABEL = "Nhóm chat"
 JOINED_BUTTON_LABEL = "Đã tham gia, tải file"
+APPROVE_BUTTON_LABEL = "Duyệt"
+REJECT_BUTTON_LABEL = "Từ chối"
+REVOKE_BUTTON_LABEL = "Gỡ quyền"
 
-# Channel / Bot API: unicode prefix (icon_custom_emoji_id is stripped on broadcast channels).
+# Plain unicode prefixes everywhere (channel + PM/groups). No icon_custom_emoji_id / tg-emoji on buttons.
 DOWNLOAD_BUTTON_TEXT = f"📥 {DOWNLOAD_BUTTON_LABEL}"
 CHANNEL_BUTTON_TEXT = f"📢 {CHANNEL_BUTTON_LABEL}"
 GROUP_BUTTON_TEXT = f"💬 {GROUP_BUTTON_LABEL}"
+APPROVE_BUTTON_TEXT = f"✅ {APPROVE_BUTTON_LABEL}"
+REJECT_BUTTON_TEXT = f"❌ {REJECT_BUTTON_LABEL}"
+REVOKE_BUTTON_TEXT = f"❌ {REVOKE_BUTTON_LABEL}"
 
 _CLEAR_LINK_WORDS = frozenset({
     "off", "clear", "none", "xoa", "xoá", "xóa", "huy", "huỷ", "hủy",
