@@ -22,8 +22,8 @@ from pyrogram.types import (
 from database.up_channel_db import (
     clear_leave_ban, get_leave_ban, get_up_acl, get_up_channel, get_up_file,
     get_up_promo_links, get_up_promo_targets, is_up_allowed, list_leave_bans,
-    save_leave_ban, save_up_file, set_up_acl, set_up_channel,
-    set_up_link_channel, set_up_link_group,
+    list_up_acl, revoke_up_acl, save_leave_ban, save_up_file, set_up_acl,
+    set_up_channel, set_up_link_channel, set_up_link_group,
 )
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
@@ -48,6 +48,7 @@ from dorasuper.helper.channel_up import (
     is_appstore_url,
     lookup_appstore,
     evaluate_join_gate_decision,
+    format_up_acl_entry,
     join_gate_block_kind,
     membership_check_result,
     membership_is_banned,
@@ -55,7 +56,9 @@ from dorasuper.helper.channel_up import (
     normalize_stored_features,
     normalize_telegram_link,
     parse_promo_link_args,
+    parse_up_user_ref,
     public_username_from_tme_url,
+    render_up_acl_line,
     render_appstore_poster,
     reply_markup_to_botapi,
     should_autoban_on_leave,
@@ -76,6 +79,9 @@ Chỉ admin bot và những người được ThanhDora duyệt mới dùng đư
 /up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
 /up_link_channel [@kenh | https://t.me/... | -100... | here] – Đặt nút + chat_id Kênh (off/xóa để gỡ). Bot cần admin có quyền ban.
 /up_link_group [@nhom | https://t.me/... | -100... | here] – Đặt nút + chat_id Nhóm chat (off/xóa để gỡ).
+/up_list – Xem ai được dùng /up (SUDO + đã duyệt; có nút Gỡ quyền).
+/up_grant &lt;id|@user&gt; – Cấp quyền /up trực tiếp (hoặc trả lời tin của họ).
+/up_revoke &lt;id|@user&gt; – Gỡ quyền /up (không gỡ được SUDO).
 /up_unban &lt;id|@user&gt; – Gỡ ban tự động (kênh + nhóm) cho người bị ban vì rời.
 /up_banlist – Xem danh sách đã bị ban tự động vì rời kênh/nhóm.
 /cancel – Hủy phiên /up đang nhập.
@@ -1256,6 +1262,250 @@ async def up_leave_autoban(_, update: ChatMemberUpdated):
         f"(<code>{user.id}</code>) rời <code>{left_chat}</code> — "
         f"đã ban: {html.escape(', '.join(banned_ok) or 'không thành công')}."
     )
+
+
+
+async def _resolve_up_user_target(message: Message):
+    """Trả (user_id, user_obj|None, err_html|None) từ reply hoặc arg."""
+    args = (message.text or "").split(maxsplit=1)
+    if message.reply_to_message and message.reply_to_message.from_user:
+        u = message.reply_to_message.from_user
+        return u.id, u, None
+    if len(args) < 2:
+        return None, None, "EMPTY"
+    parsed = parse_up_user_ref(args[1])
+    if parsed["kind"] == "empty":
+        return None, None, "EMPTY"
+    if parsed["kind"] == "invalid":
+        return None, None, f"{E_ERROR} Không hiểu đối tượng: <code>{html.escape(str(parsed['value']))}</code>"
+    if parsed["kind"] == "id":
+        uid = parsed["value"]
+        try:
+            u = await app.get_users(uid)
+            return u.id, u, None
+        except Exception:
+            return uid, None, None
+    # username
+    try:
+        u = await app.get_users(parsed["value"])
+        return u.id, u, None
+    except Exception as e:
+        return None, None, f"{E_ERROR} Không tìm user: {html.escape(str(e))}"
+
+
+def _up_list_revoke_markup(user_ids: list[int]) -> InlineKeyboardMarkup | None:
+    rows = []
+    for uid in user_ids[:20]:
+        rows.append([
+            InlineKeyboardButton(
+                f"Gỡ quyền {uid}",
+                callback_data=f"upacl_rv_{uid}",
+            )
+        ])
+    return InlineKeyboardMarkup(rows) if rows else None
+
+
+@app.on_message(filters.command(["up_list"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_list(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới xem /up_list.")
+        return
+    allowed = await list_up_acl("allowed", 100)
+    pending = await list_up_acl("pending", 40)
+    lines = [f"{E_TIP} <b>Quyền dùng /up</b>"]
+
+    lines.append("")
+    lines.append(f"{E_SUCCESS} <b>SUDO (luôn được dùng)</b>:")
+    for sid in SUDO:
+        try:
+            u = await app.get_users(int(sid))
+            mention = mention_user(u)
+            uname = f" @{html.escape(u.username)}" if u.username else ""
+        except Exception:
+            mention = f"<code>{sid}</code>"
+            uname = ""
+        lines.append(f"• {mention} (<code>{sid}</code>){uname}")
+
+    lines.append("")
+    lines.append(f"{E_USER} <b>Đã duyệt</b> ({len(allowed)}):")
+    revoke_ids = []
+    if not allowed:
+        lines.append("• (trống)")
+    else:
+        for rec in allowed:
+            info = format_up_acl_entry(rec)
+            when = format_ts_vn(info["when_ts"], FMT_HM_DMY) if info["when_ts"] else "?"
+            lines.append(render_up_acl_line(rec, when))
+            if info["user_id"] is not None and not _is_sudo_id(info["user_id"]):
+                revoke_ids.append(info["user_id"])
+
+    if pending:
+        lines.append("")
+        lines.append(f"{E_LOADING} <b>Đang chờ duyệt</b> ({len(pending)}):")
+        for rec in pending:
+            info = format_up_acl_entry(rec)
+            when = format_ts_vn(info["when_ts"], FMT_HM_DMY) if info["when_ts"] else "?"
+            lines.append(render_up_acl_line(rec, when))
+
+    markup = _up_list_revoke_markup(revoke_ids)
+    text = "\n".join(lines)
+    # Telegram message limit — trim if needed
+    if len(text) > 3900:
+        text = text[:3900] + "\n…"
+    try:
+        await message.reply_text(
+            text,
+            parse_mode=enums.ParseMode.HTML,
+            reply_markup=markup,
+            disable_web_page_preview=True,
+        )
+    except TypeError:
+        await message.reply_text(
+            text,
+            parse_mode=enums.ParseMode.HTML,
+            reply_markup=markup,
+        )
+
+
+@app.on_message(filters.command(["up_grant"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_grant(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới /up_grant được.")
+        return
+    uid, user, err = await _resolve_up_user_target(message)
+    if uid is None:
+        if err and err != "EMPTY":
+            await _reply_html(message, err)
+        else:
+            await _reply_html(
+                message,
+                f"{E_TIP} Dùng <code>/up_grant &lt;user_id|@user&gt;</code> hoặc trả lời tin của họ.",
+            )
+        return
+    if _is_sudo_id(uid):
+        await _reply_html(message, f"{E_TIP} <code>{uid}</code> đã là SUDO — luôn dùng được /up.")
+        return
+    name = ""
+    username = ""
+    if user:
+        name = user.first_name or ""
+        username = user.username or ""
+        mention = mention_user(user)
+    else:
+        rec = await get_up_acl(uid) or {}
+        name = rec.get("name") or str(uid)
+        username = rec.get("username") or ""
+        mention = f'<a href="tg://user?id={uid}">{html.escape(str(name))}</a>'
+    await set_up_acl(
+        uid,
+        "allowed",
+        name=name,
+        username=username,
+        decided_at=utc_timestamp(),
+        decided_by=message.from_user.id if message.from_user else None,
+        granted_via="up_grant",
+    )
+    await _reply_html(message, f"{E_SUCCESS} Đã cấp quyền /up cho {mention} (<code>{uid}</code>).")
+    try:
+        with skip_autodel():
+            await app.send_message(
+                uid,
+                f"{E_SUCCESS} Bạn đã được cấp quyền dùng <code>/up</code> "
+                f"(trả lời file IPA, DEB, dylib,...) để đăng bài lên kênh.",
+                parse_mode=enums.ParseMode.HTML,
+                no_autodel=True,
+            )
+    except Exception:
+        pass
+
+
+@app.on_message(filters.command(["up_revoke"], COMMAND_HANDLER), group=_HANDLER_GROUP)
+@capture_err
+async def command_up_revoke(_, message: Message):
+    if not _is_sudo(message):
+        await _reply_html(message, f"{E_WARN} Chỉ admin bot mới /up_revoke được.")
+        return
+    uid, user, err = await _resolve_up_user_target(message)
+    if uid is None:
+        if err and err != "EMPTY":
+            await _reply_html(message, err)
+        else:
+            await _reply_html(
+                message,
+                f"{E_TIP} Dùng <code>/up_revoke &lt;user_id|@user&gt;</code> hoặc trả lời tin của họ.",
+            )
+        return
+    if _is_sudo_id(uid):
+        await _reply_html(
+            message,
+            f"{E_WARN} Không thể gỡ quyền /up của SUDO (<code>{uid}</code>).",
+        )
+        return
+    rec = await get_up_acl(uid)
+    if not rec or rec.get("status") != "allowed":
+        await _reply_html(
+            message,
+            f"{E_TIP} <code>{uid}</code> hiện không có quyền /up trong danh sách duyệt.",
+        )
+        return
+    await revoke_up_acl(uid, by=message.from_user.id if message.from_user else None)
+    if user:
+        mention = mention_user(user)
+    else:
+        name = (rec or {}).get("name") or str(uid)
+        mention = f'<a href="tg://user?id={uid}">{html.escape(str(name))}</a>'
+    await _reply_html(message, f"{E_SUCCESS} Đã gỡ quyền /up của {mention} (<code>{uid}</code>).")
+    try:
+        with skip_autodel():
+            await app.send_message(
+                uid,
+                f"{E_WARN} Quyền dùng <code>/up</code> của bạn đã bị gỡ. "
+                f"Gửi lại <code>/up</code> nếu muốn xin duyệt mới.",
+                parse_mode=enums.ParseMode.HTML,
+                no_autodel=True,
+            )
+    except Exception:
+        pass
+
+
+@app.on_callback_query(filters.regex(r"^upacl_rv_(\d+)$"), group=_HANDLER_GROUP)
+@capture_err
+async def up_acl_revoke_cb(_, cq: CallbackQuery):
+    if not cq.from_user or cq.from_user.id not in SUDO:
+        await cq.answer("Chỉ ThanhDora mới gỡ quyền được.", show_alert=True)
+        return
+    uid = int(cq.matches[0].group(1))
+    if _is_sudo_id(uid):
+        await cq.answer("Không thể gỡ quyền SUDO.", show_alert=True)
+        return
+    rec = await get_up_acl(uid)
+    if not rec or rec.get("status") != "allowed":
+        await cq.answer("User này không còn trong danh sách duyệt.", show_alert=True)
+        return
+    await revoke_up_acl(uid, by=cq.from_user.id)
+    name = (rec or {}).get("name") or str(uid)
+    mention = f'<a href="tg://user?id={uid}">{html.escape(str(name))}</a>'
+    try:
+        await cq.edit_message_text(
+            f"{E_SUCCESS} Đã gỡ quyền /up của {mention} (<code>{uid}</code>).",
+            parse_mode=enums.ParseMode.HTML,
+        )
+    except Exception:
+        pass
+    await cq.answer("Đã gỡ quyền")
+    try:
+        with skip_autodel():
+            await app.send_message(
+                uid,
+                f"{E_WARN} Quyền dùng <code>/up</code> của bạn đã bị gỡ. "
+                f"Gửi lại <code>/up</code> nếu muốn xin duyệt mới.",
+                parse_mode=enums.ParseMode.HTML,
+                no_autodel=True,
+            )
+    except Exception:
+        pass
 
 
 @app.on_message(filters.command(["up_unban"], COMMAND_HANDLER), group=_HANDLER_GROUP)

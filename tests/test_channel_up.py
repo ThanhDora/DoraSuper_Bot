@@ -575,3 +575,31 @@ def test_render_appstore_poster():
     img = Image.open(BytesIO(raw))
     assert img.size == (256, 256)
     assert img.format == "JPEG"
+
+
+def test_parse_up_user_ref():
+    assert cu.parse_up_user_ref("")["kind"] == "empty"
+    assert cu.parse_up_user_ref("  ")["kind"] == "empty"
+    assert cu.parse_up_user_ref("12345") == {"kind": "id", "value": 12345}
+    assert cu.parse_up_user_ref("@Alice") == {"kind": "username", "value": "@Alice"}
+    assert cu.parse_up_user_ref("Alice")["kind"] == "username"
+    assert cu.parse_up_user_ref("!!!")["kind"] == "invalid"
+
+
+def test_format_up_acl_entry_and_line():
+    rec = {
+        "_id": 42,
+        "name": "Test <User>",
+        "username": "tester",
+        "decided_at": 1700000000,
+        "status": "allowed",
+    }
+    info = cu.format_up_acl_entry(rec)
+    assert info["user_id"] == 42
+    assert info["username"] == "tester"
+    assert "tg://user?id=42" in info["mention_html"]
+    assert "&lt;User&gt;" in info["mention_html"]
+    line = cu.render_up_acl_line(rec, "14:00 09/11/2026")
+    assert "@tester" in line
+    assert "<code>42</code>" in line
+    assert "14:00 09/11/2026" in line

@@ -1,3 +1,4 @@
+import time
 from database import dbname
 
 _col = dbname["up_channel"]
@@ -127,3 +128,30 @@ async def list_leave_bans(limit: int = 50):
     lim = max(1, int(limit))
     cursor = _bans.find().sort([("banned_at", -1)]).limit(lim)
     return await cursor.to_list(length=lim)
+
+
+async def list_up_acl(status: str | None = "allowed", limit: int = 100):
+    """Liệt kê ACL /up theo status (allowed|pending|denied|revoked|None=all)."""
+    lim = max(1, int(limit))
+    query = {}
+    if status:
+        query["status"] = status
+    # decided_at / requested_at may be missing on old docs
+    cursor = _users.find(query).sort([("decided_at", -1), ("requested_at", -1)]).limit(lim)
+    return await cursor.to_list(length=lim)
+
+
+async def clear_up_acl(user_id: int):
+    """Xóa hẳn record ACL (hiếm dùng)."""
+    if user_id is None:
+        return
+    await _users.delete_one({"_id": int(user_id)})
+
+
+async def revoke_up_acl(user_id: int, *, by: int | None = None):
+    """Gỡ quyền /up: status=revoked (chạy /up lại sẽ xin duyệt mới)."""
+    payload = {"status": "revoked", "revoked_at": time.time()}
+    if by is not None:
+        payload["revoked_by"] = int(by)
+    await _users.update_one({"_id": int(user_id)}, {"$set": payload}, upsert=False)
+    return payload

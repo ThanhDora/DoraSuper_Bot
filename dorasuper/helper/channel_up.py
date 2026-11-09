@@ -663,3 +663,66 @@ async def lookup_appstore(url: str) -> dict | None:
     icon_bytes = await ru._download_artwork_bytes(art_url) if art_url else None
     assets["icon_bytes"] = icon_bytes
     return assets
+
+
+def format_up_acl_entry(rec: dict, *, approved_ts_fmt: str = "%H:%M %d/%m/%Y") -> dict:
+    """Chuẩn hóa 1 dòng ACL /up cho list (không phụ thuộc Telegram client).
+
+    Trả {user_id, name, username, mention_html, when_ts, line_html_without_when}.
+    Caller gắn thời gian VN bằng format_ts_vn(when_ts).
+    """
+    if not rec:
+        return {
+            "user_id": None,
+            "name": "",
+            "username": "",
+            "mention_html": "?",
+            "when_ts": None,
+            "status": None,
+        }
+    uid = rec.get("user_id") or rec.get("_id")
+    try:
+        uid = int(uid) if uid is not None else None
+    except (TypeError, ValueError):
+        uid = None
+    name = (rec.get("name") or "").strip() or (str(uid) if uid else "?")
+    username = (rec.get("username") or "").strip().lstrip("@")
+    if uid is not None:
+        mention = f'<a href="tg://user?id={uid}">{html.escape(name)}</a>'
+    else:
+        mention = html.escape(name)
+    when_ts = rec.get("decided_at") or rec.get("requested_at") or rec.get("revoked_at")
+    return {
+        "user_id": uid,
+        "name": name,
+        "username": username,
+        "mention_html": mention,
+        "when_ts": when_ts,
+        "status": rec.get("status"),
+    }
+
+
+def render_up_acl_line(rec: dict, when_str: str) -> str:
+    """Một dòng HTML cho /up_list."""
+    info = format_up_acl_entry(rec)
+    uid = info["user_id"]
+    uname = f" @{html.escape(info['username'])}" if info["username"] else ""
+    uid_s = f"<code>{uid}</code>" if uid is not None else "?"
+    when = html.escape(when_str or "?")
+    return f"• {info['mention_html']} ({uid_s}){uname} — {when}"
+
+
+def parse_up_user_ref(raw: str) -> dict:
+    """Parse arg của /up_grant|/up_revoke: {kind: id|username|empty|invalid, value}."""
+    text = (raw or "").strip()
+    if not text:
+        return {"kind": "empty", "value": None}
+    if text.isdigit():
+        return {"kind": "id", "value": int(text)}
+    if text.startswith("@") and len(text) > 1:
+        return {"kind": "username", "value": text}
+    # bare username
+    if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{3,}", text):
+        return {"kind": "username", "value": "@" + text}
+    return {"kind": "invalid", "value": text}
+
