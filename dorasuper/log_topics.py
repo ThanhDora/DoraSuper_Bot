@@ -59,48 +59,92 @@ async def _get_raw_messages(app, channel, ids):
 
 
 
-async def _list_forum_topics(app) -> dict[int, str]:
-    """Lấy toàn bộ forum topic (id → title) qua channels.GetForumTopics — nhanh, không cần quét tin."""
+async def _scan_recent_history(app, found: dict, limit: int = 400) -> int:
+    """Quét get_chat_history (thường chỉ General trong forum) + lấy watermark."""
+    newest = 0
+    try:
+        async for m in app.get_chat_history(LOG_CHANNEL, limit=limit):
+            mid = int(getattr(m, "id", 0) or 0)
+            if mid > newest:
+                newest = mid
+            ftc = getattr(m, "forum_topic_created", None)
+            if ftc and getattr(ftc, "title", None):
+                found[mid] = str(ftc.title)
+                continue
+            fte = getattr(m, "forum_topic_edited", None)
+            if fte and getattr(fte, "title", None):
+                tid = getattr(m, "message_thread_id", None) or mid
+                found[int(tid)] = str(fte.title)
+    except Exception as e:
+        LOGGER.warning("LOG_TOPICS: get_chat_history lỗi: %s", e)
+    return newest
+
+
+async def _probe_newest_id(app, hint: int) -> int:
+    """Tìm message id cao nhất trong LOG_CHANNEL bằng GetMessages (bot OK, mọi topic)."""
     from pyrogram import raw
     from pyrogram.errors import FloodWait
     import asyncio
     peer = await app.resolve_peer(LOG_CHANNEL)
     channel = raw.types.InputChannel(channel_id=peer.channel_id, access_hash=peer.access_hash)
-    found: dict[int, str] = {}
-    offset_topic, offset_id, offset_date = 0, 0, 0
-    for _ in range(20):  # tối đa ~2000 topic
+    last_hit = max(int(hint or 1), 1)
+    step = 200
+    # Exponential climb
+    for _ in range(30):
+        probe = last_hit + step
         try:
-            r = await app.invoke(
-                raw.functions.channels.GetForumTopics(
-                    channel=channel,
-                    offset_date=offset_date,
-                    offset_id=offset_id,
-                    offset_topic=offset_topic,
-                    limit=100,
-                    q="",
-                ),
-                sleep_threshold=0,
-            )
+            msgs = await _get_raw_messages(app, channel, range(probe, probe + 1))
         except FloodWait as e:
-            await asyncio.sleep(min(int(getattr(e, "value", 5) or 5), 15) + 1)
+            await asyncio.sleep(min(int(getattr(e, "value", 3) or 3), 10) + 1)
             continue
-        topics = getattr(r, "topics", None) or []
-        if not topics:
-            break
-        for t in topics:
-            # ForumTopic / ForumTopicDeleted
-            tid = getattr(t, "id", None)
-            title = getattr(t, "title", None)
-            if tid is not None and title:
-                found[int(tid)] = str(title)
-        last = topics[-1]
-        offset_topic = int(getattr(last, "id", 0) or 0)
-        offset_id = int(getattr(last, "top_message", 0) or 0)
-        d = getattr(last, "date", None)
-        offset_date = int(d) if isinstance(d, int) else 0
-        if len(topics) < 100:
-            break
-    return found
+        if msgs:
+            last_hit = max(m.id for m in msgs)
+            step = min(step * 2, 20000)
+            continue
+        # Binary search (last_hit, probe]
+        lo, hi = last_hit, probe
+        while lo + 1 < hi:
+            mid = (lo + hi) // 2
+            try:
+                msgs = await _get_raw_messages(app, channel, range(mid, mid + 1))
+            except FloodWait as e:
+                await asyncio.sleep(min(int(getattr(e, "value", 3) or 3), 10) + 1)
+                continue
+            if msgs:
+                lo = max(m.id for m in msgs)
+            else:
+                hi = mid
+        return lo
+    return last_hit
+
+
+async def _collect_topic_actions(app, start: int, end: int, found: dict) -> None:
+    """Quét GetMessages [start, end] lấy MessageActionTopicCreate/Edit."""
+    from pyrogram import raw
+    from pyrogram.errors import FloodWait
+    import asyncio
+    if end < start:
+        return
+    peer = await app.resolve_peer(LOG_CHANNEL)
+    channel = raw.types.InputChannel(channel_id=peer.channel_id, access_hash=peer.access_hash)
+    cur = start
+    while cur <= end:
+        batch_end = min(cur + 199, end)
+        try:
+            msgs = await _get_raw_messages(app, channel, range(cur, batch_end + 1))
+        except FloodWait as e:
+            await asyncio.sleep(min(int(getattr(e, "value", 3) or 3), 10) + 1)
+            continue
+        for m in msgs:
+            act = getattr(m, "action", None)
+            if isinstance(m, raw.types.MessageService) and isinstance(act, raw.types.MessageActionTopicCreate):
+                found[int(m.id)] = act.title
+            elif isinstance(m, raw.types.MessageService) and isinstance(act, raw.types.MessageActionTopicEdit) and act.title:
+                rt = getattr(m, "reply_to", None)
+                tid = getattr(rt, "reply_to_top_id", None) or getattr(rt, "reply_to_msg_id", None)
+                if tid:
+                    found[int(tid)] = act.title
+        cur = batch_end + 1
 
 
 async def _scan_range(app, start: int, deadline: float | None, found: dict, batch: int = 200) -> tuple[int, bool]:
@@ -195,10 +239,7 @@ def _publish(mapping: dict) -> None:
 
 async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
     try:
-        try:
-            found.update(await _list_forum_topics(app))
-        except Exception as e:
-            LOGGER.warning("LOG_TOPICS: GetForumTopics (nền) lỗi: %s", e)
+        await _scan_recent_history(app, found, limit=500)
         mapping = _apply(saved, found)
         if all(mapping.get(k) for k, _ in _TOPICS_DEF):
             await _col.update_one({"_id": "log_topics"}, {"$set": {k: v for k, v in mapping.items() if v}}, upsert=True)
@@ -226,7 +267,7 @@ async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
 
 
 async def ensure_log_topics(app) -> None:
-    """Xác định thread_id các tab log: config.env > Mongo > GetForumTopics > quét tin > tạo mới."""
+    """Xác định thread_id các tab log: config.env > Mongo > history gần đây > quét id cao > tạo mới."""
     import asyncio
     import os
     import time
@@ -242,24 +283,29 @@ async def ensure_log_topics(app) -> None:
         return
 
     found: dict[int, str] = {}
-    # 1) API forum topics — bắt topic anh mới tạo (File) ngay, không phụ thuộc quét id thấp.
+    # 1) History General (có thể không thấy topic khác) + watermark gợi ý.
+    newest_hist = await _scan_recent_history(app, found, limit=200)
+    hint = max([newest_hist] + list(saved.values()) + list(found.keys()) + [1])
+    # 2) Probe id cao nhất rồi quét cửa sổ gần cuối — bắt topic File mới (id == service msg).
     try:
-        listed = await _list_forum_topics(app)
-        found.update(listed)
-        LOGGER.info("LOG_TOPICS: GetForumTopics trả về %s topic", len(listed))
+        newest = await _probe_newest_id(app, hint)
+        LOGGER.info("LOG_TOPICS: newest_msg_id≈%s (hint=%s)", newest, hint)
+        window = 2500
+        await _collect_topic_actions(app, max(1, newest - window), newest, found)
+        # Cũng quét quanh các topic id đã biết (topic create nằm đúng id đó).
+        for tid in list(saved.values()):
+            await _collect_topic_actions(app, max(1, int(tid) - 5), int(tid) + 5, found)
     except Exception as e:
-        LOGGER.warning("LOG_TOPICS: GetForumTopics lỗi: %s", e)
+        LOGGER.warning("LOG_TOPICS: probe/collect lỗi: %s", e)
+        newest = hint
+    if found:
+        LOGGER.info("LOG_TOPICS: thấy %s topic title(s): %s", len(found), list(found.items())[:15])
 
     mapping = _apply(saved, found)
-    nxt, done = 1, False
-    if any(v is None for v in mapping.values()):
-        try:
-            nxt, done = await _scan_range(app, 1, time.monotonic() + 8, found)
-            mapping = _apply(saved, found)
-        except Exception as e:
-            LOGGER.warning("LOG_TOPICS: quét nhanh lỗi: %s", e)
+    done = False
+    start_hi = max(1, int(newest) - 500)
 
-    # Chỉ thử tạo topic còn thiếu (bot có thể không có quyền → bỏ qua).
+    # 3) Thử tạo topic còn thiếu (thường 403 nếu bot không có quyền — bỏ qua).
     for key, name in _TOPICS_DEF:
         if mapping[key] is None:
             try:
@@ -272,9 +318,11 @@ async def ensure_log_topics(app) -> None:
     await _col.update_one({"_id": "log_topics"}, {"$set": {k: v for k, v in mapping.items() if v}}, upsert=True)
     _publish(mapping)
     if any(v is None for v in mapping.values()) and not done:
-        LOGGER.info("LOG_TOPICS: chưa đủ, tiếp tục quét nền từ id %s", nxt)
+        # Quét nền từ id thấp hơn cửa sổ cao (bắt topic cũ nếu còn thiếu).
+        bg_start = max(1, start_hi - 2000)
+        LOGGER.info("LOG_TOPICS: chưa đủ, tiếp tục quét nền từ id %s", bg_start)
         saved_now = {k: v for k, v in mapping.items() if v}
-        asyncio.create_task(_background_scan(app, saved_now, found, nxt))
+        asyncio.create_task(_background_scan(app, saved_now, found, bg_start))
 
 
 def topic_id(key: str) -> int | None:
