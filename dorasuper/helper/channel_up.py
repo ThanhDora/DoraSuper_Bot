@@ -214,6 +214,73 @@ def parse_promo_link_args(raw: str) -> dict:
     return {"action": "invalid", "url": None, "chat_id": None}
 
 
+
+def public_username_from_tme_url(url: str) -> str | None:
+    """Lấy @username công khai từ https://t.me/user; None nếu invite/+ hoặc không parse được."""
+    text = (url or "").strip()
+    if not text:
+        return None
+    lower = text.lower()
+    if "/+" in lower or "joinchat/" in lower:
+        return None
+    m = re.search(r"(?:t\.me|telegram\.me)/([A-Za-z0-9_]{4,})", text, re.I)
+    if not m:
+        return None
+    user = m.group(1)
+    if user.lower() in ("c", "joinchat", "addstickers", "share", "s"):
+        return None
+    return user
+
+
+def evaluate_join_gate_decision(configured: list[str], results: dict[str, str]) -> dict:
+    """Fail-closed khi đã cấu hình link.
+
+    results[kind] in {"joined","missing","banned","error"}.
+    Nếu không cấu hình gì → ok (không chặn).
+    Có cấu hình mà error/missing/banned → không ok (không gửi file).
+    """
+    configured = [k for k in (configured or []) if k]
+    if not configured:
+        return {
+            "ok": True,
+            "banned": False,
+            "missing": [],
+            "errors": [],
+            "checkable": 0,
+        }
+    banned = any(results.get(k) == "banned" for k in configured)
+    missing = [k for k in configured if results.get(k) == "missing"]
+    errors = [k for k in configured if results.get(k) in (None, "error") or k not in results]
+    # also treat unknown as error
+    for k in configured:
+        if results.get(k) not in ("joined", "missing", "banned", "error"):
+            if k not in errors:
+                errors.append(k)
+    if banned:
+        return {
+            "ok": False,
+            "banned": True,
+            "missing": missing,
+            "errors": errors,
+            "checkable": len(configured) - len(errors),
+        }
+    if missing or errors:
+        return {
+            "ok": False,
+            "banned": False,
+            "missing": missing,
+            "errors": errors,
+            "checkable": len(configured) - len(errors),
+        }
+    return {
+        "ok": True,
+        "banned": False,
+        "missing": [],
+        "errors": [],
+        "checkable": len(configured),
+    }
+
+
 def build_join_gate_keyboard_botapi(
     token: str,
     *,

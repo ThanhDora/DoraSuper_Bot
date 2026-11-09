@@ -309,8 +309,48 @@ def test_membership_is_joined():
     assert not cu.membership_is_joined("left")
     assert not cu.membership_is_joined("banned")
     assert cu.membership_is_banned("banned")
+    assert cu.membership_is_banned("kicked")
     assert not cu.membership_is_banned("member")
 
+
+
+
+def test_public_username_from_tme_url():
+    assert cu.public_username_from_tme_url("https://t.me/dorateam") == "dorateam"
+    assert cu.public_username_from_tme_url("https://t.me/DoraTeamMods") == "DoraTeamMods"
+    assert cu.public_username_from_tme_url("https://telegram.me/Foo_Bar") == "Foo_Bar"
+    assert cu.public_username_from_tme_url("https://t.me/+invite") is None
+    assert cu.public_username_from_tme_url("https://t.me/joinchat/AbC") is None
+    assert cu.public_username_from_tme_url("") is None
+    assert cu.public_username_from_tme_url("https://example.com/x") is None
+
+
+def test_evaluate_join_gate_decision_fail_closed():
+    # no targets configured → allow
+    d = cu.evaluate_join_gate_decision([], {})
+    assert d["ok"] is True and d["checkable"] == 0
+    # all joined → allow
+    d = cu.evaluate_join_gate_decision(["channel", "group"], {"channel": "joined", "group": "joined"})
+    assert d["ok"] is True and not d["missing"] and not d["errors"]
+    # missing → block
+    d = cu.evaluate_join_gate_decision(["channel"], {"channel": "missing"})
+    assert d["ok"] is False and d["missing"] == ["channel"]
+    # error / uncheckable → block (fail closed)
+    d = cu.evaluate_join_gate_decision(["channel", "group"], {"channel": "error", "group": "joined"})
+    assert d["ok"] is False and "channel" in d["errors"]
+    # banned → block
+    d = cu.evaluate_join_gate_decision(["group"], {"group": "banned"})
+    assert d["ok"] is False and d["banned"] is True
+    # left/kicked treated upstream as missing/banned; decision still fail-closed on missing
+    d = cu.evaluate_join_gate_decision(["channel", "group"], {"channel": "missing", "group": "missing"})
+    assert d["ok"] is False and set(d["missing"]) == {"channel", "group"}
+
+
+def test_membership_left_kicked_not_joined():
+    assert not cu.membership_is_joined("left")
+    assert not cu.membership_is_joined("kicked")
+    assert cu.membership_is_banned("kicked")
+    assert cu.membership_is_banned("banned")
 
 def test_should_autoban_on_leave():
     assert cu.should_autoban_on_leave(old_status="member", new_status="left")

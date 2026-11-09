@@ -40,11 +40,13 @@ from dorasuper.helper.channel_up import (
     is_allowed_package,
     is_appstore_url,
     lookup_appstore,
+    evaluate_join_gate_decision,
     membership_is_banned,
     membership_is_joined,
     normalize_stored_features,
     normalize_telegram_link,
     parse_promo_link_args,
+    public_username_from_tme_url,
     render_appstore_poster,
     reply_markup_to_botapi,
     should_autoban_on_leave,
@@ -874,61 +876,106 @@ async def _send_document_html(
 
 
 async def _member_status_in_chat(chat_id, user_id):
-    """Trả (joined: bool|None, banned: bool, raw_status). joined=None nếu không check được."""
+    """Trả (joined: bool|None, banned: bool, raw_status). joined=None nếu lỗi không check được."""
     try:
         mem = await app.get_chat_member(chat_id, user_id)
     except Exception as e:
+        err = str(e).lower()
+        name = e.__class__.__name__.lower()
+        # UserNotParticipant / USER_NOT_PARTICIPANT / not a member → coi như chưa join
+        if (
+            "usernotparticipant" in name
+            or "user_not_participant" in err
+            or "not a participant" in err
+            or "not a member" in err
+            or "chat_member_invalid" in err
+            or "peer_id_invalid" in err
+        ):
+            return False, False, "left"
         LOGGER.warning("get_chat_member chat=%s user=%s: %s", chat_id, user_id, e)
         return None, False, None
     status = mem.status
     is_member = getattr(mem, "is_member", None)
     if membership_is_banned(status):
         return False, True, status
-    return membership_is_joined(status, is_member), False, status
+    if membership_is_joined(status, is_member):
+        return True, False, status
+    # LEFT and anything else → not joined
+    return False, False, status
+
+
+async def _ensure_promo_chat_id(kind: str, target: dict):
+    """Lấy chat_id đã lưu hoặc resolve từ URL public rồi ghi Mongo."""
+    cid = target.get("chat_id")
+    if cid:
+        return int(cid)
+    url = target.get("url")
+    username = public_username_from_tme_url(url or "")
+    if not username:
+        return None
+    try:
+        chat = await app.get_chat(username)
+        cid = int(chat.id)
+    except Exception as e:
+        LOGGER.warning("resolve promo %s from %s failed: %s", kind, url, e)
+        return None
+    try:
+        if kind == "channel":
+            await set_up_link_channel(url, cid)
+        else:
+            await set_up_link_group(url, cid)
+        target["chat_id"] = cid
+        LOGGER.info("up promo %s chat_id backfilled: %s -> %s", kind, url, cid)
+    except Exception as e:
+        LOGGER.warning("save promo chat_id %s failed: %s", kind, e)
+    return cid
 
 
 async def _evaluate_join_gate(user_id: int):
-    """Trả dict: ok, banned, missing(list), targets, checkable_count."""
+    """Fail-closed: đã cấu hình link thì phải check được và user phải đang join."""
     targets = await get_up_promo_targets()
-    missing = []
-    banned = False
-    checkable = 0
+    configured = []
+    results = {}
     for kind in ("channel", "group"):
         t = targets[kind]
-        cid = t.get("chat_id")
-        if not cid:
-            if t.get("url"):
-                key = f"{kind}:{t['url']}"
-                if key not in _nocheck_warned:
-                    _nocheck_warned.add(key)
-                    await _log_up(
-                        f"{E_WARN} /up: đã có link <b>{kind}</b> nhưng chưa có chat_id — "
-                        f"bỏ qua kiểm tra join cho mục này. Dùng /up_link_{kind} here hoặc kèm -100id."
-                    )
+        if not t.get("url") and not t.get("chat_id"):
             continue
-        checkable += 1
+        configured.append(kind)
+        cid = await _ensure_promo_chat_id(kind, t)
+        if not cid:
+            results[kind] = "error"
+            key = f"uncheckable:{kind}:{t.get('url')}"
+            if key not in _nocheck_warned:
+                _nocheck_warned.add(key)
+                await _log_up(
+                    f"{E_WARN} /up: không kiểm tra được <b>{kind}</b> "
+                    f"(thiếu chat_id / không resolve được). <b>Không gửi file</b>."
+                )
+            continue
         joined, is_ban, _ = await _member_status_in_chat(cid, user_id)
         if joined is None:
+            results[kind] = "error"
             key = f"fail:{kind}:{cid}"
             if key not in _nocheck_warned:
                 _nocheck_warned.add(key)
                 await _log_up(
-                    f"{E_WARN} /up: không kiểm tra được thành viên trong <code>{cid}</code> "
-                    f"({kind}). Bỏ qua mục này. Kiểm tra bot còn admin không."
+                    f"{E_WARN} /up: lỗi get_chat_member <code>{cid}</code> ({kind}). "
+                    f"<b>Không gửi file</b>. Kiểm tra bot còn admin."
                 )
-            continue
-        if is_ban:
-            banned = True
+        elif is_ban:
+            results[kind] = "banned"
         elif not joined:
-            missing.append(kind)
-    if banned:
-        return {"ok": False, "banned": True, "missing": missing, "targets": targets, "checkable": checkable}
-    # Nếu không có mục nào checkable → cho tải (không chặn oan) nhưng đã warn LOG
-    if checkable == 0:
-        return {"ok": True, "banned": False, "missing": [], "targets": targets, "checkable": 0}
-    if missing:
-        return {"ok": False, "banned": False, "missing": missing, "targets": targets, "checkable": checkable}
-    return {"ok": True, "banned": False, "missing": [], "targets": targets, "checkable": checkable}
+            results[kind] = "missing"
+        else:
+            results[kind] = "joined"
+
+    decision = evaluate_join_gate_decision(configured, results)
+    decision["targets"] = targets
+    decision["results"] = results
+    # join prompt uses missing; if only errors, still show prompt
+    if not decision["ok"] and not decision.get("banned") and not decision.get("missing"):
+        decision["missing"] = list(decision.get("errors") or configured)
+    return decision
 
 
 async def _send_join_gate_prompt(message: Message, token: str, gate: dict):
