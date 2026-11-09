@@ -150,8 +150,18 @@ def _publish(mapping: dict) -> None:
 
 async def _background_scan(app, saved: dict, found: dict, start: int) -> None:
     try:
-        nxt, _ = await _scan_range(app, start, None, found)
+        nxt, done = await _scan_range(app, start, None, found)
         mapping = _apply(saved, found)
+        # Sau khi quét xong (hoặc hết tin), tạo topic còn thiếu (vd: File, Tin nhắn riêng).
+        if done or any(v is None for v in mapping.values()):
+            for key, name in _TOPICS_DEF:
+                if mapping.get(key) is None:
+                    try:
+                        t = await app.create_forum_topic(chat_id=LOG_CHANNEL, title=name)
+                        mapping[key] = t.id
+                        LOGGER.info("LOG_TOPIC [%s] đã tạo mới (nền): thread_id=%s", key, t.id)
+                    except Exception as e:
+                        LOGGER.error("LOG_TOPIC [%s] không tạo được topic (nền): %s", key, e)
         await _col.update_one({"_id": "log_topics"}, {"$set": {**{k: v for k, v in mapping.items() if v}, "scan_next": nxt}}, upsert=True)
         _publish(mapping)
         missing = [k for k, v in mapping.items() if v is None]
