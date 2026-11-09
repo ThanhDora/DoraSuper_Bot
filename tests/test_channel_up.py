@@ -83,7 +83,7 @@ def test_build_channel_caption():
     )
     assert overflow is None
     assert "<b>Clash of Clans</b>" in caption
-    assert "iOS · <code>16.0.1</code>" in caption
+    assert "Phiên bản · <code>16.0.1</code>" in caption
     assert "Bundle · <code>com.supercell.magic</code>" in caption
     assert "Người bán" not in caption
     assert "Supercell" not in caption
@@ -106,7 +106,7 @@ def test_caption_escapes_html():
 
 def test_caption_omits_missing_fields():
     caption, _ = cu.build_channel_caption(name="Game")
-    assert "iOS" not in caption
+    assert "Phiên bản" not in caption
     assert "Bundle" not in caption
     assert "Người bán" not in caption
     assert "Chức năng" not in caption

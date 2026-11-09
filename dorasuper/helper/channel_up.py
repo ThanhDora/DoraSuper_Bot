@@ -216,7 +216,7 @@ def _header_lines(
 ) -> list[str]:
     lines = [f"<b>{title}</b>"]
     if version:
-        lines.append(f"iOS · <code>{html.escape(version)}</code>")
+        lines.append(f"Phiên bản · <code>{html.escape(version)}</code>")
     if include_bundle and bundle_id:
         lines.append(f"Bundle · <code>{html.escape(bundle_id)}</code>")
     if store_url:
