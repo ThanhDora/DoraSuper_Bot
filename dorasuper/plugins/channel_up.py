@@ -41,6 +41,8 @@ from dorasuper.helper.channel_up import (
     is_appstore_url,
     lookup_appstore,
     evaluate_join_gate_decision,
+    join_gate_block_kind,
+    membership_check_result,
     membership_is_banned,
     membership_is_joined,
     normalize_stored_features,
@@ -876,31 +878,38 @@ async def _send_document_html(
 
 
 async def _member_status_in_chat(chat_id, user_id):
-    """Trả (joined: bool|None, banned: bool, raw_status). joined=None nếu lỗi không check được."""
+    """Trả (joined: bool|None, banned: bool, raw_status).
+
+    Never-joined / LEFT / UserNotParticipant / member not found → (False, False, left).
+    Chỉ BANNED/KICKED → banned=True. joined=None chỉ khi lỗi không phân loại được.
+    """
     try:
         mem = await app.get_chat_member(chat_id, user_id)
     except Exception as e:
         err = str(e).lower()
         name = e.__class__.__name__.lower()
-        # UserNotParticipant / USER_NOT_PARTICIPANT / not a member → coi như chưa join
+        # Mọi dạng "chưa/không phải thành viên" → missing (không phải banned)
         if (
             "usernotparticipant" in name
             or "user_not_participant" in err
             or "not a participant" in err
             or "not a member" in err
+            or "member not found" in err
+            or "participant_id_invalid" in err
             or "chat_member_invalid" in err
             or "peer_id_invalid" in err
+            or "user_id_invalid" in err
         ):
             return False, False, "left"
         LOGGER.warning("get_chat_member chat=%s user=%s: %s", chat_id, user_id, e)
         return None, False, None
     status = mem.status
     is_member = getattr(mem, "is_member", None)
-    if membership_is_banned(status):
+    kind = membership_check_result(status, is_member)
+    if kind == "banned":
         return False, True, status
-    if membership_is_joined(status, is_member):
+    if kind == "joined":
         return True, False, status
-    # LEFT and anything else → not joined
     return False, False, status
 
 
@@ -952,7 +961,7 @@ async def _evaluate_join_gate(user_id: int):
                     f"(thiếu chat_id / không resolve được). <b>Không gửi file</b>."
                 )
             continue
-        joined, is_ban, _ = await _member_status_in_chat(cid, user_id)
+        joined, is_ban, raw = await _member_status_in_chat(cid, user_id)
         if joined is None:
             results[kind] = "error"
             key = f"fail:{kind}:{cid}"
@@ -968,6 +977,10 @@ async def _evaluate_join_gate(user_id: int):
             results[kind] = "missing"
         else:
             results[kind] = "joined"
+        LOGGER.info(
+            "up join-gate user=%s %s chat=%s -> %s raw=%s",
+            user_id, kind, cid, results.get(kind), raw,
+        )
 
     decision = evaluate_join_gate_decision(configured, results)
     decision["targets"] = targets
@@ -1055,14 +1068,30 @@ async def deliver_up_file(message: Message, payload: str):
         return
     user = message.from_user
     if user and not _is_sudo_id(user.id):
-        # đã từng bị auto-ban vì rời
         ban_rec = await get_leave_ban(user.id)
         gate = await _evaluate_join_gate(user.id)
-        if gate["banned"] or ban_rec:
+        block = join_gate_block_kind(
+            tg_banned=bool(gate.get("banned")),
+            has_leave_ban_record=bool(ban_rec),
+        )
+        if block == "leave_ban":
             await message.reply_text(
                 "Bạn đã bị cấm vì rời Kênh/Nhóm chat. Liên hệ admin để được mở lại."
             )
             return
+        if block == "admin_ban":
+            await message.reply_text(
+                "Bạn đang bị cấm trong Kênh/Nhóm chat. Liên hệ admin để được mở lại."
+            )
+            return
+        # LEFT / never-joined / error → join prompt (kể cả khi còn Mongo record cũ lệch)
+        if ban_rec and not gate.get("banned"):
+            # record auto-ban cũ nhưng Telegram không còn BANNED → xóa record lệch
+            try:
+                await clear_leave_ban(user.id)
+                LOGGER.info("cleared stale leave-ban record user=%s", user.id)
+            except Exception as e:
+                LOGGER.warning("clear stale leave-ban user=%s: %s", user.id, e)
         if not gate["ok"]:
             await _send_join_gate_prompt(message, token, gate)
             return
@@ -1103,7 +1132,11 @@ async def upjoin_recheck(_, cq: CallbackQuery):
         return
     ban_rec = await get_leave_ban(cq.from_user.id)
     gate = await _evaluate_join_gate(cq.from_user.id)
-    if gate["banned"] or ban_rec:
+    block = join_gate_block_kind(
+        tg_banned=bool(gate.get("banned")),
+        has_leave_ban_record=bool(ban_rec),
+    )
+    if block == "leave_ban":
         await cq.answer("Bạn đã bị cấm vì rời Kênh/Nhóm. Liên hệ admin.", show_alert=True)
         try:
             await cq.message.edit_text(
@@ -1112,6 +1145,20 @@ async def upjoin_recheck(_, cq: CallbackQuery):
         except Exception:
             pass
         return
+    if block == "admin_ban":
+        await cq.answer("Bạn đang bị cấm trong Kênh/Nhóm. Liên hệ admin.", show_alert=True)
+        try:
+            await cq.message.edit_text(
+                "Bạn đang bị cấm trong Kênh/Nhóm chat. Liên hệ admin để được mở lại."
+            )
+        except Exception:
+            pass
+        return
+    if ban_rec and not gate.get("banned"):
+        try:
+            await clear_leave_ban(cq.from_user.id)
+        except Exception:
+            pass
     if not gate["ok"]:
         await cq.answer("Bạn chưa tham gia đủ Kênh và Nhóm chat.", show_alert=True)
         return
@@ -1160,17 +1207,23 @@ async def up_leave_autoban(_, update: ChatMemberUpdated):
             )
         return
 
-    # Voluntary leave: new LEFT or missing new with old MEMBER
-    left_by_admin = bool(update.from_user and update.from_user.id != user.id)
+    # Voluntary leave ONLY: from_user must be the leaving user themself.
+    # Thiếu from_user / admin kick / channel anonymous → không auto-ban.
+    actor = update.from_user
+    if not actor or actor.id != user.id:
+        return
     effective_new = new_status
     if new is None and old is not None:
         effective_new = ChatMemberStatus.LEFT
+    old_is_member = getattr(old, "is_member", None) if old else None
     if not should_autoban_on_leave(
         old_status=old_status,
         new_status=effective_new,
         user_is_bot=bool(user.is_bot),
         user_is_sudo=_is_sudo_id(user.id),
-        left_by_admin=left_by_admin,
+        left_by_admin=False,
+        self_leave=True,
+        old_is_member=old_is_member,
     ):
         return
 

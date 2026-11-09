@@ -352,18 +352,61 @@ def test_membership_left_kicked_not_joined():
     assert cu.membership_is_banned("kicked")
     assert cu.membership_is_banned("banned")
 
+
+
+def test_membership_check_result_never_joined_not_banned():
+    assert cu.membership_check_result("left") == "missing"
+    assert cu.membership_check_result("member") == "joined"
+    assert cu.membership_check_result("banned") == "banned"
+    assert cu.membership_check_result("kicked") == "banned"
+    assert cu.membership_check_result("restricted", False) == "missing"
+    assert cu.membership_check_result("restricted", True) == "joined"
+    assert not cu.membership_is_banned("left")
+    assert cu.membership_is_banned("banned")
+    assert cu.membership_is_banned("kicked")
+
+
+def test_join_gate_block_kind():
+    assert cu.join_gate_block_kind(tg_banned=False, has_leave_ban_record=False) is None
+    assert cu.join_gate_block_kind(tg_banned=False, has_leave_ban_record=True) is None
+    assert cu.join_gate_block_kind(tg_banned=True, has_leave_ban_record=True) == "leave_ban"
+    assert cu.join_gate_block_kind(tg_banned=True, has_leave_ban_record=False) == "admin_ban"
+
+
+def test_evaluate_join_gate_left_is_missing_not_banned():
+    d = cu.evaluate_join_gate_decision(
+        ["channel", "group"],
+        {"channel": "missing", "group": "missing"},
+    )
+    assert d["ok"] is False
+    assert d["banned"] is False
+    assert set(d["missing"]) == {"channel", "group"}
+
+
 def test_should_autoban_on_leave():
-    assert cu.should_autoban_on_leave(old_status="member", new_status="left")
-    assert cu.should_autoban_on_leave(old_status="restricted", new_status="left")
-    assert not cu.should_autoban_on_leave(old_status="member", new_status="banned")
-    assert not cu.should_autoban_on_leave(
-        old_status="member", new_status="left", left_by_admin=True,
+    assert cu.should_autoban_on_leave(old_status="member", new_status="left", self_leave=True)
+    assert cu.should_autoban_on_leave(
+        old_status="restricted", new_status="left", self_leave=True, old_is_member=True,
     )
     assert not cu.should_autoban_on_leave(
-        old_status="member", new_status="left", user_is_sudo=True,
+        old_status="restricted", new_status="left", self_leave=True, old_is_member=False,
+    )
+    assert not cu.should_autoban_on_leave(old_status="member", new_status="banned", self_leave=True)
+    assert not cu.should_autoban_on_leave(old_status="member", new_status="left")  # thiếu self_leave
+    assert not cu.should_autoban_on_leave(
+        old_status="member", new_status="left", self_leave=True, left_by_admin=True,
     )
     assert not cu.should_autoban_on_leave(
-        old_status="member", new_status="left", user_is_bot=True,
+        old_status="member", new_status="left", self_leave=True, user_is_sudo=True,
+    )
+    assert not cu.should_autoban_on_leave(
+        old_status="member", new_status="left", self_leave=True, user_is_bot=True,
+    )
+    assert not cu.should_autoban_on_leave(
+        old_status="left", new_status="left", self_leave=True,
+    )
+    assert not cu.should_autoban_on_leave(
+        old_status=None, new_status="left", self_leave=True,
     )
     assert cu.should_clear_leave_ban_on_unban(old_status="banned", new_status="left")
     assert cu.should_clear_leave_ban_on_unban(old_status="banned", new_status="member")

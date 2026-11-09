@@ -156,8 +156,22 @@ def membership_is_joined(status, is_member=None) -> bool:
 
 
 def membership_is_banned(status) -> bool:
+    """Chỉ BANNED/KICKED (Telegram đã cấm). LEFT / never-joined không phải banned."""
     name = _status_name(status)
     return name in ("banned", "kicked")
+
+
+def membership_check_result(status, is_member=None) -> str:
+    """Trả 'joined' | 'missing' | 'banned' từ status get_chat_member.
+
+    LEFT / RESTRICTED(!is_member) / unknown non-member → missing (hiện join prompt).
+    BANNED/KICKED → banned (cần kết hợp Mongo ở tầng trên).
+    """
+    if membership_is_banned(status):
+        return "banned"
+    if membership_is_joined(status, is_member):
+        return "joined"
+    return "missing"
 
 
 def should_autoban_on_leave(
@@ -167,15 +181,38 @@ def should_autoban_on_leave(
     user_is_bot: bool = False,
     user_is_sudo: bool = False,
     left_by_admin: bool = False,
+    self_leave: bool = False,
+    old_is_member=None,
 ) -> bool:
-    """True khi user tự rời (MEMBER/RESTRICTED -> LEFT), không phải admin kick / bot / sudo."""
-    if user_is_bot or user_is_sudo or left_by_admin:
+    """True chỉ khi user TỰ rời: MEMBER/RESTRICTED(is_member) → LEFT.
+
+    Bắt buộc self_leave=True (from_user.id == user.id). Không ban khi from_user
+    thiếu/admin kick / bot / sudo / never-joined (old LEFT) / download-gate.
+    """
+    if user_is_bot or user_is_sudo or left_by_admin or not self_leave:
         return False
     old_name = _status_name(old_status)
     new_name = _status_name(new_status)
     if new_name != "left":
         return False
-    return old_name in ("member", "restricted")
+    if old_name == "member":
+        return True
+    if old_name == "restricted":
+        # chỉ khi trước đó đang là thành viên bị hạn chế, không phải chờ duyệt
+        return bool(old_is_member) if old_is_member is not None else True
+    return False
+
+
+def join_gate_block_kind(*, tg_banned: bool, has_leave_ban_record: bool) -> str | None:
+    """None = không block kiểu ban; 'leave_ban' | 'admin_ban'."""
+    if tg_banned and has_leave_ban_record:
+        return "leave_ban"
+    if tg_banned and not has_leave_ban_record:
+        return "admin_ban"
+    if has_leave_ban_record and not tg_banned:
+        # record cũ nhưng TG không còn BANNED → không hiện leave-ban; để join prompt / deliver xử lý
+        return None
+    return None
 
 
 def should_clear_leave_ban_on_unban(*, old_status, new_status) -> bool:
