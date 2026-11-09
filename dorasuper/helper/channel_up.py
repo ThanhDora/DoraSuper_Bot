@@ -106,6 +106,36 @@ def _e(emojis: dict | None, key: str) -> str:
     return table.get(key) or _DEFAULT_EMOJI[key]
 
 
+def caption_visible_len(html_text: str) -> int:
+    """Độ dài UTF-16 của chữ hiện ra, không tính thẻ HTML (giới hạn caption Telegram)."""
+    text = re.sub(r"<[^>]+>", "", html_text or "")
+    return len(html.unescape(text).encode("utf-16-le")) // 2
+
+
+def _header_lines(
+    emojis: dict | None,
+    title: str,
+    version: str,
+    seller: str,
+    filename: str,
+    store_url: str,
+    *,
+    include_filename: bool,
+    include_seller: bool,
+) -> list[str]:
+    lines = [f"{_e(emojis, 'trophy')}{_e(emojis, 'sparkle')} <b>{title}</b>"]
+    if version:
+        lines.append(f"{_e(emojis, 'ios')} Phiên bản: <code>{html.escape(version)}</code>")
+    if include_seller and seller:
+        lines.append(f"{_e(emojis, 'user')} Nhà phát hành: {html.escape(seller)}")
+    if include_filename and filename:
+        lines.append(f"{_e(emojis, 'gear')} File: <code>{html.escape(filename)}</code>")
+    if store_url:
+        safe_href = html.escape(store_url, quote=True)
+        lines.append(f"{_e(emojis, 'link')} App Store: <a href=\"{safe_href}\">Mở trên App Store</a>")
+    return lines
+
+
 def build_channel_caption(
     *,
     name: str,
@@ -117,54 +147,39 @@ def build_channel_caption(
     emojis: dict | None = None,
     max_len: int = 1024,
 ) -> tuple[str, str | None]:
-    """Dựng caption HTML. Trả về (caption, phần tràn nếu quá max_len)."""
+    """Dựng caption HTML. Trả về (caption, phần tràn nếu quá max_len của chữ hiện ra)."""
     title = html.escape((name or "").strip() or "Ứng dụng")
-    lines = [f"{_e(emojis, 'trophy')}{_e(emojis, 'sparkle')} <b>{title}</b>"]
-    if version:
-        lines.append(f"{_e(emojis, 'ios')} Phiên bản: <code>{html.escape(version)}</code>")
-    if seller:
-        lines.append(f"{_e(emojis, 'user')} Nhà phát hành: {html.escape(seller)}")
-    if filename:
-        lines.append(f"{_e(emojis, 'gear')} File: <code>{html.escape(filename)}</code>")
-    if store_url:
-        safe_href = html.escape(store_url, quote=True)
-        lines.append(f"{_e(emojis, 'link')} App Store: <a href=\"{safe_href}\">Mở trên App Store</a>")
-
     feature_lines = []
     for item in features or []:
         key = feature_emoji_key(item)
         feature_lines.append(f"{_e(emojis, key)} {html.escape(item)}")
-    if feature_lines:
-        lines.append("")
-        lines.append(f"{_e(emojis, 'star')} <b>Chức năng</b>")
-        lines.extend(feature_lines)
 
-    caption = "\n".join(lines)
-    if len(caption) <= max_len:
-        return caption, None
+    def compose(include_filename: bool, include_seller: bool, feats: list[str]) -> str:
+        lines = _header_lines(
+            emojis, title, version, seller, filename, store_url,
+            include_filename=include_filename, include_seller=include_seller,
+        )
+        if feats:
+            lines.append("")
+            lines.append(f"{_e(emojis, 'star')} <b>Chức năng</b>")
+            lines.extend(feats)
+        return "\n".join(lines)
 
-    overflow = None
-    if feature_lines:
-        head = [row for row in lines if row not in feature_lines]
-        kept = []
-        body = "\n".join(head)
-        overflow_rows = []
-        for row in feature_lines:
-            trial = body + ("\n" if body else "") + "\n".join(kept + [row])
-            if len(trial) > max_len - 8:
-                overflow_rows = feature_lines[len(kept):]
-                break
-            kept.append(row)
-        caption = body + (("\n" + "\n".join(kept)) if kept else "")
-        if overflow_rows:
-            overflow = "\n".join(overflow_rows)
-            if len(caption) < max_len:
-                caption = (caption.rstrip() + "\n…")[:max_len]
-        else:
-            overflow = None
-    else:
-        overflow = None
-        caption = caption[:max_len]
+    for inc_file, inc_seller in ((True, True), (False, True), (False, False)):
+        caption = compose(inc_file, inc_seller, feature_lines)
+        if caption_visible_len(caption) <= max_len:
+            return caption, None
+
+    kept: list[str] = []
+    overflow_rows: list[str] = []
+    for row in feature_lines:
+        trial = compose(False, False, kept + [row])
+        if caption_visible_len(trial) > max_len:
+            overflow_rows = feature_lines[len(kept):]
+            break
+        kept.append(row)
+    caption = compose(False, False, kept)
+    overflow = "\n".join(overflow_rows) if overflow_rows else None
     return caption, overflow
 
 

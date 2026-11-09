@@ -178,8 +178,48 @@ def _has_custom_emoji(msg: Message) -> bool:
     return any(getattr(e, "type", None) == enums.MessageEntityType.CUSTOM_EMOJI for e in ents)
 
 
+async def _edit_caption_via_botapi(chat_id, message_id, html_caption: str) -> bool:
+    """Gắn caption HTML qua Bot API để giữ <tg-emoji>, tránh lớp MTProto gỡ custom emoji."""
+    token = getattr(app, "bot_token", None)
+    if not token:
+        return False
+    try:
+        import aiohttp
+    except ImportError:
+        return False
+    payload = {
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "caption": html_caption,
+        "parse_mode": "HTML",
+    }
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                f"https://api.telegram.org/bot{token}/editMessageCaption",
+                json=payload,
+            ) as resp:
+                data = await resp.json(content_type=None)
+        if not data.get("ok"):
+            return False
+        ents = (data.get("result") or {}).get("caption_entities") or []
+        return any((e or {}).get("type") == "custom_emoji" for e in ents)
+    except Exception:
+        return False
+
+
 async def _apply_caption_html(message: Message, html_caption: str, reply_markup=None):
-    """Gắn caption sau khi ảnh đã lên, cùng cách parse HTML với tin nhắn thường."""
+    """Gắn caption sau khi ảnh đã lên."""
+    chat_id = message.chat.id if message.chat else None
+    if chat_id and await _edit_caption_via_botapi(chat_id, message.id, html_caption):
+        try:
+            refreshed = await app.get_messages(chat_id, message.id)
+            if refreshed:
+                return refreshed
+        except Exception:
+            return message
+        return message
     try:
         edited = await message.edit_caption(
             html_caption, parse_mode=enums.ParseMode.HTML, reply_markup=reply_markup
@@ -208,22 +248,7 @@ async def _apply_caption_html(message: Message, html_caption: str, reply_markup=
 
 async def _send_photo_html(chat_id, photo, html_caption: str, **kwargs):
     markup = kwargs.get("reply_markup")
-    posted = None
-    try:
-        posted = await app.send_photo(
-            chat_id, photo, caption=html_caption, parse_mode=enums.ParseMode.HTML, **kwargs
-        )
-        if posted and _has_custom_emoji(posted):
-            return posted
-    except Exception:
-        posted = None
-        if hasattr(photo, "seek"):
-            try:
-                photo.seek(0)
-            except Exception:
-                pass
-    if posted is None:
-        posted = await app.send_photo(chat_id, photo, **kwargs)
+    posted = await app.send_photo(chat_id, photo, **kwargs)
     try:
         return await _apply_caption_html(posted, html_caption, reply_markup=markup)
     except Exception:

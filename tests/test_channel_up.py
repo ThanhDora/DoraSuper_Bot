@@ -98,8 +98,33 @@ def test_caption_overflow():
         features=features,
         max_len=400,
     )
-    assert len(caption) <= 400
+    assert cu.caption_visible_len(caption) <= 400
     assert overflow
+
+
+def test_caption_keeps_all_features_despite_long_html():
+    tag = '<tg-emoji emoji-id="5226431245918942763">x</tg-emoji>'
+    emojis = {
+        "trophy": tag, "sparkle": tag, "star": tag, "ios": tag,
+        "user": tag, "link": tag, "gear": tag, "gift": tag, "shield": tag,
+    }
+    features = [f"Chức năng chi tiết số {i}" for i in range(15)]
+    long_url = "https://apps.apple.com/vn/app/" + ("very-long-name-" * 12) + "/id529479190"
+    caption, overflow = cu.build_channel_caption(
+        name="Game Name",
+        version="1.2.3",
+        seller="Some Publisher",
+        store_url=long_url,
+        features=features,
+        filename="VeryLongFileNameOfThePackage.ipa",
+        emojis=emojis,
+    )
+    assert overflow is None
+    for item in features:
+        assert item in caption
+    assert "VeryLongFileNameOfThePackage.ipa" in caption
+    assert len(caption) > 1024  # HTML dài vì thẻ emoji + URL, nhưng chữ hiện ra vẫn đủ chỗ
+    assert cu.caption_visible_len(caption) <= 1024
 
 
 def test_render_appstore_poster():
