@@ -7,6 +7,7 @@ import logging
 from logging import getLogger
 
 from datetime import datetime, timedelta
+from dorasuper.helper.timezone import FMT_DMY_HMS, format_ts_vn, format_vn, to_vn, utc_timestamp
 
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 from pyrogram import Client, enums, filters
@@ -242,9 +243,15 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
         last_left = member_history.get("last_left")
         mention = f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
 
-        joined_date = datetime.fromtimestamp(time.time()).strftime("%d/%m/%Y %H:%M:%S")
-        first_joined_str = first_joined.strftime("%d/%m/%Y %H:%M:%S") if first_joined and isinstance(first_joined, datetime) else (joined_date if join_count == 1 else "Không rõ")
-        last_left_str = last_left.strftime("%d/%m/%Y %H:%M:%S") if last_left and isinstance(last_left, datetime) else "Chưa từng rời"
+        joined_date = format_ts_vn(utc_timestamp(), FMT_DMY_HMS)
+        if first_joined and isinstance(first_joined, datetime):
+            first_joined_str = format_vn(first_joined, FMT_DMY_HMS)
+        else:
+            first_joined_str = joined_date if join_count == 1 else "Không rõ"
+        if last_left and isinstance(last_left, datetime):
+            last_left_str = format_vn(last_left, FMT_DMY_HMS)
+        else:
+            last_left_str = "Chưa từng rời"
 
         custom_message, buttons = await get_custom_welcome(member.chat.id)
         if join_count == 1:

@@ -1,6 +1,7 @@
 import asyncio
 import html
 from datetime import datetime
+from dorasuper.helper.timezone import FMT_HM_DMY, format_vn, now_vn
 
 from pyrogram import enums, filters
 from pyrogram.errors import MessageIdInvalid, PeerIdInvalid
@@ -214,7 +215,7 @@ async def command_karma(_, message):
         await auto_delete_message(response_message, 120)
         return
 
-    msg_date = datetime.now().strftime("%H:%M %d/%m/%Y")
+    msg_date = format_vn(now_vn(), FMT_HM_DMY)
     title = html.escape(message.chat.title or "nhóm")
     karma_text = (
         f"{E_TROPHY}{E_SPARKLE} <b>Top 10 thành viên xếp hạng cao nhất</b>\n"

@@ -4,6 +4,14 @@ import io
 import secrets
 import time
 from datetime import datetime
+from dorasuper.helper.timezone import (
+    FMT_DM_HM,
+    FMT_HM_DMY,
+    format_ts_vn,
+    format_vn,
+    now_vn,
+    utc_timestamp,
+)
 
 from pyrogram import enums, filters
 from pyrogram.enums import ChatMemberStatus, ChatType
@@ -797,7 +805,7 @@ async def _handle_features(message: Message, raw: str):
             "store_url": data.get("store_url") or "",
             "features": list(features),
             "created_by": uid,
-            "created_at": time.time(),
+            "created_at": utc_timestamp(),
         })
         photo = io.BytesIO(data["poster"])
         photo.name = "poster.jpg"
@@ -815,7 +823,8 @@ async def _handle_features(message: Message, raw: str):
         return
     _sessions.pop(uid, None)
     link = _post_link(chat, posted.id)
-    when = datetime.now().strftime("%H:%M %d/%m/%Y")
+    # VPS chạy UTC — luôn format Asia/Ho_Chi_Minh cho người dùng VN
+    when = format_vn(now_vn(), FMT_HM_DMY)
     await status.edit(
         f"{E_SUCCESS} Đã đăng bài lên <b>{html.escape(chat.title or 'kênh')}</b> lúc {when}.\n"
         f"{E_LINK} <a href=\"{html.escape(link, quote=True)}\">Xem bài đăng</a>",
@@ -1241,7 +1250,7 @@ async def up_leave_autoban(_, update: ChatMemberUpdated):
         "username": user.username or "",
         "left_chat_id": left_chat,
         "banned_chats": banned_ok,
-        "banned_at": time.time(),
+        "banned_at": utc_timestamp(),
     })
     await _log_up(
         f"{E_WARN} /up auto-ban: <a href=\"tg://user?id={user.id}\">{html.escape(name or str(user.id))}</a> "
@@ -1312,10 +1321,7 @@ async def command_up_banlist(_, message: Message):
         uid = rec.get("user_id") or rec.get("_id")
         name = html.escape(str(rec.get("name") or ""))
         when = rec.get("banned_at")
-        try:
-            when_s = datetime.fromtimestamp(float(when)).strftime("%d/%m %H:%M") if when else "?"
-        except Exception:
-            when_s = "?"
+        when_s = format_ts_vn(when, FMT_DM_HM) if when else "?"
         left = rec.get("left_chat_id") or "?"
         lines.append(f"• <code>{uid}</code> {name} — rời <code>{left}</code> lúc {when_s}")
     await _reply_html(message, "\n".join(lines))

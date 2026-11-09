@@ -6,6 +6,7 @@ import logging
 from urllib.parse import urlparse
 from collections import deque
 from datetime import datetime, timezone
+from dorasuper.helper.timezone import now_vn
 from logging import getLogger
 
 import aiohttp
@@ -563,8 +564,8 @@ _VI_WEEKDAYS = ("Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"
 
 def _get_system_prompt_with_date() -> str:
     """Trả về SYSTEM_PROMPT với thứ, ngày, tháng, năm hiện tại và danh sách emoji được phép."""
-    now = datetime.now()
-    date_en = now.strftime("%A, %B %d, %Y")  # e.g. Monday, March 02, 2026
+    now = now_vn()
+    date_en = now.strftime("%A, %B %d, %Y")  # VN local date for the model
     thu = _VI_WEEKDAYS[now.weekday()]
     date_vi = f"{thu}, ngày {now.day} tháng {now.month} năm {now.year}"
     return (
