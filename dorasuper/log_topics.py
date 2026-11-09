@@ -195,8 +195,10 @@ async def ensure_log_topics(app) -> None:
         LOGGER.warning("LOG_TOPICS: quét nhanh lỗi: %s", e)
     mapping = _apply(saved, found)
 
+    # Tạo ngay topic còn thiếu (vd: File, Tin nhắn riêng). Không chờ quét hết kênh —
+    # các topic cũ đã có trong Mongo; topic mới sẽ không xuất hiện trong lịch sử.
     for key, name in _TOPICS_DEF:
-        if mapping[key] is None and done:  # chỉ tạo khi đã quét hết mà vẫn không có
+        if mapping[key] is None:
             try:
                 t = await app.create_forum_topic(chat_id=LOG_CHANNEL, title=name)
                 mapping[key] = t.id
