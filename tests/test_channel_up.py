@@ -624,3 +624,36 @@ def test_channel_button_texts_use_unicode_not_tg_emoji():
     assert cu.GROUP_BUTTON_LABEL == "Nhóm chat"
     assert cu.JOINED_BUTTON_LABEL == "Đã tham gia, tải file"
 
+
+def test_reply_markup_to_botapi_keeps_icon_custom_emoji_id():
+    src = {
+        "inline_keyboard": [[
+            {
+                "text": "Tải file",
+                "callback_data": "x",
+                "icon_custom_emoji_id": "4965313018326942268",
+            }
+        ]]
+    }
+    out = cu.reply_markup_to_botapi(src)
+    assert out["inline_keyboard"][0][0]["icon_custom_emoji_id"] == "4965313018326942268"
+    assert out["inline_keyboard"][0][0]["text"] == "Tải file"
+    assert cu.markup_has_button_icons(src) is True
+    stripped = cu.strip_button_icons_to_unicode(
+        src, {"4965313018326942268": "📥"},
+    )
+    assert "icon_custom_emoji_id" not in stripped["inline_keyboard"][0][0]
+    assert stripped["inline_keyboard"][0][0]["text"].startswith("📥")
+
+
+def test_icon_id_from_emoji_tag():
+    assert cu.icon_id_from_emoji_tag(
+        '<tg-emoji emoji-id="4965313018326942268">📥</tg-emoji>'
+    ) == "4965313018326942268"
+    assert cu.icon_id_from_emoji_tag("plain") is None
+
+
+def test_botapi_button_helper():
+    b = cu.botapi_button("Tải file", callback_data="x", icon_custom_emoji_id="123")
+    assert b == {"text": "Tải file", "callback_data": "x", "icon_custom_emoji_id": "123"}
+
