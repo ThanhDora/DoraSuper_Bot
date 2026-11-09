@@ -188,9 +188,9 @@ async def del_thumb(_, m: Message):
 # ---------- Metadata ----------
 def _meta_kb(on: bool):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(f"{E_CHECK} Metadata: BẬT" if on else f"{E_CROSS} Metadata: TẮT",
+        [InlineKeyboardButton("Metadata: BẬT" if on else "Metadata: TẮT",
                               callback_data="rnmeta_toggle")],
-        [InlineKeyboardButton(f"{E_GEAR} Đặt metadata riêng", callback_data="rnmeta_custom")],
+        [InlineKeyboardButton("Đặt metadata riêng", callback_data="rnmeta_custom")],
     ])
 
 

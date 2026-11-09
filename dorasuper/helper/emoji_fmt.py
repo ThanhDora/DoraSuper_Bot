@@ -29,5 +29,5 @@ EMOJI_FMT = {
 }
 
 
-# The button constructor extracts the id into icon_custom_emoji_id, never sends tags.
-EMOJI_FMT_BTN = EMOJI_FMT.copy()
+# Button labels stay plain text: placeholders expand to empty so no emoji/icons leak onto buttons.
+EMOJI_FMT_BTN = {key: "" for key in EMOJI_FMT}

@@ -12,7 +12,7 @@ def keyboard(buttons_list, row_width: int = 2):
     if theres, a url, it will make url button, else callback button
     """
     buttons = InlineKeyboard(row_width=row_width)
-    # Ikb is patched at startup: tagged templates become icon_custom_emoji_id,
+    # Ikb is patched at startup: tagged templates / glyphs are stripped to plain text,
     # never HTML embedded in the button label.
     data = [
         Ikb(text=str(i[0]), url=str(i[1]))

@@ -20,13 +20,13 @@ APPROVE_BUTTON_LABEL = "Duyệt"
 REJECT_BUTTON_LABEL = "Từ chối"
 REVOKE_BUTTON_LABEL = "Gỡ quyền"
 
-# Plain unicode prefixes everywhere (channel + PM/groups). No icon_custom_emoji_id / tg-emoji on buttons.
-DOWNLOAD_BUTTON_TEXT = f"📥 {DOWNLOAD_BUTTON_LABEL}"
-CHANNEL_BUTTON_TEXT = f"📢 {CHANNEL_BUTTON_LABEL}"
-GROUP_BUTTON_TEXT = f"💬 {GROUP_BUTTON_LABEL}"
-APPROVE_BUTTON_TEXT = f"✅ {APPROVE_BUTTON_LABEL}"
-REJECT_BUTTON_TEXT = f"❌ {REJECT_BUTTON_LABEL}"
-REVOKE_BUTTON_TEXT = f"❌ {REVOKE_BUTTON_LABEL}"
+# Plain text labels only — no emoji / icon_custom_emoji_id / tg-emoji on buttons.
+DOWNLOAD_BUTTON_TEXT = DOWNLOAD_BUTTON_LABEL
+CHANNEL_BUTTON_TEXT = CHANNEL_BUTTON_LABEL
+GROUP_BUTTON_TEXT = GROUP_BUTTON_LABEL
+APPROVE_BUTTON_TEXT = APPROVE_BUTTON_LABEL
+REJECT_BUTTON_TEXT = REJECT_BUTTON_LABEL
+REVOKE_BUTTON_TEXT = REVOKE_BUTTON_LABEL
 
 _CLEAR_LINK_WORDS = frozenset({
     "off", "clear", "none", "xoa", "xoá", "xóa", "huy", "huỷ", "hủy",
@@ -143,7 +143,7 @@ def reply_markup_to_botapi(reply_markup) -> dict | None:
     return {"inline_keyboard": rows_out}
 
 
-JOINED_BUTTON_TEXT = f"✅ {JOINED_BUTTON_LABEL}"
+JOINED_BUTTON_TEXT = JOINED_BUTTON_LABEL
 BLOCKQUOTE_FEATURES_OPEN = "<blockquote expandable>"
 
 

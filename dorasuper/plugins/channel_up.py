@@ -112,7 +112,7 @@ async def _can_use_up(user_id) -> bool:
 
 
 def _approval_markup(user_id: int) -> InlineKeyboardMarkup:
-    # Plain unicode labels only (no icon_custom_emoji_id / tg-emoji on buttons).
+    # Plain text labels only (no emoji / icon_custom_emoji_id / tg-emoji on buttons).
     return InlineKeyboardMarkup(
         [[
             InlineKeyboardButton(APPROVE_BUTTON_TEXT, callback_data=f"upacl_ok_{user_id}"),
@@ -327,7 +327,7 @@ def _bot_username() -> str:
 async def _post_markup(token: str, *, for_channel: bool = False) -> InlineKeyboardMarkup:
     """Hàng 1: Tải file. Hàng 2: Kênh | Nhóm chat (nếu đã setup).
 
-    Mọi nơi (kênh + PM/group): unicode-prefixed plain labels — không dùng icon_custom_emoji_id.
+    Mọi nơi (kênh + PM/group): plain text labels — không emoji / icon_custom_emoji_id.
     for_channel giữ để tương thích call site; không đổi hành vi.
     """
     del for_channel  # same labels everywhere
@@ -345,7 +345,7 @@ async def _post_markup(token: str, *, for_channel: bool = False) -> InlineKeyboa
 
 
 def _join_gate_markup(token: str, channel_url, group_url) -> InlineKeyboardMarkup:
-    """PM join prompt: unicode-prefixed labels only."""
+    """PM join prompt: plain text labels only."""
     rows = []
     link_row = []
     if channel_url:

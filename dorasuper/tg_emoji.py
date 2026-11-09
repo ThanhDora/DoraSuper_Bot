@@ -69,6 +69,34 @@ def with_unicode_fallback(text, alt):
     return f"{a} {label}"
 
 
+# Symbol / pictograph ranges commonly used as button decorations (not ASCII < >).
+_BUTTON_GLYPH_RE = re.compile(
+    "["
+    "\U0001F300-\U0001FAFF"  # misc symbols & pictographs + supplemental
+    "\U00002600-\U000027BF"  # misc symbols + dingbats
+    "\U0001F1E0-\U0001F1FF"  # regional-indicator flags
+    "\U00002300-\U000023FF"  # misc technical
+    "\U00002B00-\U00002BFF"  # arrows etc.
+    "\U000025A0-\U000025FF"  # geometric shapes
+    "\U00002190-\U000021FF"  # arrows
+    "\uFE0F\u200D\u20E3"    # VS16, ZWJ, keycap
+    "]+",
+)
+
+
+def plain_button_label(text):
+    """Strip tg-emoji tags and unicode/symbol glyphs from a button label.
+
+    Keeps meaningful ASCII such as pagination '<' / '>'. Empty labels become
+    an invisible placeholder so Telegram still accepts the button.
+    """
+    label = EMOJI_TAG.sub("", str(text if text is not None else ""))
+    label = html.unescape(label)
+    label = _BUTTON_GLYPH_RE.sub("", label)
+    label = re.sub(r"\s+", " ", label).strip()
+    return label or "\u2060"
+
+
 def to_html(text):
     """Canonicalize both input forms without changing ids or fallback text."""
     return EMOJI_TAG.sub(
@@ -103,7 +131,7 @@ def emoji_error(error):
 
 
 def plain_markup(markup):
-    """Copy high-level inline markup, preserving button actions and labels."""
+    """Copy high-level inline markup; strip icons and decorative glyphs from labels."""
     if markup is None or not hasattr(markup, "inline_keyboard"):
         return markup
     result = copy(markup)
@@ -112,12 +140,9 @@ def plain_markup(markup):
         new_row = []
         for button in row:
             button = copy(button)
-            alt = getattr(button, "_dora_icon_alt", None) or alt_for_icon(
-                getattr(button, "icon_custom_emoji_id", None)
-            )
             button.icon_custom_emoji_id = None
-            if alt:
-                button.text = with_unicode_fallback(getattr(button, "text", None) or "", alt)
+            button._dora_icon_alt = None
+            button.text = plain_button_label(getattr(button, "text", None) or "")
             new_row.append(button)
         result.inline_keyboard.append(new_row)
     return result
@@ -147,11 +172,9 @@ def _plain_request(value):
         return value
     result = value
     if getattr(value, "style", None) is not None:
-        icon = getattr(value.style, "icon", None)
         result = without_style(value)
-        alt = alt_for_icon(icon)
-        if alt and hasattr(result, "text"):
-            new_text = with_unicode_fallback(getattr(result, "text", None) or "", alt)
+        if hasattr(result, "text"):
+            new_text = plain_button_label(getattr(result, "text", None) or "")
             if new_text != getattr(result, "text", None):
                 result = copy(result)
                 result.text = new_text
@@ -171,7 +194,7 @@ def install():
     """Idempotent, process-local patches for the pinned older pyrofork."""
     from pyrogram import Client, types
     from pyrogram.parser.html import Parser, HTML
-    from .tg_keyboard import install_raw_types, with_icon
+    from .tg_keyboard import install_raw_types
     if getattr(Parser, "_dora_official_emoji", False):
         return
     install_raw_types()
@@ -200,27 +223,17 @@ def install():
 
     @wraps(init)
     def button_init(self, text, *args, icon_custom_emoji_id=None, **kwargs):
-        raw_text = str(text)
-        match = EMOJI_TAG.search(raw_text)
-        label, extracted = split_button(raw_text)
+        # Project policy: every button is plain text — no custom emoji icons,
+        # no unicode decorative glyphs. icon_custom_emoji_id is accepted then ignored.
+        del icon_custom_emoji_id
+        label = plain_button_label(text)
         init(self, label, *args, **kwargs)
-        alt = match["alt"] if match else None
-        icon_id = str(icon_custom_emoji_id or extracted) if (
-            premium_enabled() and (icon_custom_emoji_id or extracted)
-        ) else None
-        if icon_id and alt is None:
-            alt = alt_for_icon(icon_id)
-        self.icon_custom_emoji_id = icon_id
-        self._dora_icon_alt = alt
-        # When premium icons are off, keep a unicode-prefixed label.
-        if not icon_id and alt:
-            self.text = with_unicode_fallback(label, alt)
+        self.icon_custom_emoji_id = None
+        self._dora_icon_alt = None
 
     @wraps(write)
     async def button_write(self, client):
-        button = await write(self, client)
-        icon = getattr(self, "icon_custom_emoji_id", None)
-        return with_icon(button, icon) if icon and premium_enabled() else button
+        return await write(self, client)
 
     def button_read(button):
         result = read(button)

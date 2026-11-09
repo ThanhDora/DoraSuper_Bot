@@ -15,7 +15,7 @@ import dorasuper
 from dorasuper import emoji
 from dorasuper.tg_emoji import (
     EMOJI_TAG, to_html, to_unicode, split_button, premium_enabled, install,
-    _plain_request, invoke_with_fallback, plain_markup,
+    _plain_request, invoke_with_fallback, plain_markup, plain_button_label,
 )
 from dorasuper.tg_keyboard import SCHEMA, STYLED_TYPES
 from pyrogram import raw, types
@@ -79,11 +79,11 @@ class EmojiTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(kwargs=kwargs):
                 button = types.InlineKeyboardButton(NEW+' Button', **kwargs)
                 self.assertEqual(button.text, 'Button')
-                self.assertEqual(button.icon_custom_emoji_id, '123')
+                self.assertIsNone(button.icon_custom_emoji_id)
                 wire = await button.write(client)
-                self.assertEqual(wire.style.icon, 123)
+                self.assertIsNone(getattr(wire, 'style', None))
                 decoded = TLObject.read(BytesIO(wire.write()))
-                self.assertEqual(decoded.style.icon, 123)
+                self.assertIsNone(getattr(decoded, 'style', None))
                 self.assertEqual(decoded.text, 'Button')
                 plain = _plain_request(wire)
                 self.assertIsNone(getattr(plain, 'style', None))
@@ -95,11 +95,14 @@ class EmojiTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_wire_constructor_and_flags(self):
         button = types.InlineKeyboardButton(NEW+' B', callback_data='q')
-        wire = (await button.write(None)).write()
-        # Official TL: keyboardButtonCallback#e62bc960, style at flags.10;
-        # keyboardButtonStyle#4fdd3430, icon at flags.3, then int64 document id.
-        self.assertEqual(wire[:24], bytes.fromhex(
-            '60c92be6 00040000 3034dd4f 08000000 7b00000000000000'))
+        wire_obj = await button.write(None)
+        wire = wire_obj.write()
+        # Plain callback button (no style / icon — project policy strips all button icons).
+        decoded = TLObject.read(BytesIO(wire))
+        self.assertEqual(decoded.text, 'B')
+        self.assertEqual(decoded.data, b'q')
+        self.assertIsNone(getattr(decoded, 'style', None))
+        self.assertIsNone(getattr(wire_obj, 'style', None))
 
     async def test_disabled_request_boundary(self):
         button = types.InlineKeyboardButton(NEW+' B', callback_data='q')
@@ -118,20 +121,24 @@ class EmojiTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(calls[0].entities, [])
         self.assertIsNone(getattr(calls[0].reply_markup.rows[0].buttons[0], 'style', None))
 
-    def test_button_format_preserves_tags(self):
+    def test_button_format_strips_emoji(self):
         ns = selected_source('dorasuper/helper/emoji_fmt.py',
             {'EMOJI_FMT', 'EMOJI_FMT_BTN'}, dict(vars(emoji)))
-        self.assertEqual(ns['EMOJI_FMT_BTN'], ns['EMOJI_FMT'])
-        label = '{E_MENU} Menu'.format(**ns['EMOJI_FMT_BTN'])
+        self.assertTrue(all(v == '' for v in ns['EMOJI_FMT_BTN'].values()))
+        label = '{E_MENU} Menu'.format(**ns['EMOJI_FMT_BTN']).strip()
         button = types.InlineKeyboardButton(label, callback_data='menu')
         self.assertEqual(button.text, 'Menu')
-        self.assertEqual(button.icon_custom_emoji_id, EMOJI_TAG.search(emoji.E_MENU)['id'])
+        self.assertIsNone(button.icon_custom_emoji_id)
+        self.assertEqual(plain_button_label('📥 Tải file'), 'Tải file')
+        self.assertEqual(plain_button_label('🇻🇳 Tiếng Việt'), 'Tiếng Việt')
 
-    async def test_explicit_icon_and_read(self):
+    async def test_explicit_icon_ignored(self):
         b = types.InlineKeyboardButton('Button', callback_data='q', icon_custom_emoji_id='456')
+        self.assertIsNone(b.icon_custom_emoji_id)
         wire = await b.write(None)
+        self.assertIsNone(getattr(wire, 'style', None))
         read = types.InlineKeyboardButton.read(TLObject.read(BytesIO(wire.write())))
-        self.assertEqual(read.icon_custom_emoji_id, '456')
+        self.assertIsNone(read.icon_custom_emoji_id)
         self.assertEqual(read.callback_data, 'q')
 
     async def test_disabled(self):
@@ -145,8 +152,10 @@ class EmojiTests(unittest.IsolatedAsyncioTestCase):
             self.assertIsNone(getattr(await b.write(None), 'style', None))
 
     async def test_rejected_icons_retry_once(self):
-        b = types.InlineKeyboardButton(NEW+' Button', callback_data='q')
-        wire = await b.write(None)
+        # Simulate a wire button that still carries a style icon (legacy / foreign).
+        from dorasuper.tg_keyboard import with_icon
+        b = types.InlineKeyboardButton('Button', callback_data='q')
+        wire = with_icon(await b.write(None), 123)
         query = raw.functions.messages.SendMessage(
             peer=raw.types.InputPeerSelf(), message='👍', random_id=99,
             entities=[raw.types.MessageEntityCustomEmoji(offset=0, length=2, document_id=123),
@@ -182,9 +191,9 @@ class EmojiTests(unittest.IsolatedAsyncioTestCase):
         m = types.InlineKeyboardMarkup([[b]])
         plain = plain_markup(m)
         self.assertIsNone(plain.inline_keyboard[0][0].icon_custom_emoji_id)
-        self.assertEqual(b.icon_custom_emoji_id, '123')
-        self.assertEqual(b.text, 'B')  # icon applied → no unicode prefix
-        self.assertEqual(plain.inline_keyboard[0][0].text, '👍 B')  # fallback unicode
+        self.assertIsNone(b.icon_custom_emoji_id)
+        self.assertEqual(b.text, 'B')
+        self.assertEqual(plain.inline_keyboard[0][0].text, 'B')
         self.assertEqual(plain.inline_keyboard[0][0].callback_data, 'payload')
 
     def test_idempotent(self):

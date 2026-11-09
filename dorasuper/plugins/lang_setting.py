@@ -31,7 +31,7 @@ def gen_langs_kb():
         lang = langdict[langs[0]]["main"]
         a = [
             InlineKeyboardButton(
-                f"{lang['language_flag']} {lang['language_name']}",
+                lang['language_name'],
                 callback_data=f"set_lang {langs[0]}",
             )
         ]
@@ -41,7 +41,7 @@ def gen_langs_kb():
             lang = langdict[langs[0]]["main"]
             a.append(
                 InlineKeyboardButton(
-                    f"{lang['language_flag']} {lang['language_name']}",
+                    lang['language_name'],
                     callback_data=f"set_lang {langs[0]}",
                 )
             )

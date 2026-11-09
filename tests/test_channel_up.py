@@ -460,10 +460,10 @@ def test_build_join_gate_keyboard_botapi():
     )
     rows = kb["inline_keyboard"]
     assert rows[0] == [
-        {"text": "📢 Kênh", "url": "https://t.me/c"},
-        {"text": "💬 Nhóm chat", "url": "https://t.me/g"},
+        {"text": "Kênh", "url": "https://t.me/c"},
+        {"text": "Nhóm chat", "url": "https://t.me/g"},
     ]
-    assert rows[1] == [{"text": "✅ Đã tham gia, tải file", "callback_data": "upjoin_deadbeef"}]
+    assert rows[1] == [{"text": "Đã tham gia, tải file", "callback_data": "upjoin_deadbeef"}]
     # no download URL that would bypass the gate
     assert all("upfile_" not in (b.get("url") or "") for row in rows for b in row)
 
@@ -473,12 +473,12 @@ def test_download_keyboard_botapi():
     assert kb == {
         "inline_keyboard": [[
             {
-                "text": "📥 Tải file",
+                "text": "Tải file",
                 "url": "https://t.me/DoraSuper_Bot?start=upfile_deadbeef",
             }
         ]]
     }
-    assert cu.DOWNLOAD_BUTTON_TEXT == "📥 Tải file"
+    assert cu.DOWNLOAD_BUTTON_TEXT == "Tải file"
     assert cu.DOWNLOAD_BUTTON_LABEL == "Tải file"
     assert "<tg-emoji" not in kb["inline_keyboard"][0][0]["text"]
     assert len(kb["inline_keyboard"][0][0]["text"]) <= 64
@@ -496,10 +496,10 @@ def test_download_keyboard_with_promo_links():
     )
     rows = kb["inline_keyboard"]
     assert len(rows) == 2
-    assert rows[0] == [{"text": "📥 Tải file", "url": "https://t.me/DoraSuper_Bot?start=upfile_tok"}]
+    assert rows[0] == [{"text": "Tải file", "url": "https://t.me/DoraSuper_Bot?start=upfile_tok"}]
     assert rows[1] == [
-        {"text": "📢 Kênh", "url": "https://t.me/MyChannel"},
-        {"text": "💬 Nhóm chat", "url": "https://t.me/+AbCdEf"},
+        {"text": "Kênh", "url": "https://t.me/MyChannel"},
+        {"text": "Nhóm chat", "url": "https://t.me/+AbCdEf"},
     ]
     for btn in rows[0] + rows[1]:
         assert len(btn["text"]) <= 64
@@ -509,7 +509,7 @@ def test_download_keyboard_with_promo_links():
         "Bot", "t", channel_url="https://t.me/c", group_url=None,
     )
     assert len(kb2["inline_keyboard"]) == 2
-    assert kb2["inline_keyboard"][1] == [{"text": "📢 Kênh", "url": "https://t.me/c"}]
+    assert kb2["inline_keyboard"][1] == [{"text": "Kênh", "url": "https://t.me/c"}]
     # Neither -> single row
     kb3 = cu.build_download_keyboard_botapi("Bot", "t")
     assert len(kb3["inline_keyboard"]) == 1
@@ -606,7 +606,7 @@ def test_format_up_acl_entry_and_line():
     assert "14:00 09/11/2026" in line
 
 
-def test_channel_button_texts_use_unicode_not_tg_emoji():
+def test_channel_button_texts_are_plain():
     for label in (
         cu.DOWNLOAD_BUTTON_TEXT,
         cu.CHANNEL_BUTTON_TEXT,
@@ -619,11 +619,17 @@ def test_channel_button_texts_use_unicode_not_tg_emoji():
         assert "<tg-emoji" not in label
         assert "icon_custom_emoji" not in label
         assert len(label) <= 64
-    assert cu.DOWNLOAD_BUTTON_TEXT == "📥 Tải file"
-    assert cu.CHANNEL_BUTTON_TEXT == "📢 Kênh"
-    assert cu.GROUP_BUTTON_TEXT == "💬 Nhóm chat"
-    assert cu.JOINED_BUTTON_TEXT == "✅ Đã tham gia, tải file"
-    assert cu.APPROVE_BUTTON_TEXT == "✅ Duyệt"
-    assert cu.REJECT_BUTTON_TEXT == "❌ Từ chối"
-    assert cu.REVOKE_BUTTON_TEXT == "❌ Gỡ quyền"
+    assert cu.DOWNLOAD_BUTTON_TEXT == "Tải file"
+    assert cu.CHANNEL_BUTTON_TEXT == "Kênh"
+    assert cu.GROUP_BUTTON_TEXT == "Nhóm chat"
+    assert cu.JOINED_BUTTON_TEXT == "Đã tham gia, tải file"
+    assert cu.APPROVE_BUTTON_TEXT == "Duyệt"
+    assert cu.REJECT_BUTTON_TEXT == "Từ chối"
+    assert cu.REVOKE_BUTTON_TEXT == "Gỡ quyền"
+    for label in (
+        cu.DOWNLOAD_BUTTON_TEXT, cu.CHANNEL_BUTTON_TEXT, cu.GROUP_BUTTON_TEXT,
+        cu.JOINED_BUTTON_TEXT, cu.APPROVE_BUTTON_TEXT, cu.REJECT_BUTTON_TEXT,
+        cu.REVOKE_BUTTON_TEXT,
+    ):
+        assert not any(ch in label for ch in "📥📢💬✅❌")
 
