@@ -124,5 +124,6 @@ async def clear_leave_ban(user_id: int):
 
 
 async def list_leave_bans(limit: int = 50):
-    cursor = _bans.find().sort("banned_at", -1).limit(max(1, int(limit)))
-    return await cursor.to_list(length=max(1, int(limit)))
+    lim = max(1, int(limit))
+    cursor = _bans.find().sort([("banned_at", -1)]).limit(lim)
+    return await cursor.to_list(length=lim)
