@@ -38,16 +38,6 @@ def test_artwork_url_larger():
     assert ru.artwork_url_larger(None) is None
 
 
-def test_create_itunes_artwork():
-    from io import BytesIO
-    from PIL import Image
-    buf = BytesIO()
-    Image.new("RGB", (64, 64), (20, 40, 200)).save(buf, format="PNG")
-    raw = ru.create_itunes_artwork(buf.getvalue(), size=128)
-    img = Image.open(BytesIO(raw))
-    assert img.size == (128, 128)
-    assert img.format == "PNG"
-
 
 def test_extract_bundle_info_from_ipa(tmp_path):
     import zipfile, plistlib
@@ -67,20 +57,6 @@ def test_extract_bundle_info_from_ipa(tmp_path):
     assert bid2 == "com.example.demo"
 
 
-def test_inject_itunes_artwork(tmp_path):
-    import zipfile
-    ipa = tmp_path / "a.ipa"
-    with zipfile.ZipFile(ipa, "w") as z:
-        z.writestr("Payload/A.app/Info.plist", b"x")
-        z.writestr("Payload/A.app/foo", b"bar")
-    art = b"PNGDATA"
-    out = ru.inject_itunes_artwork_into_ipa(str(ipa), art, out_dir=str(tmp_path))
-    assert out and Path(out).exists()
-    with zipfile.ZipFile(out) as z:
-        assert "iTunesArtwork" in z.namelist()
-        assert z.read("iTunesArtwork") == art
-        assert z.read("Payload/A.app/foo") == b"bar"
-
 
 def test_caption_gamename():
     assert ru.format_caption("{gamename} - {filename}", "a.ipa", "1MB", "00:00:00", "My Game") == "My Game - a.ipa"
@@ -90,3 +66,17 @@ def test_sanitize_and_search_terms():
     assert "/" not in ru.sanitize_filename_for_app("A/B:C")
     terms = ru._search_terms_for_bundle("com.company.myapp")
     assert "com.company.myapp" in terms and "myapp" in terms
+
+
+def test_no_ipa_artwork_inject():
+    """Regression: không còn chèn iTunesArtwork vào nội dung IPA."""
+    src = Path(__file__).parent.parent / "dorasuper/helper/rename_utils.py"
+    plugin = Path(__file__).parent.parent / "dorasuper/plugins/file_rename.py"
+    s = src.read_text(encoding="utf-8")
+    p = plugin.read_text(encoding="utf-8")
+    assert "inject_itunes_artwork_into_ipa" not in s
+    assert "fetch_itunes_artwork_and_inject_ipa" not in s
+    assert "create_itunes_artwork" not in s
+    assert "fetch_itunes_artwork_and_inject_ipa" not in p
+    assert "chèn vào IPA" not in p
+    assert "fetch_itunes_artwork" in p  # thumb vẫn giữ

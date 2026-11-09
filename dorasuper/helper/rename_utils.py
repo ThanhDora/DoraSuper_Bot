@@ -169,13 +169,6 @@ def prepare_thumb_rgb(img: Image.Image) -> Image.Image:
     return img.convert("RGB")
 
 
-def create_itunes_artwork(icon_data: bytes, size: int = 1024) -> bytes:
-    img = Image.open(BytesIO(icon_data)).convert("RGBA")
-    img = img.resize((size, size), getattr(Image, "LANCZOS", Image.BICUBIC))
-    out = BytesIO()
-    img.save(out, format="PNG", optimize=True)
-    return out.getvalue()
-
 
 def _bundle_id_from_plist(plist):
     try:
@@ -316,61 +309,6 @@ def get_bundle_id_from_file(file_path, extension_hint=None):
     if low.endswith(".deb"):
         return extract_bundle_info_from_deb(file_path)
     return None, None, None
-
-
-def inject_itunes_artwork_into_ipa(ipa_path, artwork_bytes, out_dir=None):
-    """Chèn file iTunesArtwork vào IPA (copy zip, không giải nén hết)."""
-    ipa_path = Path(ipa_path).resolve()
-    if not ipa_path.exists():
-        return None
-    if out_dir:
-        os.makedirs(out_dir, exist_ok=True)
-        fd, out_ipa = tempfile.mkstemp(suffix=".ipa", prefix="ipa_art_", dir=out_dir)
-    else:
-        fd, out_ipa = tempfile.mkstemp(suffix=".ipa", prefix="ipa_art_")
-    os.close(fd)
-    try:
-        with zipfile.ZipFile(ipa_path, "r") as zin, zipfile.ZipFile(
-            out_ipa, "w", zipfile.ZIP_DEFLATED
-        ) as zout:
-            for item in zin.infolist():
-                if item.filename == "iTunesArtwork":
-                    continue
-                zout.writestr(item, zin.read(item.filename))
-            zout.writestr("iTunesArtwork", artwork_bytes)
-        return out_ipa
-    except Exception as e:
-        _log.warning("inject_itunes_artwork_into_ipa: %s", e)
-        try:
-            os.unlink(out_ipa)
-        except Exception:
-            pass
-        return None
-
-
-def _itunes_lookup_requests(bundle_id):
-    if not _requests:
-        return None
-    for url in (
-        f"https://itunes.apple.com/lookup?bundleId={bundle_id}",
-        f"https://itunes.apple.com/lookup?bundleId={bundle_id}&country=us",
-    ):
-        try:
-            data = _requests.get(url, timeout=15, headers=ITUNES_HEADERS).json()
-            if data.get("resultCount", 0) == 0:
-                continue
-            app = data["results"][0]
-            icon = app.get("artworkUrl512") or app.get("artworkUrl100")
-            return {
-                "icon_512": app.get("artworkUrl512"),
-                "icon_100": app.get("artworkUrl100"),
-                "icon": icon,
-                "track_name": app.get("trackName"),
-                "version": app.get("version"),
-            }
-        except Exception:
-            continue
-    return None
 
 
 def _download_artwork_requests(icon_url):
@@ -658,28 +596,3 @@ async def fetch_itunes_artwork(bundle_id, out_dir=None):
         return None, str(e)
 
 
-async def fetch_itunes_artwork_and_inject_ipa(bundle_id, ipa_path, out_dir=None):
-    """Render artwork 1024, chèn vào IPA, trả (modified_ipa, thumb_path, error)."""
-    icon_bytes = await fetch_icon_from_bundle(bundle_id)
-    if not icon_bytes:
-        return None, None, "Không lấy được icon từ iTunes."
-    artwork_bytes = create_itunes_artwork(icon_bytes, size=1024)
-    modified_ipa = inject_itunes_artwork_into_ipa(ipa_path, artwork_bytes, out_dir=out_dir)
-    if not modified_ipa:
-        return None, None, "Không chèn được iTunesArtwork vào IPA."
-    if out_dir:
-        os.makedirs(out_dir, exist_ok=True)
-        fd, thumb_path = tempfile.mkstemp(suffix=".png", prefix="itunes_thumb_", dir=out_dir)
-    else:
-        fd, thumb_path = tempfile.mkstemp(suffix=".png", prefix="itunes_thumb_")
-    os.close(fd)
-    try:
-        with open(thumb_path, "wb") as f:
-            f.write(artwork_bytes)
-        return modified_ipa, thumb_path, None
-    except Exception:
-        try:
-            os.unlink(thumb_path)
-        except Exception:
-            pass
-        return modified_ipa, None, None

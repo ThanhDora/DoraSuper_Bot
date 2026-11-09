@@ -22,7 +22,7 @@ from dorasuper.helper.pyro_progress import humanbytes, progress_for_pyrogram
 from dorasuper.helper.rename_utils import (
     MAX_RENAME_SIZE, add_prefix_suffix, change_metadata, convert_duration,
     ensure_extension, format_caption, probe, safe_filename,
-    get_bundle_id_from_file, fetch_itunes_artwork, fetch_itunes_artwork_and_inject_ipa,
+    get_bundle_id_from_file, fetch_itunes_artwork,
     fetch_itunes_track_name, fetch_itunes_version, sanitize_filename_for_app,
     prepare_thumb_rgb,
 )
@@ -55,7 +55,7 @@ __HELP__ = """<blockquote>Gửi tài liệu/video/audio vào chat riêng với b
 --change-subtitle-title Tên
 --change-author Tên</code>
 
-Khi đổi tên file <b>.ipa</b>/<b>.deb</b>, bot tự lấy ảnh từ Apple iTunes làm thumbnail (và chèn vào IPA nếu là .ipa).</blockquote>"""
+Khi đổi tên file <b>.ipa</b>/<b>.deb</b>, bot tự lấy ảnh từ Apple iTunes làm <b>thumbnail</b> Telegram (không chỉnh nội dung file).</blockquote>"""
 
 PM = filters.private & filters.incoming
 
@@ -350,25 +350,14 @@ async def process_rename(c, file_msg: Message, media, raw_name: str):
                     "rename iTunes bundle_id=%s app=%s version=%s file=%s",
                     bundle_id, app_name or "", version or "", orig_name,
                 )
-                await status.edit(f"{E_LOADING} Đang lấy ảnh từ iTunes...", parse_mode=HTML)
+                await status.edit(f"{E_LOADING} Đang lấy ảnh từ iTunes (thumbnail)...", parse_mode=HTML)
                 try:
-                    if is_ipa:
-                        modified_ipa, thumb_path, err = await fetch_itunes_artwork_and_inject_ipa(
-                            bundle_id, upload_path, out_dir=work,
-                        )
-                        if modified_ipa:
-                            upload_path = modified_ipa
-                            LOGGER.info("Đã chèn iTunesArtwork vào IPA. bundle_id=%s", bundle_id)
-                        if thumb_path:
-                            itunes_thumb = thumb_path
-                        elif err:
-                            LOGGER.warning("iTunes inject IPA: %s", err)
-                    if itunes_thumb is None:
-                        itunes_path, err = await fetch_itunes_artwork(bundle_id, out_dir=work)
-                        if itunes_path:
-                            itunes_thumb = itunes_path
-                        elif err:
-                            LOGGER.warning("iTunes artwork: %s", err)
+                    # Chỉ dùng artwork làm thumb Telegram — không chèn/sửa nội dung IPA.
+                    itunes_path, err = await fetch_itunes_artwork(bundle_id, out_dir=work)
+                    if itunes_path:
+                        itunes_thumb = itunes_path
+                    elif err:
+                        LOGGER.warning("iTunes artwork: %s", err)
                 except Exception as e:
                     LOGGER.warning("iTunes fetch error: %s", e, exc_info=True)
                 try:
