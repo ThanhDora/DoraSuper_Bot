@@ -12,6 +12,55 @@ ALLOWED_EXTENSIONS = {
     ".ipa", ".tipa", ".deb", ".dylib", ".zip", ".7z", ".rar", ".tar", ".gz", ".xz",
 }
 
+DOWNLOAD_BUTTON_TEXT = "Tải file"
+
+
+def build_upfile_url(bot_username: str, token: str) -> str:
+    user = (bot_username or "").lstrip("@").strip()
+    tok = (token or "").strip()
+    return f"https://t.me/{user}?start=upfile_{tok}"
+
+
+def build_download_keyboard_botapi(bot_username: str, token: str) -> dict:
+    """Inline keyboard JSON cho Bot API: một nút Tải file (chữ thường, không emoji)."""
+    return {
+        "inline_keyboard": [[
+            {"text": DOWNLOAD_BUTTON_TEXT, "url": build_upfile_url(bot_username, token)},
+        ]]
+    }
+
+
+def reply_markup_to_botapi(reply_markup) -> dict | None:
+    """Đổi InlineKeyboardMarkup (Pyrogram) hoặc dict sẵn sang payload reply_markup Bot API."""
+    if reply_markup is None:
+        return None
+    if isinstance(reply_markup, dict):
+        if "inline_keyboard" in reply_markup:
+            return reply_markup
+        return None
+    rows_out = []
+    for row in getattr(reply_markup, "inline_keyboard", None) or []:
+        buttons = []
+        for btn in row:
+            if isinstance(btn, dict):
+                item = {"text": btn.get("text") or ""}
+                if btn.get("url"):
+                    item["url"] = btn["url"]
+                elif btn.get("callback_data") is not None:
+                    item["callback_data"] = btn["callback_data"]
+                buttons.append(item)
+                continue
+            item = {"text": getattr(btn, "text", None) or ""}
+            url = getattr(btn, "url", None)
+            cb = getattr(btn, "callback_data", None)
+            if url:
+                item["url"] = url
+            elif cb is not None:
+                item["callback_data"] = cb
+            buttons.append(item)
+        rows_out.append(buttons)
+    return {"inline_keyboard": rows_out}
+
 APPSTORE_ID_RE = re.compile(
     r"(?:(?:apps|itunes)\.apple\.com/.+?/id|(?:apps|itunes)\.apple\.com/app/id)(\d+)"
     r"|[?&]id=(\d+)"

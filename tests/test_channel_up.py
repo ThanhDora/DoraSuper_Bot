@@ -236,6 +236,50 @@ def test_caption_escapes_ampersand_features():
     assert "Game.ipa" not in caption
 
 
+
+def test_download_keyboard_botapi():
+    kb = cu.build_download_keyboard_botapi("DoraSuper_Bot", "deadbeef")
+    assert kb == {
+        "inline_keyboard": [[
+            {
+                "text": "Tải file",
+                "url": "https://t.me/DoraSuper_Bot?start=upfile_deadbeef",
+            }
+        ]]
+    }
+    assert cu.DOWNLOAD_BUTTON_TEXT == "Tải file"
+    assert "<tg-emoji" not in kb["inline_keyboard"][0][0]["text"]
+    assert len(kb["inline_keyboard"][0][0]["text"]) <= 64
+    assert cu.build_upfile_url("@DoraSuper_Bot", "abc") == (
+        "https://t.me/DoraSuper_Bot?start=upfile_abc"
+    )
+
+
+def test_reply_markup_to_botapi_from_dict():
+    src = cu.build_download_keyboard_botapi("BotName", "tok123")
+    assert cu.reply_markup_to_botapi(src) == src
+    assert cu.reply_markup_to_botapi(None) is None
+
+
+class _FakeBtn:
+    def __init__(self, text, url=None, callback_data=None):
+        self.text = text
+        self.url = url
+        self.callback_data = callback_data
+
+
+class _FakeMarkup:
+    def __init__(self, rows):
+        self.inline_keyboard = rows
+
+
+def test_reply_markup_to_botapi_from_pyrogram_like():
+    markup = _FakeMarkup([[_FakeBtn("Tải file", url="https://t.me/x?start=upfile_1")]])
+    assert cu.reply_markup_to_botapi(markup) == {
+        "inline_keyboard": [[{"text": "Tải file", "url": "https://t.me/x?start=upfile_1"}]]
+    }
+
+
 def test_render_appstore_poster():
     buf = BytesIO()
     Image.new("RGB", (64, 64), (30, 80, 200)).save(buf, format="PNG")

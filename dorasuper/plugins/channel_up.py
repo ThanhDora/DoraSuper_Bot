@@ -17,17 +17,20 @@ from database.up_channel_db import (
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.emoji import (
-    E_DOWNLOAD, E_ERROR, E_GEAR, E_LINK, E_LOADING,
+    E_ERROR, E_GEAR, E_LINK, E_LOADING,
     E_SUCCESS, E_TIP, E_USER, E_WARN,
 )
 from dorasuper.helper.fame import mention_user
 from dorasuper.helper.html_entities import html_to_entities, strip_custom_emoji_entities
 from dorasuper.helper.channel_up import (
+    DOWNLOAD_BUTTON_TEXT,
     build_channel_caption,
+    build_upfile_url,
     is_allowed_package,
     is_appstore_url,
     lookup_appstore,
     render_appstore_poster,
+    reply_markup_to_botapi,
     split_features,
 )
 from dorasuper.vars import COMMAND_HANDLER, SUDO, UP_CHANNEL
@@ -158,8 +161,10 @@ def _has_custom_emoji(msg: Message) -> bool:
     return any(getattr(e, "type", None) == enums.MessageEntityType.CUSTOM_EMOJI for e in ents)
 
 
-async def _edit_caption_via_botapi(chat_id, message_id, html_caption: str) -> bool:
-    """Gắn caption HTML qua Bot API (blockquote, link, code...). Trả True khi edit ok."""
+async def _edit_caption_via_botapi(
+    chat_id, message_id, html_caption: str, reply_markup=None,
+) -> bool:
+    """Gắn caption HTML (+ reply_markup) qua Bot API. Trả True khi edit ok."""
     token = getattr(app, "bot_token", None)
     if not token:
         return False
@@ -173,6 +178,9 @@ async def _edit_caption_via_botapi(chat_id, message_id, html_caption: str) -> bo
         "caption": html_caption,
         "parse_mode": "HTML",
     }
+    markup = reply_markup_to_botapi(reply_markup)
+    if markup is not None:
+        payload["reply_markup"] = markup
     try:
         timeout = aiohttp.ClientTimeout(total=20)
         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -195,7 +203,9 @@ def _html_without_unsupported_for_entities(html_caption: str) -> str:
 async def _apply_caption_html(message: Message, html_caption: str, reply_markup=None):
     """Gắn caption HTML sau khi ảnh đã lên. Ưu tiên Bot API / parse_mode HTML (giữ blockquote)."""
     chat_id = message.chat.id if message.chat else None
-    if chat_id and await _edit_caption_via_botapi(chat_id, message.id, html_caption):
+    if chat_id and await _edit_caption_via_botapi(
+        chat_id, message.id, html_caption, reply_markup=reply_markup,
+    ):
         try:
             refreshed = await app.get_messages(chat_id, message.id)
             if refreshed:
@@ -266,9 +276,10 @@ def _bot_username() -> str:
 
 def _download_markup(token: str) -> InlineKeyboardMarkup:
     username = _bot_username()
-    url = f"https://t.me/{username}?start=upfile_{token}"
+    url = build_upfile_url(username, token)
+    # Chữ nút phải plain text — không dùng <tg-emoji> (vượt 64 ký tự / không parse HTML).
     return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(f"{E_DOWNLOAD} Tải file", url=url)]]
+        [[InlineKeyboardButton(DOWNLOAD_BUTTON_TEXT, url=url)]]
     )
 
 
