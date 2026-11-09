@@ -194,8 +194,16 @@ def _all_matched(found: dict) -> bool:
     return True
 
 
+def _strip_emoji(s: str) -> str:
+    import re
+    s = re.sub(r"[\U00010000-\U0010ffff]", "", s or "")
+    s = re.sub(r"[\u2600-\u27BF\uFE0F\u200D]", "", s)
+    return " ".join(s.casefold().split())
+
+
 def _match_topic(key: str, name: str, topics: dict[int, str], used: set) -> int | None:
-    norm = lambda x: " ".join(x.casefold().split())
+    """Khớp tên topic: trim + casefold + bỏ emoji (File/file/📁 File đều được)."""
+    norm = _strip_emoji
     for tid, title in topics.items():
         if tid not in used and norm(title) == norm(name):
             return tid
@@ -317,7 +325,7 @@ async def ensure_log_topics(app) -> None:
         newest = await _probe_newest_id(app, hint)
         LOGGER.info("LOG_TOPICS: newest_msg_id≈%s (hint=%s)", newest, hint)
         # Topic create = service msg id; anh vừa tạo → gần cuối. Quét 800 id là đủ.
-        await _collect_topic_actions(app, max(1, newest - 800), newest, found)
+        await _collect_topic_actions(app, max(1, newest - 2000), newest, found)
         for tid in list(saved.values()):
             await _collect_topic_actions(app, max(1, int(tid) - 2), int(tid) + 2, found)
     except Exception as e:
