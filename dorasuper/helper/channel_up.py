@@ -792,3 +792,164 @@ def parse_up_user_ref(raw: str) -> dict:
         return {"kind": "username", "value": "@" + text}
     return {"kind": "invalid", "value": text}
 
+
+
+def format_up_file_size(size_in_bytes) -> str:
+    """Kích thước đọc được (vd: 412.30 MB). Chuỗi rỗng nếu không có số hợp lệ."""
+    if size_in_bytes is None or size_in_bytes == "":
+        return ""
+    try:
+        n = float(size_in_bytes)
+    except (TypeError, ValueError):
+        return ""
+    if n < 0:
+        return ""
+    units = ["B", "KB", "MB", "GB", "TB"]
+    idx = 0
+    while n >= 1024 and idx < len(units) - 1:
+        n /= 1024
+        idx += 1
+    if idx == 0:
+        return f"{int(n)}B"
+    return f"{n:.2f} {units[idx]}"
+
+
+def channel_post_link(chat_id=None, message_id=None, username: str | None = None) -> str | None:
+    """Link t.me tới một tin trên kênh/nhóm. None nếu thiếu message_id và không có username+id."""
+    if not message_id:
+        return None
+    try:
+        mid = int(message_id)
+    except (TypeError, ValueError):
+        return None
+    uname = (username or "").strip().lstrip("@")
+    if uname:
+        return f"https://t.me/{uname}/{mid}"
+    if chat_id is None or chat_id == "":
+        return None
+    raw = str(chat_id)
+    if raw.startswith("-100"):
+        raw = raw[4:]
+    else:
+        raw = raw.lstrip("-")
+    if not raw:
+        return None
+    return f"https://t.me/c/{raw}/{mid}"
+
+
+def _user_full_name(user) -> str:
+    if user is None:
+        return ""
+    if isinstance(user, dict):
+        first = (user.get("first_name") or "").strip()
+        last = (user.get("last_name") or "").strip()
+    else:
+        first = (getattr(user, "first_name", None) or "").strip()
+        last = (getattr(user, "last_name", None) or "").strip()
+    return " ".join(p for p in (first, last) if p)
+
+
+def _user_attr(user, name, default=None):
+    if user is None:
+        return default
+    if isinstance(user, dict):
+        return user.get(name, default)
+    return getattr(user, name, default)
+
+
+_DOWNLOAD_BLOCK_LABELS = {
+    "not_joined": "bị chặn — chưa tham gia Kênh/Nhóm chat",
+    "leave_ban": "bị chặn — đã bị cấm vì rời Kênh/Nhóm chat",
+    "admin_ban": "bị chặn — đang bị cấm trong Kênh/Nhóm chat",
+}
+
+
+def build_up_download_log(
+    user,
+    rec: dict | None = None,
+    *,
+    delivered: bool,
+    block_reason: str | None = None,
+    when_str: str | None = None,
+) -> str:
+    """HTML log (không emoji) khi người dùng bấm Tải file trên bài /up."""
+    rec = rec or {}
+    if when_str is None:
+        from datetime import datetime, timedelta, timezone
+        try:
+            from zoneinfo import ZoneInfo
+            tz = ZoneInfo("Asia/Ho_Chi_Minh")
+        except Exception:  # pragma: no cover
+            tz = timezone(timedelta(hours=7))
+        when_str = datetime.now(tz).strftime("%H:%M:%S %d/%m/%Y") + " Asia/Saigon"
+
+    if delivered:
+        status = "đã gửi"
+    else:
+        status = _DOWNLOAD_BLOCK_LABELS.get(block_reason or "", "") or (
+            f"bị chặn — {block_reason}" if block_reason else "bị chặn"
+        )
+
+    uid = _user_attr(user, "id")
+    try:
+        uid = int(uid) if uid is not None else None
+    except (TypeError, ValueError):
+        uid = None
+    full_name = _user_full_name(user) or (str(uid) if uid is not None else "Không rõ")
+    username = (_user_attr(user, "username") or "") or ""
+    username = str(username).strip().lstrip("@")
+    lang = (_user_attr(user, "language_code") or "") or ""
+    lang = str(lang).strip()
+    is_premium = bool(_user_attr(user, "is_premium", False))
+    is_bot = bool(_user_attr(user, "is_bot", False))
+    dc_id = _user_attr(user, "dc_id", None)
+
+    if uid is not None:
+        id_html = f'<a href="tg://user?id={uid}"><code>{uid}</code></a>'
+    else:
+        id_html = "không rõ"
+
+    lines = [
+        f"Tải file: {html.escape(status)}",
+        f"Thời gian: {html.escape(when_str)}",
+        "",
+        "Tài khoản",
+        f"Tên: {html.escape(full_name)}",
+        f"Username: @{html.escape(username)}" if username else "Username: không có",
+        f"ID: {id_html}",
+        f"Ngôn ngữ: {html.escape(lang) if lang else 'không rõ'}",
+        f"Premium: {'có' if is_premium else 'không'}",
+        f"Bot: {'có' if is_bot else 'không'}",
+    ]
+    if dc_id is not None and str(dc_id).strip() != "":
+        lines.append(f"DC: {html.escape(str(dc_id))}")
+    else:
+        lines.append("DC: không rõ")
+
+    game = (rec.get("name") or "").strip() or "không rõ"
+    version = (rec.get("version") or "").strip()
+    bundle = (rec.get("bundle_id") or "").strip()
+    filename = (rec.get("filename") or "").strip()
+    size_txt = format_up_file_size(rec.get("file_size"))
+    post_url = (rec.get("post_url") or "").strip() or channel_post_link(
+        rec.get("post_chat_id"),
+        rec.get("post_msg_id"),
+        rec.get("post_username"),
+    )
+
+    lines += ["", "File game"]
+    lines.append(f"Tên: {html.escape(game)}")
+    if version:
+        lines.append(f"Phiên bản: {html.escape(version)}")
+    if bundle:
+        lines.append(f"Bundle: <code>{html.escape(bundle)}</code>")
+    if post_url:
+        safe_href = html.escape(post_url, quote=True)
+        lines.append(f'Bài đăng: <a href="{safe_href}">{html.escape(post_url)}</a>')
+    if filename and size_txt:
+        lines.append(f"File: <code>{html.escape(filename)}</code> ({html.escape(size_txt)})")
+    elif filename:
+        lines.append(f"File: <code>{html.escape(filename)}</code>")
+    elif size_txt:
+        lines.append(f"File: {html.escape(size_txt)}")
+    return "\n".join(lines)

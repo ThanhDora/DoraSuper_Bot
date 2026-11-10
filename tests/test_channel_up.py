@@ -713,3 +713,81 @@ def test_render_poster_from_arbitrary_photo():
     img = Image.open(BytesIO(poster))
     assert img.format == "JPEG"
     assert img.size[0] == img.size[1]
+
+
+class _User:
+    def __init__(self, **kw):
+        self.id = kw.get("id", 123)
+        self.first_name = kw.get("first_name", "Nguyen")
+        self.last_name = kw.get("last_name", "Van A")
+        self.username = kw.get("username", "nguyenvana")
+        self.language_code = kw.get("language_code", "vi")
+        self.is_premium = kw.get("is_premium", True)
+        self.is_bot = kw.get("is_bot", False)
+        self.dc_id = kw.get("dc_id", 5)
+
+
+def test_format_up_file_size():
+    assert cu.format_up_file_size(None) == ""
+    assert cu.format_up_file_size("x") == ""
+    assert cu.format_up_file_size(512) == "512B"
+    assert cu.format_up_file_size(1024) == "1.00 KB"
+    assert cu.format_up_file_size(432537600).endswith("MB")
+
+
+def test_channel_post_link():
+    assert cu.channel_post_link(-100123, 99, "MyChan") == "https://t.me/MyChan/99"
+    assert cu.channel_post_link(-1003476714676, 42) == "https://t.me/c/3476714676/42"
+    assert cu.channel_post_link(None, None) is None
+
+
+def test_download_log_delivered_no_emoji():
+    rec = {
+        "name": "Clash of Clans",
+        "version": "16.0.1",
+        "bundle_id": "com.supercell.clashofclans",
+        "filename": "Clash.ipa",
+        "file_size": 432537600,
+        "post_url": "https://t.me/c/111/222",
+    }
+    text = cu.build_up_download_log(
+        _User(), rec, delivered=True, when_str="14:00:00 10/11/2026 Asia/Saigon",
+    )
+    assert text.startswith("Tải file: đã gửi")
+    assert "Thời gian: 14:00:00 10/11/2026 Asia/Saigon" in text
+    assert "Tên: Nguyen Van A" in text
+    assert "Username: @nguyenvana" in text
+    assert 'href="tg://user?id=123"' in text
+    assert "<code>123</code>" in text
+    assert "Ngôn ngữ: vi" in text
+    assert "Premium: có" in text
+    assert "Bot: không" in text
+    assert "DC: 5" in text
+    assert "Tên: Clash of Clans" in text
+    assert "Phiên bản: 16.0.1" in text
+    assert "Bundle: <code>com.supercell.clashofclans</code>" in text
+    assert 'href="https://t.me/c/111/222"' in text
+    assert "Clash.ipa" in text
+    assert _EMOJI_RE.search(text) is None
+
+
+def test_download_log_blocked_and_optional_fields():
+    user = _User(username=None, last_name="", language_code="", is_premium=False, dc_id=None)
+    rec = {"name": "Mod Game", "filename": "mod.ipa"}
+    text = cu.build_up_download_log(
+        user, rec, delivered=False, block_reason="not_joined",
+        when_str="14:01:00 10/11/2026 Asia/Saigon",
+    )
+    assert "Tải file: bị chặn — chưa tham gia Kênh/Nhóm chat" in text
+    assert "Username: không có" in text
+    assert "Premium: không" in text
+    assert "DC: không rõ" in text
+    assert "Bundle" not in text
+    assert "Phiên bản" not in text
+    assert "Bài đăng" not in text
+    assert "mod.ipa" in text
+    assert _EMOJI_RE.search(text) is None
+    ban = cu.build_up_download_log(
+        user, rec, delivered=False, block_reason="leave_ban", when_str="x",
+    )
+    assert "đã bị cấm vì rời" in ban

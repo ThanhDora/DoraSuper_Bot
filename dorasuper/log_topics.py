@@ -23,6 +23,7 @@ LOG_TOPIC_IDS: dict[str, int | None] = {
     "pm": None,
     "new_groups": None,
     "errors": None,
+    "downloads": None,
 }
 
 # Định nghĩa các topic cần tạo: (key trong DB, tên topic)
@@ -34,6 +35,7 @@ _TOPICS_DEF = [
     ("pm",         "Tin nhắn riêng"),
     ("new_groups", "🆕 Nhóm Mới"),
     ("errors",     "⚠️ Lỗi & Admin"),
+    ("downloads",  "Lượt tải file"),
 ]
 
 
@@ -46,6 +48,7 @@ _TOPIC_KEYWORDS = {
     "pm":         ("tin nhắn riêng", "nhắn riêng", "private", "pm"),
     "new_groups": ("nhóm mới", "new group"),
     "errors":     ("lỗi", "error"),
+    "downloads":  ("lượt tải file", "lượt tải", "tải file", "downloads"),
 }
 
 
@@ -201,19 +204,39 @@ def _strip_emoji(s: str) -> str:
     return " ".join(s.casefold().split())
 
 
+def _keyword_score(key: str, title: str) -> int:
+    """Độ dài keyword dài nhất khớp title (0 nếu không khớp)."""
+    t = _strip_emoji(title)
+    best = 0
+    for k in _TOPIC_KEYWORDS.get(key, ()):
+        if k and k in t:
+            best = max(best, len(k))
+    return best
+
+
 def _match_topic(key: str, name: str, topics: dict[int, str], used: set) -> int | None:
-    """Khớp tên topic: trim + casefold + bỏ emoji (File/file/📁 File đều được)."""
+    """Khớp tên topic: trim + casefold + bỏ emoji (File/file/📁 File đều được).
+
+    Keyword: nếu topic khác khớp cùng title với keyword dài hơn thì để lại
+    (tránh 'File' lấy nhầm topic 'Tải file' / 'Lượt tải file').
+    """
     norm = _strip_emoji
     for tid, title in topics.items():
         if tid not in used and norm(title) == norm(name):
             return tid
+    best_tid, best_score = None, 0
+    others = [k for k, _ in _TOPICS_DEF if k != key]
     for tid, title in topics.items():
         if tid in used:
             continue
-        t = norm(title)
-        if any(k in t for k in _TOPIC_KEYWORDS.get(key, ())):
-            return tid
-    return None
+        score = _keyword_score(key, title)
+        if not score:
+            continue
+        if any(_keyword_score(other, title) > score for other in others):
+            continue
+        if score > best_score:
+            best_tid, best_score = tid, score
+    return best_tid
 
 
 def _apply(saved: dict, found: dict) -> dict:
@@ -238,10 +261,8 @@ def _publish(mapping: dict) -> None:
     for k, v in mapping.items():
         LOG_TOPIC_IDS[k] = v
     LOGGER.info(
-        "LOG_TOPICS: commands=%s, photos=%s, videos=%s, files=%s, pm=%s, new_groups=%s, errors=%s",
-        LOG_TOPIC_IDS["commands"], LOG_TOPIC_IDS["photos"], LOG_TOPIC_IDS["videos"],
-        LOG_TOPIC_IDS["files"], LOG_TOPIC_IDS["pm"],
-        LOG_TOPIC_IDS["new_groups"], LOG_TOPIC_IDS["errors"],
+        "LOG_TOPICS: %s",
+        ", ".join(f"{k}={LOG_TOPIC_IDS.get(k)}" for k, _ in _TOPICS_DEF),
     )
 
 

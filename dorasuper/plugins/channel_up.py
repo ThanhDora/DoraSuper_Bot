@@ -1,3 +1,4 @@
+import asyncio
 import html
 import re
 import io
@@ -45,6 +46,7 @@ from dorasuper.helper.channel_up import (
     REVOKE_BUTTON_TEXT,
     build_channel_caption,
     build_delivery_captions,
+    build_up_download_log,
     build_upfile_url,
     is_allowed_package,
     is_appstore_url,
@@ -373,6 +375,49 @@ async def _log_up(text: str):
         LOGGER.warning("up log send failed: %s", e)
 
 
+def _schedule_up_download_log(user, rec, *, delivered: bool, block_reason: str | None = None):
+    """Ghi log Tải file vào topic downloads; lỗi không ảnh hưởng luồng gửi file."""
+    try:
+        asyncio.create_task(
+            _log_up_download(user, rec, delivered=delivered, block_reason=block_reason)
+        )
+    except Exception as e:
+        LOGGER.warning("up download log schedule failed: %s", e)
+
+
+async def _log_up_download(user, rec, *, delivered: bool, block_reason: str | None = None):
+    try:
+        from pyrogram.errors import FloodWait
+        from dorasuper.log_topics import topic_id
+
+        text = build_up_download_log(
+            user, rec or {}, delivered=delivered, block_reason=block_reason,
+        )
+        if not LOG_CHANNEL:
+            LOGGER.info("up download log (no LOG_CHANNEL): %s", text)
+            return
+        thread = topic_id("downloads")
+        last = None
+        for _ in range(3):
+            try:
+                await app.send_message(
+                    LOG_CHANNEL,
+                    text,
+                    parse_mode=enums.ParseMode.HTML,
+                    message_thread_id=thread,
+                    disable_web_page_preview=True,
+                )
+                return
+            except FloodWait as e:
+                last = e
+                wait = int(getattr(e, "value", 1) or 1)
+                await asyncio.sleep(min(wait, 25) + 1)
+        if last:
+            LOGGER.warning("up download log FloodWait: %s", last)
+    except Exception as e:
+        LOGGER.warning("up download log failed: %s", e)
+
+
 async def _bot_rights_in_chat(chat_id):
     """Trả (ok, status_text, can_ban)."""
     try:
@@ -672,6 +717,7 @@ async def command_up(_, message: Message):
         "file_msg_id": file_msg.id,
         "file_id": file_msg.document.file_id,
         "filename": filename,
+        "file_size": getattr(file_msg.document, "file_size", None) or 0,
         "ask_chat_id": message.chat.id,
     }
     if preset_link:
@@ -1050,6 +1096,7 @@ async def _handle_features(message: Message, raw: str):
             "file_chat_id": data.get("file_chat_id"),
             "file_msg_id": data.get("file_msg_id"),
             "filename": data.get("filename") or "",
+            "file_size": data.get("file_size") or 0,
             "name": data.get("name") or "",
             "version": data.get("version") or "",
             "bundle_id": data.get("bundle_id") or "",
@@ -1073,6 +1120,15 @@ async def _handle_features(message: Message, raw: str):
             parse_mode=enums.ParseMode.HTML,
         )
         return
+    try:
+        await save_up_file(token, {
+            "post_chat_id": chat.id,
+            "post_msg_id": posted.id,
+            "post_username": getattr(chat, "username", None) or "",
+            "post_url": _post_link(chat, posted.id),
+        })
+    except Exception as e:
+        LOGGER.warning("save up post link failed: %s", e)
     _sessions.pop(uid, None)
     link = _post_link(chat, posted.id)
     # VPS chạy UTC — luôn format Asia/Ho_Chi_Minh cho người dùng VN
@@ -1340,11 +1396,13 @@ async def deliver_up_file(message: Message, payload: str):
             await message.reply_text(
                 "Bạn đã bị cấm vì rời Kênh/Nhóm chat. Liên hệ admin để được mở lại."
             )
+            _schedule_up_download_log(user, rec, delivered=False, block_reason="leave_ban")
             return
         if block == "admin_ban":
             await message.reply_text(
                 "Bạn đang bị cấm trong Kênh/Nhóm chat. Liên hệ admin để được mở lại."
             )
+            _schedule_up_download_log(user, rec, delivered=False, block_reason="admin_ban")
             return
         # LEFT / never-joined / error → join prompt (kể cả khi còn Mongo record cũ lệch)
         if ban_rec and not gate.get("banned"):
@@ -1356,8 +1414,11 @@ async def deliver_up_file(message: Message, payload: str):
                 LOGGER.warning("clear stale leave-ban user=%s: %s", user.id, e)
         if not gate["ok"]:
             await _send_join_gate_prompt(message, token, gate)
+            _schedule_up_download_log(user, rec, delivered=False, block_reason="not_joined")
             return
-    await _deliver_up_file_content(message, rec, token)
+    ok = await _deliver_up_file_content(message, rec, token)
+    if ok:
+        _schedule_up_download_log(user, rec, delivered=True)
 
 
 @app.on_message(filters.command("start", COMMAND_HANDLER) & filters.private, group=_HANDLER_GROUP)
@@ -1386,11 +1447,10 @@ async def upjoin_recheck(_, cq: CallbackQuery):
         return
     if _is_sudo_id(cq.from_user.id):
         await cq.answer("Đang gửi file...")
-        # synthesize a message-like object for delivery chat
-        class _M:
-            pass
         m = cq.message
-        await _deliver_up_file_content(m, rec, token)
+        ok = await _deliver_up_file_content(m, rec, token)
+        if ok:
+            _schedule_up_download_log(cq.from_user, rec, delivered=True)
         return
     ban_rec = await get_leave_ban(cq.from_user.id)
     gate = await _evaluate_join_gate(cq.from_user.id)
@@ -1406,6 +1466,7 @@ async def upjoin_recheck(_, cq: CallbackQuery):
             )
         except Exception:
             pass
+        _schedule_up_download_log(cq.from_user, rec, delivered=False, block_reason="leave_ban")
         return
     if block == "admin_ban":
         await cq.answer("Bạn đang bị cấm trong Kênh/Nhóm. Liên hệ admin.", show_alert=True)
@@ -1415,6 +1476,7 @@ async def upjoin_recheck(_, cq: CallbackQuery):
             )
         except Exception:
             pass
+        _schedule_up_download_log(cq.from_user, rec, delivered=False, block_reason="admin_ban")
         return
     if ban_rec and not gate.get("banned"):
         try:
@@ -1423,9 +1485,12 @@ async def upjoin_recheck(_, cq: CallbackQuery):
             pass
     if not gate["ok"]:
         await cq.answer("Bạn chưa tham gia đủ Kênh và Nhóm chat.", show_alert=True)
+        _schedule_up_download_log(cq.from_user, rec, delivered=False, block_reason="not_joined")
         return
     await cq.answer("Đã xác nhận. Đang gửi file...")
-    await _deliver_up_file_content(cq.message, rec, token)
+    ok = await _deliver_up_file_content(cq.message, rec, token)
+    if ok:
+        _schedule_up_download_log(cq.from_user, rec, delivered=True)
 
 
 @app.on_chat_member_updated(group=0)
