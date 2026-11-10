@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import time
 import io
 import re
 from pathlib import Path
@@ -953,3 +954,121 @@ def build_up_download_log(
     elif size_txt:
         lines.append(f"File: {html.escape(size_txt)}")
     return "\n".join(lines)
+
+
+UP_DOWNLOAD_DEDUPE_WINDOW = 60.0
+ALREADY_DELIVERED_TEXT = "File này đã được gửi rồi. Hãy kiểm tra tin nhắn trước đó."
+
+
+class WindowDedupe:
+    """In-memory dedupe: acquire/complete trong cửa sổ vài giây, chống double-click."""
+
+    def __init__(self, window_sec: float = UP_DOWNLOAD_DEDUPE_WINDOW):
+        self.window_sec = float(window_sec)
+        self._state: dict[str, tuple[str, float]] = {}
+
+    def _purge(self, now: float) -> None:
+        expired = [k for k, (_, ts) in self._state.items() if now - ts > self.window_sec]
+        for k in expired:
+            self._state.pop(k, None)
+
+    def acquire(self, key: str, now: float | None = None) -> bool:
+        """True nếu giữ được key (lần đầu / hết hạn). False nếu đang pending hoặc vừa xong."""
+        now = time.time() if now is None else now
+        self._purge(now)
+        if key in self._state:
+            return False
+        self._state[key] = ("pending", now)
+        return True
+
+    def complete(self, key: str, *, ok: bool, now: float | None = None) -> None:
+        now = time.time() if now is None else now
+        if ok:
+            self._state[key] = ("done", now)
+            return
+        cur = self._state.get(key)
+        if cur and cur[0] == "pending":
+            self._state.pop(key, None)
+
+    def is_blocked(self, key: str, now: float | None = None) -> bool:
+        now = time.time() if now is None else now
+        self._purge(now)
+        return key in self._state
+
+    def clear(self) -> None:
+        self._state.clear()
+
+
+up_download_dedupe = WindowDedupe()
+
+
+def up_file_identity(rec: dict | None = None, token: str = "") -> str:
+    rec = rec or {}
+    for val in (token, rec.get("_id"), rec.get("post_msg_id"), rec.get("file_id"), rec.get("filename")):
+        if val is not None and str(val).strip():
+            return str(val).strip().lower()
+    return "unknown"
+
+
+def up_delivery_dedupe_key(user_id, rec: dict | None = None, token: str = "") -> str:
+    return f"deliver:{user_id}:{up_file_identity(rec, token)}"
+
+
+def up_download_log_dedupe_key(
+    user_id,
+    rec: dict | None = None,
+    token: str = "",
+    *,
+    delivered: bool,
+    block_reason: str | None = None,
+) -> str:
+    ident = up_file_identity(rec, token)
+    kind = "sent" if delivered else f"block:{(block_reason or 'blocked')}"
+    return f"log:{user_id}:{ident}:{kind}"
+
+
+def try_begin_up_delivery(
+    user_id, rec: dict | None = None, token: str = "", *, store: WindowDedupe | None = None, now: float | None = None,
+) -> bool:
+    if user_id is None:
+        return True
+    st = store or up_download_dedupe
+    return st.acquire(up_delivery_dedupe_key(user_id, rec, token), now)
+
+
+def finish_up_delivery(
+    user_id, rec: dict | None = None, token: str = "", *, ok: bool,
+    store: WindowDedupe | None = None, now: float | None = None,
+) -> None:
+    if user_id is None:
+        return
+    st = store or up_download_dedupe
+    st.complete(up_delivery_dedupe_key(user_id, rec, token), ok=ok, now=now)
+
+
+def try_begin_up_download_log(
+    user_id, rec: dict | None = None, token: str = "", *, delivered: bool,
+    block_reason: str | None = None, store: WindowDedupe | None = None, now: float | None = None,
+) -> bool:
+    """True nếu được phép gửi log (lần đầu trong cửa sổ)."""
+    if user_id is None:
+        return True
+    st = store or up_download_dedupe
+    key = up_download_log_dedupe_key(
+        user_id, rec, token, delivered=delivered, block_reason=block_reason,
+    )
+    return st.acquire(key, now)
+
+
+def finish_up_download_log(
+    user_id, rec: dict | None = None, token: str = "", *, delivered: bool,
+    block_reason: str | None = None, ok: bool,
+    store: WindowDedupe | None = None, now: float | None = None,
+) -> None:
+    if user_id is None:
+        return
+    st = store or up_download_dedupe
+    key = up_download_log_dedupe_key(
+        user_id, rec, token, delivered=delivered, block_reason=block_reason,
+    )
+    st.complete(key, ok=ok, now=now)

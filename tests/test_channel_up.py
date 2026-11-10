@@ -791,3 +791,57 @@ def test_download_log_blocked_and_optional_fields():
         user, rec, delivered=False, block_reason="leave_ban", when_str="x",
     )
     assert "đã bị cấm vì rời" in ban
+
+
+def test_window_dedupe_acquire_complete_and_expiry():
+    store = cu.WindowDedupe(window_sec=60)
+    assert store.acquire("k", now=100.0) is True
+    assert store.acquire("k", now=100.5) is False  # in-flight
+    store.complete("k", ok=True, now=101.0)
+    assert store.acquire("k", now=150.0) is False  # still in 60s window
+    assert store.acquire("k", now=162.0) is True   # expired
+
+
+def test_window_dedupe_failed_send_releases():
+    store = cu.WindowDedupe(window_sec=60)
+    assert store.acquire("k", now=1.0) is True
+    store.complete("k", ok=False, now=2.0)
+    assert store.acquire("k", now=2.5) is True  # retry allowed
+
+
+def test_delivery_dedupe_keys_and_helpers():
+    rec = {"_id": "abc123", "filename": "Game.ipa", "post_msg_id": 99}
+    assert cu.up_file_identity(rec) == "abc123"
+    assert cu.up_file_identity(rec, token="ABC123") == "abc123"
+    assert cu.up_delivery_dedupe_key(7, rec, "abc123") == "deliver:7:abc123"
+    sent = cu.up_download_log_dedupe_key(7, rec, delivered=True)
+    blocked = cu.up_download_log_dedupe_key(7, rec, delivered=False, block_reason="not_joined")
+    assert sent != blocked
+    assert sent.endswith(":sent")
+    assert "block:not_joined" in blocked
+
+
+def test_try_begin_delivery_and_log_independent():
+    store = cu.WindowDedupe(window_sec=60)
+    rec = {"_id": "tok1"}
+    assert cu.try_begin_up_delivery(1, rec, "tok1", store=store, now=10) is True
+    assert cu.try_begin_up_delivery(1, rec, "tok1", store=store, now=11) is False
+    # different user can still get the file
+    assert cu.try_begin_up_delivery(2, rec, "tok1", store=store, now=11) is True
+    # log sent can be reserved independently
+    assert cu.try_begin_up_download_log(1, rec, "tok1", delivered=True, store=store, now=11) is True
+    assert cu.try_begin_up_download_log(1, rec, "tok1", delivered=True, store=store, now=12) is False
+    # blocked is a different key
+    assert cu.try_begin_up_download_log(
+        1, rec, "tok1", delivered=False, block_reason="not_joined", store=store, now=12,
+    ) is True
+    assert cu.try_begin_up_download_log(
+        1, rec, "tok1", delivered=False, block_reason="not_joined", store=store, now=13,
+    ) is False
+    cu.finish_up_delivery(1, rec, "tok1", ok=False, store=store, now=14)
+    assert cu.try_begin_up_delivery(1, rec, "tok1", store=store, now=14.5) is True
+
+
+def test_already_delivered_text_plain():
+    assert "File này đã được gửi rồi" in cu.ALREADY_DELIVERED_TEXT
+    assert _EMOJI_RE.search(cu.ALREADY_DELIVERED_TEXT) is None
