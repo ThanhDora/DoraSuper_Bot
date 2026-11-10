@@ -401,6 +401,53 @@ def is_appstore_url(url: str) -> bool:
     return parse_appstore_track_id(text) is not None
 
 
+_HTTP_URL_RE = re.compile(r"https?://[^\s<>\'\"]+", re.I)
+_SKIP_TOKENS = frozenset({
+    "-", "—", "–", ".",
+    "bo qua", "bỏ qua", "boqua", "bỏqua",
+    "skip", "none", "n/a", "na",
+    "khong", "không", "k", "ko",
+})
+
+
+def extract_http_url(text: str) -> str | None:
+    """Lấy URL http(s) đầu tiên (hoặc www....). None nếu không có."""
+    raw = (text or "").strip()
+    if not raw:
+        return None
+    m = _HTTP_URL_RE.search(raw)
+    trail = ").,];>'\""
+    if m:
+        return m.group(0).rstrip(trail)
+    first = raw.split()[0]
+    if first.lower().startswith("www.") and "." in first[4:]:
+        return "https://" + first.rstrip(trail)
+    return None
+
+
+def is_skip_text(text: str) -> bool:
+    """True nếu người dùng muốn bỏ qua bước (phiên bản/bundle/link)."""
+    t = " ".join((text or "").strip().casefold().split())
+    return t in _SKIP_TOKENS
+
+
+def caption_link_label(store_url: str, link_label: str = "") -> str:
+    """Nhãn dòng link trong caption: 'App Store' hoặc 'Link'."""
+    label = (link_label or "").strip()
+    if label:
+        return label
+    return "App Store" if is_appstore_url(store_url) else "Link"
+
+
+def is_image_document(mime_type: str | None, file_name: str | None) -> bool:
+    """True nếu document là ảnh (mime hoặc đuôi file)."""
+    mime = (mime_type or "").lower()
+    if mime.startswith("image/"):
+        return True
+    name = (file_name or "").lower()
+    return name.endswith((".jpg", ".jpeg", ".png", ".webp", ".bmp"))
+
+
 def split_features(text: str) -> list[str]:
     lines = []
     for raw in (text or "").splitlines():
@@ -433,6 +480,7 @@ def _header_lines(
     store_url: str,
     *,
     include_bundle: bool,
+    link_label: str = "",
 ) -> list[str]:
     lines = [f"<b>{title}</b>"]
     if version:
@@ -441,7 +489,8 @@ def _header_lines(
         lines.append(f"Bundle · <code>{html.escape(bundle_id)}</code>")
     if store_url:
         safe_href = html.escape(store_url, quote=True)
-        lines.append(f'<a href="{safe_href}">App Store</a>')
+        label = html.escape(caption_link_label(store_url, link_label))
+        lines.append(f'<a href="{safe_href}">{label}</a>')
     return lines
 
 
@@ -456,6 +505,7 @@ def build_channel_caption(
     filename: str = "",
     emojis: dict | None = None,
     max_len: int = 1024,
+    link_label: str = "",
 ) -> tuple[str, str | None]:
     """Dựng caption HTML không emoji. Trả về (caption, phần tràn nếu quá max_len chữ hiện ra).
 
@@ -475,6 +525,7 @@ def build_channel_caption(
     def compose(include_bundle: bool, feats: list[str]) -> str:
         lines = _header_lines(
             title, version, bundle_id, store_url, include_bundle=include_bundle,
+            link_label=link_label,
         )
         if feats:
             quote = ["<b>Chức năng</b>", *feats]
@@ -510,6 +561,7 @@ def build_delivery_captions(
     features: list[str] | None = None,
     caption_max: int = 1024,
     text_max: int = 4096,
+    link_label: str = "",
 ) -> tuple[str, str | None]:
     """Caption gửi kèm file (≤ caption_max) và follow-up text nếu bị cắt (≤ text_max).
 
@@ -529,6 +581,7 @@ def build_delivery_captions(
         store_url=store_url or "",
         features=feats,
         max_len=caption_max,
+        link_label=link_label,
     )
     if not overflow:
         return file_caption, None
@@ -539,6 +592,7 @@ def build_delivery_captions(
         store_url=store_url or "",
         features=feats,
         max_len=text_max,
+        link_label=link_label,
     )
     return file_caption, full
 

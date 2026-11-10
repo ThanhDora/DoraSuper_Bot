@@ -633,3 +633,83 @@ def test_channel_button_texts_are_plain():
     ):
         assert not any(ch in label for ch in "📥📢💬✅❌")
 
+
+def test_extract_http_url():
+    assert cu.extract_http_url("https://apps.apple.com/app/id1") == "https://apps.apple.com/app/id1"
+    assert cu.extract_http_url("xem https://example.com/game?x=1 nhé").startswith("https://example.com/game")
+    assert cu.extract_http_url("www.example.com/mod") == "https://www.example.com/mod"
+    assert cu.extract_http_url("xin chao") is None
+    assert cu.extract_http_url("") is None
+    assert cu.extract_http_url("https://testflight.apple.com/join/abc").startswith("https://testflight.apple.com/")
+
+
+def test_is_skip_text():
+    assert cu.is_skip_text("bỏ qua")
+    assert cu.is_skip_text("  Bo Qua  ")
+    assert cu.is_skip_text("-")
+    assert cu.is_skip_text("skip")
+    assert cu.is_skip_text("không")
+    assert not cu.is_skip_text("1.2.3")
+    assert not cu.is_skip_text("My Game")
+
+
+def test_caption_link_label():
+    assert cu.caption_link_label("https://apps.apple.com/app/id1") == "App Store"
+    assert cu.caption_link_label("https://example.com/game") == "Link"
+    assert cu.caption_link_label("https://example.com", "Link") == "Link"
+    assert cu.caption_link_label("https://apps.apple.com/app/id1", "App Store") == "App Store"
+
+
+def test_is_image_document():
+    assert cu.is_image_document("image/jpeg", "x.bin")
+    assert cu.is_image_document("application/octet-stream", "cover.PNG")
+    assert not cu.is_image_document("application/zip", "game.ipa")
+    assert not cu.is_image_document(None, None)
+
+
+def test_caption_non_appstore_link_label():
+    caption, _ = cu.build_channel_caption(
+        name="Mod Game",
+        version="1.0",
+        store_url="https://example.com/mod",
+        link_label="Link",
+        features=["Mod menu"],
+    )
+    assert '>Link</a>' in caption
+    assert "App Store" not in caption
+    assert "https://example.com/mod" in caption
+    assert "Phiên bản · <code>1.0</code>" in caption
+    assert "Bundle" not in caption
+    assert _EMOJI_RE.search(caption) is None
+
+
+def test_caption_appstore_label_unchanged():
+    caption, _ = cu.build_channel_caption(
+        name="Clash of Clans",
+        store_url="https://apps.apple.com/app/id529479190",
+    )
+    assert ">App Store</a>" in caption
+    assert ">Link</a>" not in caption
+
+
+def test_delivery_captions_respect_link_label():
+    caption, followup = cu.build_delivery_captions(
+        name="Game",
+        version="2.0",
+        store_url="https://testflight.apple.com/join/xyz",
+        features=["Menu"],
+        link_label="Link",
+    )
+    assert followup is None
+    assert ">Link</a>" in caption
+    assert "App Store" not in caption
+    assert "Phiên bản · <code>2.0</code>" in caption
+
+
+def test_render_poster_from_arbitrary_photo():
+    buf = BytesIO()
+    Image.new("RGB", (640, 360), (30, 80, 160)).save(buf, format="JPEG")
+    poster = cu.render_appstore_poster(buf.getvalue(), title="Cover Game")
+    img = Image.open(BytesIO(poster))
+    assert img.format == "JPEG"
+    assert img.size[0] == img.size[1]

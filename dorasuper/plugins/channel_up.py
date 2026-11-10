@@ -48,6 +48,9 @@ from dorasuper.helper.channel_up import (
     build_upfile_url,
     is_allowed_package,
     is_appstore_url,
+    is_image_document,
+    is_skip_text,
+    extract_http_url,
     lookup_appstore,
     evaluate_join_gate_decision,
     format_up_acl_entry,
@@ -77,7 +80,7 @@ __HELP__ = f"""
 
 Chỉ admin bot và những người được ThanhDora duyệt mới dùng được /up. Người khác gửi /up sẽ chờ duyệt.
 
-<blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store, nhập chức năng, bot sẽ render ảnh và đăng lên kênh.
+<blockquote>/up – Trả lời file (hoặc gửi kèm lệnh) rồi làm theo hướng dẫn: dán link App Store hoặc link khác; nếu không lấy được App Store thì gửi ảnh bìa, nhập tên/phiên bản, rồi chức năng.
 /up_channel [@kenh | -100...] – Đặt kênh đăng bài (chỉ admin bot).
 /up_link_channel [@kenh | https://t.me/... | -100... | here] – Đặt nút + chat_id Kênh (off/xóa để gỡ). Bot cần admin có quyền ban.
 /up_link_group [@nhom | https://t.me/... | -100... | here] – Đặt nút + chat_id Nhóm chat (off/xóa để gỡ).
@@ -677,7 +680,9 @@ async def command_up(_, message: Message):
     await _reply_html(
         message,
         f"{E_LINK} Đã nhận file <code>{html.escape(filename)}</code>.\n"
-        f"Hãy gửi link App Store của game này (hoặc <code>/cancel</code> để hủy).",
+        f"Hãy gửi link App Store hoặc link khác của game này. "
+        f"Nếu không có link App Store, gửi <code>bỏ qua</code> rồi gửi ảnh bìa. "
+        f"<code>/cancel</code> để hủy.",
     )
 
 
@@ -711,10 +716,88 @@ async def channel_up_session(_, message: Message):
         await _request_up_access(message)
         return
     step = data.get("step")
+    raw = (message.text or "").strip()
     if step == "link":
-        await _handle_link(message, (message.text or "").strip())
+        await _handle_link(message, raw)
+    elif step == "cover":
+        await _reply_html(
+            message,
+            f"{E_TIP} Bước này cần một <b>ảnh bìa</b> (ảnh hoặc file ảnh). "
+            f"Gửi <code>/cancel</code> để hủy.",
+        )
+    elif step == "name":
+        await _handle_manual_name(message, raw)
+    elif step == "version":
+        await _handle_manual_version(message, raw)
+    elif step == "bundle":
+        await _handle_manual_bundle(message, raw)
     elif step == "features":
-        await _handle_features(message, (message.text or "").strip())
+        await _handle_features(message, raw)
+
+
+def _touch_session(uid, data: dict) -> dict:
+    data["started"] = time.time()
+    _sessions[uid] = data
+    return data
+
+
+def _cover_prompt() -> str:
+    return (
+        f"{E_TIP} Không tìm được thông tin App Store từ link này.\n"
+        f"Hãy gửi một <b>ảnh bìa</b> cho bài đăng (ảnh hoặc file ảnh). "
+        f"Gửi <code>/cancel</code> để hủy."
+    )
+
+
+async def _ask_features(message: Message, data: dict, status=None) -> None:
+    name = data.get("name") or "Ứng dụng"
+    caption = (
+        f"{E_SUCCESS} Đây là ảnh sẽ gửi kèm bài đăng của <b>{html.escape(name)}</b>"
+        f"{' — ' + html.escape(data['version']) if data.get('version') else ''}.\n"
+        f"{E_TIP} Hãy nhập chức năng của game (mỗi ý một dòng). Gửi <code>/cancel</code> để hủy."
+    )
+    poster = data.get("poster")
+    if poster:
+        photo = io.BytesIO(poster)
+        photo.name = "poster.jpg"
+        try:
+            await _reply_photo_html(message, photo, caption)
+            if status:
+                await status.delete()
+            return
+        except Exception:
+            pass
+    if status:
+        try:
+            await status.edit(caption, parse_mode=enums.ParseMode.HTML)
+            return
+        except Exception:
+            pass
+    await _reply_html(message, caption)
+
+
+async def _enter_cover_step(message: Message, data: dict, uid, *, store_url: str, link_label: str,
+                            need_manual_meta: bool, name: str = "", version: str = "",
+                            bundle_id: str = "", seller: str = "", status=None) -> None:
+    data.update({
+        "step": "cover",
+        "store_url": store_url or "",
+        "link_label": link_label or "",
+        "need_manual_meta": need_manual_meta,
+        "name": name or "",
+        "version": version or "",
+        "seller": seller or "",
+        "bundle_id": bundle_id or "",
+    })
+    _touch_session(uid, data)
+    prompt = _cover_prompt()
+    if status:
+        try:
+            await status.edit(prompt, parse_mode=enums.ParseMode.HTML)
+            return
+        except Exception:
+            pass
+    await _reply_html(message, prompt)
 
 
 async def _handle_link(message: Message, raw: str):
@@ -722,55 +805,207 @@ async def _handle_link(message: Message, raw: str):
     if not data:
         await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
         return
-    if not is_appstore_url(raw):
-        await _reply_html(
-            message,
-            f"{E_ERROR} Đây chưa phải link App Store. Hãy gửi link dạng "
-            f"<code>https://apps.apple.com/...</code>",
+    url = extract_http_url(raw)
+    candidate = url or raw.strip()
+
+    if is_appstore_url(candidate):
+        status = await _reply_html(message, f"{E_LOADING} Đang lấy thông tin và render ảnh từ App Store...")
+        info = await lookup_appstore(candidate)
+        store_url = (info or {}).get("track_view_url") or candidate
+        if info and info.get("icon_bytes"):
+            name = info.get("track_name") or "Ứng dụng"
+            try:
+                poster = render_appstore_poster(info["icon_bytes"], title=name)
+            except Exception:
+                await _enter_cover_step(
+                    message, data, uid, store_url=store_url, link_label="App Store",
+                    need_manual_meta=False,
+                    name=name, version=info.get("version") or "",
+                    bundle_id=info.get("bundle_id") or "",
+                    seller=info.get("seller_name") or "",
+                    status=status,
+                )
+                return
+            data.update({
+                "step": "features",
+                "store_url": store_url,
+                "link_label": "App Store",
+                "name": name,
+                "version": info.get("version") or "",
+                "seller": info.get("seller_name") or "",
+                "bundle_id": info.get("bundle_id") or "",
+                "poster": poster,
+                "need_manual_meta": False,
+            })
+            _touch_session(uid, data)
+            await _ask_features(message, data, status)
+            return
+        # Lookup không ra ảnh (có thể vẫn có tên) → xin ảnh bìa, giữ meta nếu có.
+        has_meta = bool(info and (info.get("track_name") or info.get("version") or info.get("bundle_id")))
+        await _enter_cover_step(
+            message, data, uid, store_url=store_url, link_label="App Store",
+            need_manual_meta=not has_meta,
+            name=(info or {}).get("track_name") or "",
+            version=(info or {}).get("version") or "",
+            bundle_id=(info or {}).get("bundle_id") or "",
+            seller=(info or {}).get("seller_name") or "",
+            status=status,
         )
         return
-    status = await _reply_html(message, f"{E_LOADING} Đang lấy thông tin và render ảnh từ App Store...")
-    info = await lookup_appstore(raw)
-    if not info or not info.get("icon_bytes"):
+
+    if url or is_skip_text(raw):
+        await _enter_cover_step(
+            message, data, uid,
+            store_url=url or "",
+            link_label="Link" if url else "",
+            need_manual_meta=True,
+        )
+        return
+
+    await _reply_html(
+        message,
+        f"{E_TIP} Hãy gửi một link (App Store hoặc link khác), "
+        f"hoặc gửi <code>bỏ qua</code> rồi gửi ảnh bìa. <code>/cancel</code> để hủy.",
+    )
+
+
+def _is_cover_image(message: Message) -> bool:
+    if getattr(message, "photo", None):
+        return True
+    doc = getattr(message, "document", None)
+    if not doc:
+        return False
+    return is_image_document(getattr(doc, "mime_type", None), getattr(doc, "file_name", None))
+
+
+def _is_up_session_cover(_, __, message: Message) -> bool:
+    if not message or not message.from_user:
+        return False
+    uid, data = _session_of(message)
+    return bool(data and data.get("step") == "cover") and _is_cover_image(message)
+
+
+@app.on_message(filters.create(_is_up_session_cover), group=_HANDLER_GROUP)
+@capture_err
+async def channel_up_cover(_, message: Message):
+    await _handle_cover_image(message)
+
+
+async def _handle_cover_image(message: Message):
+    uid, data = _session_of(message)
+    if not data:
+        await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
+        return
+    if not await _can_use_up(uid):
+        _sessions.pop(uid, None)
+        await _request_up_access(message)
+        return
+    status = await _reply_html(message, f"{E_LOADING} Đang xử lý ảnh bìa...")
+    try:
+        downloaded = await message.download(in_memory=True)
+        if hasattr(downloaded, "seek"):
+            downloaded.seek(0)
+            raw = downloaded.read()
+        elif isinstance(downloaded, (bytes, bytearray)):
+            raw = bytes(downloaded)
+        else:
+            path = str(downloaded)
+            with open(path, "rb") as f:
+                raw = f.read()
+            try:
+                import os
+                os.unlink(path)
+            except OSError:
+                pass
+        if not raw:
+            raise ValueError("empty image")
+        title = (data.get("name") or "").strip()
+        poster = render_appstore_poster(raw, title=title)
+    except Exception:
         await status.edit(
-            f"{E_ERROR} Không lấy được ảnh từ link này. Kiểm tra lại link App Store giúp em.",
+            f"{E_ERROR} Không đọc được ảnh này. Hãy gửi lại ảnh hoặc file ảnh (jpg/png/webp).",
             parse_mode=enums.ParseMode.HTML,
         )
         return
-    name = info.get("track_name") or "Ứng dụng"
-    try:
-        poster = render_appstore_poster(info["icon_bytes"], title=name)
-    except Exception:
-        await status.edit(
-            f"{E_ERROR} Render ảnh không thành công. Thử lại link khác giúp em.",
-            parse_mode=enums.ParseMode.HTML,
+    data["cover_bytes"] = raw
+    data["poster"] = poster
+    _touch_session(uid, data)
+    if data.get("need_manual_meta") or not (data.get("name") or "").strip():
+        data["step"] = "name"
+        _touch_session(uid, data)
+        photo = io.BytesIO(poster)
+        photo.name = "poster.jpg"
+        caption = (
+            f"{E_SUCCESS} Đã nhận ảnh bìa.\n"
+            f"{E_TIP} Hãy gửi <b>tên game</b>. Sau đó có thể nhập phiên bản và Bundle ID "
+            f"(bỏ qua được). <code>/cancel</code> để hủy."
         )
+        try:
+            await _reply_photo_html(message, photo, caption)
+            await status.delete()
+        except Exception:
+            await status.edit(caption, parse_mode=enums.ParseMode.HTML)
         return
-    data.update(
-        {
-            "step": "features",
-            "started": time.time(),
-            "store_url": info.get("track_view_url") or raw,
-            "name": name,
-            "version": info.get("version") or "",
-            "seller": info.get("seller_name") or "",
-            "bundle_id": info.get("bundle_id") or "",
-            "poster": poster,
-        }
-    )
-    _sessions[uid] = data
-    photo = io.BytesIO(poster)
-    photo.name = "poster.jpg"
-    caption = (
-        f"{E_SUCCESS} Đây là ảnh sẽ gửi kèm bài đăng của <b>{html.escape(name)}</b>"
-        f"{' — ' + html.escape(data['version']) if data.get('version') else ''}.\n"
-        f"{E_TIP} Hãy nhập chức năng của game (mỗi ý một dòng). Gửi <code>/cancel</code> để hủy."
-    )
+    data["step"] = "features"
+    _touch_session(uid, data)
+    await _ask_features(message, data, status)
+
+
+def _rerender_poster(data: dict) -> None:
+    raw = data.get("cover_bytes")
+    if not raw:
+        return
     try:
-        await _reply_photo_html(message, photo, caption)
-        await status.delete()
+        data["poster"] = render_appstore_poster(raw, title=(data.get("name") or "").strip())
     except Exception:
-        await status.edit(caption, parse_mode=enums.ParseMode.HTML)
+        pass
+
+
+async def _handle_manual_name(message: Message, raw: str):
+    uid, data = _session_of(message)
+    if not data:
+        await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
+        return
+    name = (raw or "").strip()
+    if not name or is_skip_text(name):
+        await _reply_html(message, f"{E_TIP} Hãy gửi tên game (không bỏ qua được). <code>/cancel</code> để hủy.")
+        return
+    data["name"] = name
+    _rerender_poster(data)
+    data["step"] = "version"
+    _touch_session(uid, data)
+    await _reply_html(
+        message,
+        f"{E_SUCCESS} Tên: <b>{html.escape(name)}</b>.\n"
+        f"{E_TIP} Hãy gửi <b>phiên bản</b> (ví dụ <code>1.2.3</code>). "
+        f"Gửi <code>bỏ qua</code> nếu không có.",
+    )
+
+
+async def _handle_manual_version(message: Message, raw: str):
+    uid, data = _session_of(message)
+    if not data:
+        await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
+        return
+    data["version"] = "" if is_skip_text(raw) else (raw or "").strip()
+    data["step"] = "bundle"
+    _touch_session(uid, data)
+    await _reply_html(
+        message,
+        f"{E_TIP} Hãy gửi <b>Bundle ID</b> nếu có (ví dụ <code>com.example.app</code>). "
+        f"Gửi <code>bỏ qua</code> nếu không có.",
+    )
+
+
+async def _handle_manual_bundle(message: Message, raw: str):
+    uid, data = _session_of(message)
+    if not data:
+        await _reply_html(message, f"{E_WARN} Phiên /up đã hết hạn. Gửi lại <code>/up</code> giúp em.")
+        return
+    data["bundle_id"] = "" if is_skip_text(raw) else (raw or "").strip()
+    data["step"] = "features"
+    _touch_session(uid, data)
+    await _ask_features(message, data)
 
 
 async def _handle_features(message: Message, raw: str):
@@ -796,6 +1031,7 @@ async def _handle_features(message: Message, raw: str):
         store_url=data.get("store_url") or "",
         features=features,
         filename=data.get("filename") or "",
+        link_label=data.get("link_label") or "",
     )
     token = secrets.token_hex(8)
     try:
@@ -818,6 +1054,7 @@ async def _handle_features(message: Message, raw: str):
             "version": data.get("version") or "",
             "bundle_id": data.get("bundle_id") or "",
             "store_url": data.get("store_url") or "",
+            "link_label": data.get("link_label") or "",
             "features": list(features),
             "created_by": uid,
             "created_at": utc_timestamp(),
@@ -1044,6 +1281,7 @@ async def _deliver_up_file_content_inner(message: Message, rec: dict, token: str
         bundle_id=rec.get("bundle_id") or "",
         store_url=rec.get("store_url") or "",
         features=normalize_stored_features(rec.get("features")),
+        link_label=rec.get("link_label") or "",
     )
     markup = await _post_markup(token)
     try:
