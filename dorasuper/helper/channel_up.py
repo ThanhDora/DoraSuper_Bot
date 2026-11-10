@@ -474,6 +474,58 @@ def caption_visible_len(html_text: str) -> int:
     return len(html.unescape(text).encode("utf-16-le")) // 2
 
 
+
+_OFFICIAL_EMOJI_CACHE: dict[str, str] | None = None
+
+_FEATURE_EMOJI_NAMES = {
+    "gift": "E_GIFT",
+    "shield": "E_SHIELD",
+    "gear": "E_GEAR",
+    "rocket": "E_ROCKET",
+    "lock": "E_LOCK",
+    "dart": "E_DART",
+    "pin": "E_PIN",
+    "crown": "E_MENU",
+    "fire": "E_FIRE",
+    "party": "E_PARTY",
+    "sparkle": "E_SPARKLE",
+}
+
+
+def _official_emoji_map() -> dict[str, str]:
+    """Đọc E_* từ dorasuper/emoji.py, không import package (tránh khởi động client)."""
+    global _OFFICIAL_EMOJI_CACHE
+    if _OFFICIAL_EMOJI_CACHE is not None:
+        return _OFFICIAL_EMOJI_CACHE
+    mapping: dict[str, str] = {}
+    try:
+        path = Path(__file__).resolve().parent.parent / "emoji.py"
+        ns: dict = {}
+        exec(path.read_text(encoding="utf-8"), ns)
+        mapping = {k: v for k, v in ns.items() if k.startswith("E_") and isinstance(v, str)}
+    except Exception:
+        mapping = {}
+    _OFFICIAL_EMOJI_CACHE = mapping
+    return mapping
+
+
+def official_emoji(name: str, fallback: str = "") -> str:
+    """Tag <tg-emoji> chính thức đã dùng trong project, hoặc unicode fallback."""
+    key = name if name.startswith("E_") else f"E_{name}"
+    val = _official_emoji_map().get(key)
+    if val:
+        return val
+    return fallback
+
+
+def emoji_prefix(name: str, *, enabled: bool, fallback: str = "") -> str:
+    """'TAG ' ở đầu dòng khi bật; rỗng khi tắt (caption kênh)."""
+    if not enabled:
+        return ""
+    tag = official_emoji(name, fallback)
+    return f"{tag} " if tag else ""
+
+
 def _header_lines(
     title: str,
     version: str,
@@ -482,16 +534,18 @@ def _header_lines(
     *,
     include_bundle: bool,
     link_label: str = "",
+    with_emoji: bool = False,
 ) -> list[str]:
-    lines = [f"<b>{title}</b>"]
+    p = lambda name: emoji_prefix(name, enabled=with_emoji)
+    lines = [f"{p('E_IOS')}<b>{title}</b>"]
     if version:
-        lines.append(f"Phiên bản · <code>{html.escape(version)}</code>")
+        lines.append(f"{p('E_TAG')}Phiên bản · <code>{html.escape(version)}</code>")
     if include_bundle and bundle_id:
-        lines.append(f"Bundle · <code>{html.escape(bundle_id)}</code>")
+        lines.append(f"{p('E_ID')}Bundle · <code>{html.escape(bundle_id)}</code>")
     if store_url:
         safe_href = html.escape(store_url, quote=True)
         label = html.escape(caption_link_label(store_url, link_label))
-        lines.append(f'<a href="{safe_href}">{label}</a>')
+        lines.append(f'{p("E_LINK")}<a href="{safe_href}">{label}</a>')
     return lines
 
 
@@ -507,8 +561,9 @@ def build_channel_caption(
     emojis: dict | None = None,
     max_len: int = 1024,
     link_label: str = "",
+    with_emoji: bool = False,
 ) -> tuple[str, str | None]:
-    """Dựng caption HTML không emoji. Trả về (caption, phần tràn nếu quá max_len chữ hiện ra).
+    """Dựng caption HTML. Mặc định không emoji (bài kênh). with_emoji=True cho tin nhắn riêng.
 
     Tham số emojis, filename và seller giữ chữ ký cũ nhưng bị bỏ qua. Hiện
     Bundle ID thay cho người bán; chức năng bọc trong <blockquote expandable> (Telegram ẩn bớt khi dài).
@@ -517,19 +572,26 @@ def build_channel_caption(
     """
     _ = emojis, filename, seller
     title = html.escape((name or "").strip() or "Ứng dụng")
-    feature_lines = [
-        f"• {html.escape(item, quote=False)}"
-        for item in (features or [])
-        if (item or "").strip()
-    ]
+    feature_lines = []
+    for item in (features or []):
+        if not (item or "").strip():
+            continue
+        safe = html.escape(item, quote=False)
+        if with_emoji:
+            ekey = feature_emoji_key(item)
+            ename = _FEATURE_EMOJI_NAMES.get(ekey, "E_SPARKLE")
+            feature_lines.append(f"{emoji_prefix(ename, enabled=True)}{safe}")
+        else:
+            feature_lines.append(f"• {safe}")
 
     def compose(include_bundle: bool, feats: list[str]) -> str:
         lines = _header_lines(
             title, version, bundle_id, store_url, include_bundle=include_bundle,
-            link_label=link_label,
+            link_label=link_label, with_emoji=with_emoji,
         )
         if feats:
-            quote = ["<b>Chức năng</b>", *feats]
+            head = f"{emoji_prefix('E_LIST', enabled=with_emoji)}<b>Chức năng</b>"
+            quote = [head, *feats]
             lines.append("")
             lines.append(BLOCKQUOTE_FEATURES_OPEN + "\n".join(quote) + "</blockquote>")
         return "\n".join(lines)
@@ -573,7 +635,7 @@ def build_delivery_captions(
     has_meta = bool((version or "").strip() or (bundle_id or "").strip() or (store_url or "").strip() or feats)
     if not has_meta:
         title = html.escape((name or "").strip() or "File")
-        return f"<b>{title}</b>", None
+        return f"{emoji_prefix('E_IOS', enabled=True)}<b>{title}</b>", None
 
     file_caption, overflow = build_channel_caption(
         name=name or "Ứng dụng",
@@ -583,6 +645,7 @@ def build_delivery_captions(
         features=feats,
         max_len=caption_max,
         link_label=link_label,
+        with_emoji=True,
     )
     if not overflow:
         return file_caption, None
@@ -594,6 +657,7 @@ def build_delivery_captions(
         features=feats,
         max_len=text_max,
         link_label=link_label,
+        with_emoji=True,
     )
     return file_caption, full
 
@@ -886,10 +950,14 @@ def build_up_download_log(
 
     if delivered:
         status = "đã gửi"
+        head_e = "E_SUCCESS"
     else:
         status = _DOWNLOAD_BLOCK_LABELS.get(block_reason or "", "") or (
             f"bị chặn — {block_reason}" if block_reason else "bị chặn"
         )
+        head_e = "E_WARN"
+
+    p = lambda name: emoji_prefix(name, enabled=True)
 
     uid = _user_attr(user, "id")
     try:
@@ -911,21 +979,21 @@ def build_up_download_log(
         id_html = "không rõ"
 
     lines = [
-        f"Tải file: {html.escape(status)}",
-        f"Thời gian: {html.escape(when_str)}",
+        f"{p(head_e)}Tải file: {html.escape(status)}",
+        f"{p('E_CLOCK')}Thời gian: {html.escape(when_str)}",
         "",
-        "Tài khoản",
-        f"Tên: {html.escape(full_name)}",
-        f"Username: @{html.escape(username)}" if username else "Username: không có",
-        f"ID: {id_html}",
-        f"Ngôn ngữ: {html.escape(lang) if lang else 'không rõ'}",
-        f"Premium: {'có' if is_premium else 'không'}",
-        f"Bot: {'có' if is_bot else 'không'}",
+        f"{p('E_USER')}Tài khoản",
+        f"{p('E_TAG')}Tên: {html.escape(full_name)}",
+        f"{p('E_MSG')}Username: @{html.escape(username)}" if username else f"{p('E_MSG')}Username: không có",
+        f"{p('E_ID')}ID: {id_html}",
+        f"{p('E_GLOBE')}Ngôn ngữ: {html.escape(lang) if lang else 'không rõ'}",
+        f"{p('E_STAR')}Premium: {'có' if is_premium else 'không'}",
+        f"{p('E_BOT')}Bot: {'có' if is_bot else 'không'}",
     ]
     if dc_id is not None and str(dc_id).strip() != "":
-        lines.append(f"DC: {html.escape(str(dc_id))}")
+        lines.append(f"{p('E_STAT')}DC: {html.escape(str(dc_id))}")
     else:
-        lines.append("DC: không rõ")
+        lines.append(f"{p('E_STAT')}DC: không rõ")
 
     game = (rec.get("name") or "").strip() or "không rõ"
     version = (rec.get("version") or "").strip()
@@ -938,26 +1006,32 @@ def build_up_download_log(
         rec.get("post_username"),
     )
 
-    lines += ["", "File game"]
-    lines.append(f"Tên: {html.escape(game)}")
+    lines += ["", f"{p('E_IOS')}File game"]
+    lines.append(f"{p('E_IOS')}Tên: {html.escape(game)}")
     if version:
-        lines.append(f"Phiên bản: {html.escape(version)}")
+        lines.append(f"{p('E_TAG')}Phiên bản: {html.escape(version)}")
     if bundle:
-        lines.append(f"Bundle: <code>{html.escape(bundle)}</code>")
+        lines.append(f"{p('E_ID')}Bundle: <code>{html.escape(bundle)}</code>")
     if post_url:
         safe_href = html.escape(post_url, quote=True)
-        lines.append(f'Bài đăng: <a href="{safe_href}">{html.escape(post_url)}</a>')
+        lines.append(f'{p("E_LINK")}Bài đăng: <a href="{safe_href}">{html.escape(post_url)}</a>')
     if filename and size_txt:
-        lines.append(f"File: <code>{html.escape(filename)}</code> ({html.escape(size_txt)})")
+        lines.append(f"{p('E_DOWNLOAD')}File: <code>{html.escape(filename)}</code> ({html.escape(size_txt)})")
     elif filename:
-        lines.append(f"File: <code>{html.escape(filename)}</code>")
+        lines.append(f"{p('E_DOWNLOAD')}File: <code>{html.escape(filename)}</code>")
     elif size_txt:
-        lines.append(f"File: {html.escape(size_txt)}")
+        lines.append(f"{p('E_DOWNLOAD')}File: {html.escape(size_txt)}")
     return "\n".join(lines)
 
 
 UP_DOWNLOAD_DEDUPE_WINDOW = 60.0
 ALREADY_DELIVERED_TEXT = "File này đã được gửi rồi. Hãy kiểm tra tin nhắn trước đó."
+
+
+def already_delivered_html() -> str:
+    """Thông báo PM (có custom emoji). Callback alert vẫn dùng ALREADY_DELIVERED_TEXT (plain)."""
+    return f"{emoji_prefix('E_SUCCESS', enabled=True)}{ALREADY_DELIVERED_TEXT}"
+
 
 
 class WindowDedupe:

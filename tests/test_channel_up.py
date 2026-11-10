@@ -291,9 +291,11 @@ def test_build_delivery_captions_full():
 def test_build_delivery_captions_old_record_fallback():
     caption, followup = cu.build_delivery_captions(name="Old Game")
     assert followup is None
-    assert caption == "<b>Old Game</b>"
+    assert caption.endswith("<b>Old Game</b>")
+    assert cu.official_emoji("E_IOS") in caption
     caption2, followup2 = cu.build_delivery_captions(name="")
-    assert caption2 == "<b>File</b>"
+    assert caption2.endswith("<b>File</b>")
+    assert cu.official_emoji("E_IOS") in caption2
     assert followup2 is None
 
 
@@ -753,7 +755,13 @@ def test_download_log_delivered_no_emoji():
     text = cu.build_up_download_log(
         _User(), rec, delivered=True, when_str="14:00:00 10/11/2026 Asia/Saigon",
     )
-    assert text.startswith("Tải file: đã gửi")
+    assert "Tải file: đã gửi" in text
+    assert cu.official_emoji("E_SUCCESS") in text
+    assert cu.official_emoji("E_CLOCK") in text
+    assert cu.official_emoji("E_USER") in text
+    assert cu.official_emoji("E_ID") in text
+    assert cu.official_emoji("E_IOS") in text
+    assert cu.official_emoji("E_DOWNLOAD") in text
     assert "Thời gian: 14:00:00 10/11/2026 Asia/Saigon" in text
     assert "Tên: Nguyen Van A" in text
     assert "Username: @nguyenvana" in text
@@ -768,7 +776,6 @@ def test_download_log_delivered_no_emoji():
     assert "Bundle: <code>com.supercell.clashofclans</code>" in text
     assert 'href="https://t.me/c/111/222"' in text
     assert "Clash.ipa" in text
-    assert _EMOJI_RE.search(text) is None
 
 
 def test_download_log_blocked_and_optional_fields():
@@ -786,7 +793,7 @@ def test_download_log_blocked_and_optional_fields():
     assert "Phiên bản" not in text
     assert "Bài đăng" not in text
     assert "mod.ipa" in text
-    assert _EMOJI_RE.search(text) is None
+    assert cu.official_emoji("E_WARN") in text
     ban = cu.build_up_download_log(
         user, rec, delivered=False, block_reason="leave_ban", when_str="x",
     )
@@ -845,3 +852,72 @@ def test_try_begin_delivery_and_log_independent():
 def test_already_delivered_text_plain():
     assert "File này đã được gửi rồi" in cu.ALREADY_DELIVERED_TEXT
     assert _EMOJI_RE.search(cu.ALREADY_DELIVERED_TEXT) is None
+
+
+def test_already_delivered_html_uses_official_emoji():
+    html = cu.already_delivered_html()
+    assert cu.official_emoji("E_SUCCESS") in html
+    assert cu.ALREADY_DELIVERED_TEXT in html
+    assert "tg-emoji" in html
+    assert "tg-emoji" not in cu.ALREADY_DELIVERED_TEXT
+    assert _EMOJI_RE.search(cu.ALREADY_DELIVERED_TEXT) is None
+
+
+def test_delivery_captions_use_official_emoji_and_blockquote():
+    caption, followup = cu.build_delivery_captions(
+        name="Clash of Clans",
+        version="16.0.1",
+        bundle_id="com.supercell.clashofclans",
+        store_url="https://apps.apple.com/app/id529479190",
+        features=["Vô hạn tiền", "Mod menu"],
+    )
+    assert followup is None
+    assert cu.official_emoji("E_IOS") in caption
+    assert cu.official_emoji("E_TAG") in caption
+    assert cu.official_emoji("E_ID") in caption
+    assert cu.official_emoji("E_LINK") in caption
+    assert cu.official_emoji("E_LIST") in caption
+    assert cu.official_emoji("E_GIFT") in caption
+    assert cu.official_emoji("E_GEAR") in caption
+    assert "<blockquote expandable>" in caption
+    assert "</blockquote>" in caption
+    assert "<b>Clash of Clans</b>" in caption
+    assert "Phiên bản · <code>16.0.1</code>" in caption
+    ids = set(re.findall(r'emoji-id="(\d+)"', caption))
+    official = set(re.findall(r'emoji-id="(\d+)"', "".join(cu._official_emoji_map().values())))
+    assert ids and ids <= official
+
+
+def test_channel_caption_stays_emoji_free_when_building_delivery_separately():
+    channel, _ = cu.build_channel_caption(
+        name="Clash of Clans",
+        version="16.0.1",
+        features=["Vô hạn tiền"],
+        store_url="https://apps.apple.com/app/id529479190",
+    )
+    delivery, _ = cu.build_delivery_captions(
+        name="Clash of Clans",
+        version="16.0.1",
+        features=["Vô hạn tiền"],
+        store_url="https://apps.apple.com/app/id529479190",
+    )
+    assert "tg-emoji" not in channel
+    assert _EMOJI_RE.search(channel) is None
+    assert "• Vô hạn tiền" in channel
+    assert "tg-emoji" in delivery
+    assert "• Vô hạn tiền" not in delivery
+
+
+def test_delivery_overflow_keeps_blockquote_and_official_emoji():
+    features = [f"Tính năng số {i} " + ("x" * 80) for i in range(30)]
+    caption, overflow = cu.build_delivery_captions(
+        name="Game",
+        features=features,
+        caption_max=400,
+    )
+    assert cu.caption_visible_len(caption) <= 400
+    assert overflow
+    assert "<blockquote expandable>" in caption
+    assert cu.official_emoji("E_IOS") in caption
+    assert cu.official_emoji("E_LIST") in overflow
+    assert "<blockquote expandable>" in overflow

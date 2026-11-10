@@ -45,6 +45,7 @@ from dorasuper.helper.channel_up import (
     REJECT_BUTTON_TEXT,
     REVOKE_BUTTON_TEXT,
     ALREADY_DELIVERED_TEXT,
+    already_delivered_html,
     build_channel_caption,
     build_delivery_captions,
     build_up_download_log,
@@ -457,11 +458,16 @@ async def _deliver_once(message: Message, rec: dict, token: str, user) -> bool |
 async def _notify_already_delivered(message: Message = None, cq=None):
     try:
         if cq is not None:
+            # Callback alert không hiện custom emoji — dùng chữ thường.
             await cq.answer(ALREADY_DELIVERED_TEXT, show_alert=True)
             return
         if message is not None:
             with skip_autodel():
-                await message.reply_text(ALREADY_DELIVERED_TEXT, no_autodel=True)
+                await message.reply_text(
+                    already_delivered_html(),
+                    parse_mode=enums.ParseMode.HTML,
+                    no_autodel=True,
+                )
     except Exception:
         pass
 
@@ -1205,9 +1211,15 @@ async def _send_html_text(chat_id, html_text: str):
 async def _send_document_html(
     chat_id, file_id, html_caption: str, file_name=None, reply_markup=None,
 ):
-    """Gửi document kèm caption HTML (blockquote) + nút. Ưu tiên parse_mode, rồi Bot API edit."""
+    """Gửi document kèm caption HTML (blockquote + custom emoji) + nút.
+
+    Gửi MTProto trước, rồi luôn thử edit caption bằng Bot API HTML để giữ
+    blockquote expandable và custom emoji (MTProto đôi khi nuốt custom emoji).
+    Fallback entity gỡ thẻ blockquote, vẫn giữ custom emoji nếu được.
+    """
+    sent = None
     try:
-        return await app.send_document(
+        sent = await app.send_document(
             chat_id,
             file_id,
             file_name=file_name or None,
@@ -1216,10 +1228,11 @@ async def _send_document_html(
             reply_markup=reply_markup,
         )
     except Exception:
-        pass
-    sent = await app.send_document(
-        chat_id, file_id, file_name=file_name or None, reply_markup=reply_markup,
-    )
+        sent = None
+    if sent is None:
+        sent = await app.send_document(
+            chat_id, file_id, file_name=file_name or None, reply_markup=reply_markup,
+        )
     if await _edit_caption_via_botapi(
         chat_id, sent.id, html_caption, reply_markup=reply_markup,
     ):
