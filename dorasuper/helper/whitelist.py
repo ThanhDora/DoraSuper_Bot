@@ -56,21 +56,70 @@ def is_listed(user_id, chat_ids: Iterable[int], global_ids: Iterable[int]) -> bo
     return uid in set(int(x) for x in global_ids) or uid in set(int(x) for x in chat_ids)
 
 
-def should_auto_restore(*, is_protected: bool, user_is_bot: bool, new_status) -> Optional[str]:
+NOTICE_DELETE_SECONDS = 10
+RESTORE_DEDUPE_SECONDS = 20
+
+
+def should_auto_restore(
+    *,
+    is_protected: bool,
+    user_is_bot: bool,
+    new_status,
+    old_status=None,
+    actor_is_self_bot: bool = False,
+) -> Optional[str]:
     """Return 'unban', 'unrestrict', or None.
 
-    Triggered whenever a protected (non-bot) user becomes banned or restricted,
-    including when the actor is this bot (safety net). After a successful
-    restore the follow-up update is MEMBER/LEFT, so this will not loop.
+    Only a new restriction/ban by someone else is an incident. Ignore:
+    the bot's own follow-up after it lifts a mute (often still RESTRICTED),
+    updates that do not land on BANNED/RESTRICTED, and same-state repeats.
     """
-    if not is_protected or user_is_bot:
+    if not is_protected or user_is_bot or actor_is_self_bot:
         return None
-    name = status_name(new_status)
-    if name == "BANNED":
-        return "unban"
-    if name == "RESTRICTED":
-        return "unrestrict"
-    return None
+    new = status_name(new_status)
+    if new not in {"BANNED", "RESTRICTED"}:
+        return None
+    old = status_name(old_status)
+    if old == new:
+        return None
+    return "unban" if new == "BANNED" else "unrestrict"
+
+
+def should_dedupe_restore(last_ts, now: float, window: float = RESTORE_DEDUPE_SECONDS) -> bool:
+    """True if this chat+user was already handled within the dedupe window."""
+    if last_ts is None:
+        return False
+    try:
+        return (float(now) - float(last_ts)) < float(window)
+    except (TypeError, ValueError):
+        return False
+
+
+async def schedule_whitelist_autodel(client, msg, user_message=None) -> None:
+    """Delete a whitelist notice after NOTICE_DELETE_SECONDS. Does not change global /autodel."""
+    if msg is None or client is None:
+        return
+    try:
+        from dorasuper.helper.autodel import schedule_autodel
+        await schedule_autodel(
+            client,
+            msg,
+            user_command_message=user_message,
+            seconds=NOTICE_DELETE_SECONDS,
+        )
+    except Exception:
+        pass
+
+
+async def reply_and_autodel(reply_fn, text, *, client=None, user_message=None, **kwargs):
+    """Send a whitelist reply and auto-delete it after 10s, skipping global /autodel."""
+    kwargs["no_autodel"] = True
+    sent = await reply_fn(text, **kwargs)
+    app = client
+    if app is None and user_message is not None:
+        app = getattr(user_message, "_client", None)
+    await schedule_whitelist_autodel(app, sent, user_message)
+    return sent
 
 
 def _norm_token(text: str) -> str:

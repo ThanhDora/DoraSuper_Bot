@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import time
 from logging import getLogger
 
 from pyrogram import enums, filters
@@ -37,7 +38,10 @@ from dorasuper.helper.whitelist import (
     auto_restore_html,
     missing_rights_html,
     protected_html,
+    reply_and_autodel,
+    schedule_whitelist_autodel,
     should_auto_restore,
+    should_dedupe_restore,
     split_scope,
 )
 from dorasuper.vars import COMMAND_HANDLER, SUDO
@@ -66,6 +70,29 @@ _HANDLER_GROUP_AUTO = 6
 # Pyrofork runs only the first matching handler in a group, then moves on.
 # AFK (and other) catch-alls in group=0 would swallow /whitelist; use -1 like /help, /ping.
 _HANDLER_GROUP_CMD = -1
+_recent_restores: dict[tuple[int, int], float] = {}
+
+
+def _claim_restore(chat_id: int, user_id: int) -> bool:
+    """Claim this chat+user incident. False if a notice was just sent."""
+    now = time.time()
+    key = (int(chat_id), int(user_id))
+    if should_dedupe_restore(_recent_restores.get(key), now):
+        return False
+    _recent_restores[key] = now
+    if len(_recent_restores) > 500:
+        cutoff = now - 60
+        for stale in [k for k, ts in _recent_restores.items() if ts < cutoff]:
+            _recent_restores.pop(stale, None)
+    return True
+
+
+async def _reply(message: Message, text: str, **kwargs):
+    kwargs.setdefault("parse_mode", enums.ParseMode.HTML)
+    kwargs.setdefault("quote", True)
+    return await reply_and_autodel(
+        message.reply_text, text, client=app, user_message=message, **kwargs
+    )
 
 
 def _is_sudo(message: Message) -> bool:
@@ -207,7 +234,7 @@ async def _usage(message: Message, global_scope: bool):
             "<code>/whitelist [trả lời | @user | id]</code> — thêm\n"
             "<code>/unwhitelist [trả lời | @user | id]</code> — gỡ."
         )
-    await message.reply_text(text, parse_mode=enums.ParseMode.HTML, quote=True)
+    await _reply(message, text, parse_mode=enums.ParseMode.HTML, quote=True)
 
 
 @app.on_message(filters.command(["whitelist", "whitelists", "gwhitelist", "gwhitelists"], COMMAND_HANDLER), group=_HANDLER_GROUP_CMD)
@@ -227,7 +254,7 @@ async def whitelist_cmd(_, message: Message):
     global_scope = force_global or scoped
 
     if global_scope and not _is_sudo(message):
-        return await message.reply_text(
+        return await _reply(message, 
             f"{E_WARN} Chỉ chủ bot mới quản lý danh sách trắng toàn cục.",
             parse_mode=enums.ParseMode.HTML,
             quote=True,
@@ -239,11 +266,11 @@ async def whitelist_cmd(_, message: Message):
         if global_scope:
             rows = await list_global_whitelist()
             text, markup = _render_list("g", GLOBAL_CHAT_ID, rows, 0)
-            return await message.reply_text(
+            return await _reply(message, 
                 text, reply_markup=markup, parse_mode=enums.ParseMode.HTML, quote=True
             )
         if message.chat.type == ChatType.PRIVATE:
-            return await message.reply_text(
+            return await _reply(message, 
                 f"{E_WARN} <b>Danh sách trắng theo nhóm</b> phải dùng trong nhóm "
                 "(ví dụ: <code>/whitelist</code> để xem, <code>/whitelist</code> trả lời tin người cần thêm).\n"
                 "Chủ bot có thể dùng trong chat riêng: <code>/gwhitelists</code> để xem, "
@@ -252,26 +279,26 @@ async def whitelist_cmd(_, message: Message):
                 quote=True,
             )
         if not await _can_manage(message):
-            return await message.reply_text(
+            return await _reply(message, 
                 f"{E_WARN} Bạn cần quyền hạn chế thành viên để xem hoặc sửa danh sách trắng.",
                 parse_mode=enums.ParseMode.HTML,
                 quote=True,
             )
         rows = await list_whitelist(message.chat.id)
         text, markup = _render_list("c", message.chat.id, rows, 0)
-        return await message.reply_text(
+        return await _reply(message, 
             text, reply_markup=markup, parse_mode=enums.ParseMode.HTML, quote=True
         )
 
     # add
     if message.chat.type == ChatType.PRIVATE and not global_scope:
-        return await message.reply_text(
+        return await _reply(message, 
             f"{E_WARN} Thêm danh sách trắng theo nhóm phải dùng trong nhóm.",
             parse_mode=enums.ParseMode.HTML,
             quote=True,
         )
     if not global_scope and not await _can_manage(message):
-        return await message.reply_text(
+        return await _reply(message, 
             f"{E_WARN} Bạn cần quyền hạn chế thành viên để thêm vào danh sách trắng.",
             parse_mode=enums.ParseMode.HTML,
             quote=True,
@@ -285,7 +312,7 @@ async def whitelist_cmd(_, message: Message):
         pass
     bot_id = getattr(app.me, "id", None)
     if bot_id and user_id == bot_id:
-        return await message.reply_text(
+        return await _reply(message, 
             f"{E_WARN} Không thể thêm bot vào danh sách trắng.",
             parse_mode=enums.ParseMode.HTML,
             quote=True,
@@ -310,7 +337,7 @@ async def whitelist_cmd(_, message: Message):
         text = f"{E_SUCCESS} Đã thêm {mention} vào {scope_txt}."
     else:
         text = f"{E_WARN} {mention} đã có trong {scope_txt}."
-    await message.reply_text(text, parse_mode=enums.ParseMode.HTML, quote=True)
+    await _reply(message, text, parse_mode=enums.ParseMode.HTML, quote=True)
 
 
 @app.on_message(filters.command(["unwhitelist", "ungwhitelist"], COMMAND_HANDLER), group=_HANDLER_GROUP_CMD)
@@ -328,20 +355,20 @@ async def unwhitelist_cmd(_, message: Message):
     global_scope = cmd == "ungwhitelist" or scoped
 
     if global_scope and not _is_sudo(message):
-        return await message.reply_text(
+        return await _reply(message, 
             f"{E_WARN} Chỉ chủ bot mới gỡ danh sách trắng toàn cục.",
             parse_mode=enums.ParseMode.HTML,
             quote=True,
         )
     if not global_scope:
         if message.chat.type == ChatType.PRIVATE:
-            return await message.reply_text(
+            return await _reply(message, 
                 f"{E_WARN} Gỡ danh sách trắng theo nhóm phải dùng trong nhóm.",
                 parse_mode=enums.ParseMode.HTML,
                 quote=True,
             )
         if not await _can_manage(message):
-            return await message.reply_text(
+            return await _reply(message, 
                 f"{E_WARN} Bạn cần quyền hạn chế thành viên để gỡ danh sách trắng.",
                 parse_mode=enums.ParseMode.HTML,
                 quote=True,
@@ -362,7 +389,7 @@ async def unwhitelist_cmd(_, message: Message):
         text = f"{E_SUCCESS} Đã gỡ {mention} khỏi {scope_txt}."
     else:
         text = f"{E_WARN} {mention} không có trong {scope_txt}."
-    await message.reply_text(text, parse_mode=enums.ParseMode.HTML, quote=True)
+    await _reply(message, text, parse_mode=enums.ParseMode.HTML, quote=True)
 
 
 @app.on_callback_query(filters.regex(r"^wl_list:(c|g):(-?\d+):(\d+)$"))
@@ -386,7 +413,8 @@ async def whitelist_list_page(_, cq: CallbackQuery):
         rows = await list_whitelist(chat_id)
         text, markup = _render_list("c", chat_id, rows, page)
     try:
-        await cq.message.edit_text(text, reply_markup=markup, parse_mode=enums.ParseMode.HTML)
+        edited = await cq.message.edit_text(text, reply_markup=markup, parse_mode=enums.ParseMode.HTML)
+        await schedule_whitelist_autodel(app, edited or cq.message)
     except Exception:
         pass
     await cq.answer()
@@ -401,22 +429,27 @@ async def _restore_protected_member(chat, user, action: str) -> None:
             await app.unban_chat_member(chat_id, user_id)
             await remove_chat_ban(chat_id, user_id)
         else:
+            # unban_chat_member fully lifts a mute (same as /boimmom), leaving MEMBER
+            # rather than a still-RESTRICTED member with default permissions.
             try:
-                chat_full = await app.get_chat(chat_id)
-                perms = getattr(chat_full, "permissions", None)
-            except Exception:
-                perms = None
-            if perms:
-                await app.restrict_chat_member(chat_id, user_id, permissions=perms)
-            else:
                 await app.unban_chat_member(chat_id, user_id)
+            except Exception:
+                try:
+                    chat_full = await app.get_chat(chat_id)
+                    perms = getattr(chat_full, "permissions", None)
+                except Exception:
+                    perms = None
+                if perms:
+                    await app.restrict_chat_member(chat_id, user_id, permissions=perms)
             await remove_chat_mute(chat_id, user_id)
         try:
-            await app.send_message(
+            notice = await app.send_message(
                 chat_id,
                 auto_restore_html(action, mention),
                 parse_mode=enums.ParseMode.HTML,
+                no_autodel=True,
             )
+            await schedule_whitelist_autodel(app, notice)
         except Exception:
             pass
     except ChatAdminRequired:
@@ -425,11 +458,13 @@ async def _restore_protected_member(chat, user, action: str) -> None:
             chat_id, user_id, action,
         )
         try:
-            await app.send_message(
+            notice = await app.send_message(
                 chat_id,
                 missing_rights_html(mention),
                 parse_mode=enums.ParseMode.HTML,
+                no_autodel=True,
             )
+            await schedule_whitelist_autodel(app, notice)
         except Exception:
             pass
     except Exception as e:
@@ -455,11 +490,20 @@ async def whitelist_auto_unban(_, update: ChatMemberUpdated):
     except Exception as e:
         LOGGER.debug("whitelist check failed: %s", e)
         return
+    bot_id = getattr(getattr(app, "me", None), "id", None)
+    actor = update.from_user
+    actor_is_self_bot = bool(bot_id and actor and actor.id == bot_id)
+    old_member = update.old_chat_member
     action = should_auto_restore(
         is_protected=protected,
         user_is_bot=bool(user.is_bot),
         new_status=new.status,
+        old_status=old_member.status if old_member else None,
+        actor_is_self_bot=actor_is_self_bot,
     )
     if not action:
+        return
+    if not _claim_restore(chat.id, user.id):
+        LOGGER.debug("whitelist auto-restore deduped chat=%s user=%s", chat.id, user.id)
         return
     await _restore_protected_member(chat, user, action)

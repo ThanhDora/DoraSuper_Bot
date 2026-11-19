@@ -14,7 +14,7 @@ from database.blacklist_db import (
     save_blacklist_filter,
 )
 from database.whitelist_db import is_whitelisted
-from dorasuper.helper.whitelist import protected_html
+from dorasuper.helper.whitelist import protected_html, schedule_whitelist_autodel
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import adminsOnly, list_admins
@@ -91,7 +91,8 @@ async def blacklist_filters_re(self, message):
             try:
                 await message.delete_msg()
                 if await is_whitelisted(chat_id, user.id):
-                    await reply_safe(message, protected_html(user.mention))
+                    sent = await reply_safe(message, protected_html(user.mention), no_autodel=True)
+                    await schedule_whitelist_autodel(self, sent, message)
                     return
                 await message.chat.restrict_member(
                     user.id,

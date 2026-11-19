@@ -26,7 +26,7 @@ from database.chat_ban_db import get_chat_ban_until
 from database.chat_mute_db import get_chat_mute_until
 from database.gban_db import is_gbanned_user
 from database.whitelist_db import is_whitelisted
-from dorasuper.helper.whitelist import protected_html
+from dorasuper.helper.whitelist import protected_html, schedule_whitelist_autodel
 from database.greetings_db import (
     is_welcome, toggle_welcome, set_custom_welcome, get_custom_welcome,
     is_goodbye, toggle_goodbye, set_custom_goodbye, get_custom_goodbye,
@@ -727,6 +727,7 @@ async def suttoi_callback(_, callback_query):
         elif action == "kick":
             if await is_whitelisted(callback_query.message.chat.id, user_id):
                 await callback_query.message.edit_text(protected_html(callback_query.from_user.mention))
+                await schedule_whitelist_autodel(app, callback_query.message)
                 return
             await callback_query.message.chat.ban_member(user_id)
             await callback_query.message.chat.unban_member(user_id)
@@ -737,6 +738,7 @@ async def suttoi_callback(_, callback_query):
         elif action == "ban":
             if await is_whitelisted(callback_query.message.chat.id, user_id):
                 await callback_query.message.edit_text(protected_html(callback_query.from_user.mention))
+                await schedule_whitelist_autodel(app, callback_query.message)
                 return
             await callback_query.message.chat.ban_member(user_id)
             response_text = f"{E_ERROR} Người dùng {callback_query.from_user.mention} đã tự cấm mình khỏi nhóm. Có lẽ hắn ta đang tuyệt vọng 😱"

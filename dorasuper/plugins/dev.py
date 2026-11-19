@@ -50,7 +50,7 @@ from pyrogram.types import (
 
 from database.gban_db import add_gban_user, is_gbanned_user, remove_gban_user
 from database.whitelist_db import is_globally_whitelisted, is_whitelisted
-from dorasuper.helper.whitelist import protected_html
+from dorasuper.helper.whitelist import protected_html, reply_and_autodel
 from database.users_chats_db import db
 from dorasuper import BOT_NAME, app, botStartTime, dorasuper_version, user
 from dorasuper.core.decorator import new_task
@@ -420,7 +420,10 @@ async def ban_globally(self: Client, ctx: Message):
         return await ctx.reply_text(f"{E_WARN} {E_LOCK} Tôi không thể cấm người dùng đó.")
     if await is_globally_whitelisted(user_id):
         mention = user_mention if isinstance(user_mention, str) else str(user_mention)
-        return await ctx.reply_text(protected_html(mention))
+        return await reply_and_autodel(
+            ctx.reply_text, protected_html(mention),
+            client=self, user_message=ctx, parse_mode=enums.ParseMode.HTML,
+        )
     served_chats = await db.get_all_chats()
     m = await ctx.reply_text(
         f"{E_LOADING} {E_LOCK} Đang cấm {user_mention} toàn bộ nhóm... Có thể mất vài phút."

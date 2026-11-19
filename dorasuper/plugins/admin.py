@@ -21,7 +21,7 @@ from database.chat_ban_db import add_chat_ban, remove_chat_ban
 from database.chat_mute_db import add_chat_mute, remove_chat_mute
 from database.warn_db import add_warn, get_warn, remove_warns
 from database.whitelist_db import is_whitelisted
-from dorasuper.helper.whitelist import protected_html
+from dorasuper.helper.whitelist import protected_html, reply_and_autodel
 from dorasuper import app, user
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import (
@@ -189,7 +189,7 @@ async def kickFunc(client: Client, ctx: Message, strings) -> "Message":
             mention = (await app.get_users(user_id)).mention
         except Exception:
             mention = f"<code>{user_id}</code>"
-        return await ctx.reply_msg(protected_html(mention))
+        return await reply_and_autodel(ctx.reply_msg, protected_html(mention), client=app, user_message=ctx)
     try:
         user = await app.get_users(user_id)
     except PeerIdInvalid:
@@ -240,7 +240,10 @@ async def banFunc(client, message, strings):
             mention = (await app.get_users(user_id)).mention
         except Exception:
             mention = f"<code>{user_id}</code>"
-        return await message.reply_text(protected_html(mention))
+        return await reply_and_autodel(
+            message.reply_text, protected_html(mention),
+            client=app, user_message=message, parse_mode=enums.ParseMode.HTML,
+        )
 
     try:
         mention = (await app.get_users(user_id)).mention
@@ -654,7 +657,10 @@ async def mute(client, message, strings):
         return await message.reply_text(strings("mute_admin_err").format(**EMOJI_FMT))
     if await is_whitelisted(message.chat.id, user_id):
         mention = (await app.get_users(user_id)).mention
-        return await message.reply_text(protected_html(mention))
+        return await reply_and_autodel(
+            message.reply_text, protected_html(mention),
+            client=app, user_message=message, parse_mode=enums.ParseMode.HTML,
+        )
     
     mention = (await app.get_users(user_id)).mention
     keyboard = ikb({"Bỏ Im Mồm": f"boimmom_{user_id}"})
@@ -761,7 +767,10 @@ async def warn_user(client, message, strings):
     
     if warns >= 2:
         if await is_whitelisted(chat_id, user_id):
-            return await message.reply_text(protected_html(mention))
+            return await reply_and_autodel(
+                message.reply_text, protected_html(mention),
+                client=app, user_message=message, parse_mode=enums.ParseMode.HTML,
+            )
         await message.chat.ban_member(user_id)
         await message.reply_text(strings("exceed_warn_msg").format(mention=mention, **EMOJI_FMT))
         await remove_warns(chat_id, await int_to_alpha(user_id))

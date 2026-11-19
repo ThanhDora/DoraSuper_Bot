@@ -113,3 +113,52 @@ def test_command_handler_group_avoids_group_zero():
     assert "_HANDLER_GROUP_CMD = -1" in src
     assert "group=_HANDLER_GROUP_CMD" in src
     assert src.count("group=_HANDLER_GROUP_CMD") >= 2
+
+
+def test_should_auto_restore_ignores_bot_actor():
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False, new_status=_Status("RESTRICTED"),
+        old_status=_Status("MEMBER"), actor_is_self_bot=True,
+    ) is None
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False, new_status=_Status("BANNED"),
+        actor_is_self_bot=True,
+    ) is None
+
+
+def test_should_auto_restore_ignores_same_state_followup():
+    # Bot lifts a mute but Telegram still reports RESTRICTED
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False,
+        new_status=_Status("RESTRICTED"), old_status=_Status("RESTRICTED"),
+    ) is None
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False,
+        new_status=_Status("BANNED"), old_status=_Status("BANNED"),
+    ) is None
+
+
+def test_should_auto_restore_new_restriction_from_member():
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False,
+        new_status=_Status("RESTRICTED"), old_status=_Status("MEMBER"),
+        actor_is_self_bot=False,
+    ) == "unrestrict"
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False,
+        new_status=_Status("BANNED"), old_status=_Status("MEMBER"),
+    ) == "unban"
+    # Missing old_status still treated as a new incident
+    assert wl.should_auto_restore(
+        is_protected=True, user_is_bot=False, new_status=_Status("RESTRICTED"),
+    ) == "unrestrict"
+
+
+def test_should_dedupe_restore_window():
+    assert wl.should_dedupe_restore(None, 100.0, window=20) is False
+    assert wl.should_dedupe_restore(90.0, 100.0, window=20) is True
+    assert wl.should_dedupe_restore(70.0, 100.0, window=20) is False
+    assert wl.should_dedupe_restore(80.0, 100.0, window=20) is False
+    assert wl.should_dedupe_restore(80.0001, 100.0, window=20) is True
+    assert wl.NOTICE_DELETE_SECONDS == 10
+    assert wl.RESTORE_DEDUPE_SECONDS == 20
