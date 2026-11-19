@@ -105,3 +105,11 @@ def test_status_name_fallbacks():
     assert wl.status_name(_Status("restricted")) == "RESTRICTED"
     assert wl.status_name("left") == "LEFT"
     assert wl.status_name(None) == ""
+
+
+def test_command_handler_group_avoids_group_zero():
+    """Pyrofork breaks after the first match in a group; AFK catch-alls live in group 0."""
+    src = (pathlib.Path(__file__).parent.parent / "dorasuper/plugins/whitelist.py").read_text()
+    assert "_HANDLER_GROUP_CMD = -1" in src
+    assert "group=_HANDLER_GROUP_CMD" in src
+    assert src.count("group=_HANDLER_GROUP_CMD") >= 2

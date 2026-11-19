@@ -63,6 +63,9 @@ Chủ bot:
 
 _PAGE_SIZE = 15
 _HANDLER_GROUP_AUTO = 6
+# Pyrofork runs only the first matching handler in a group, then moves on.
+# AFK (and other) catch-alls in group=0 would swallow /whitelist; use -1 like /help, /ping.
+_HANDLER_GROUP_CMD = -1
 
 
 def _is_sudo(message: Message) -> bool:
@@ -207,10 +210,16 @@ async def _usage(message: Message, global_scope: bool):
     await message.reply_text(text, parse_mode=enums.ParseMode.HTML, quote=True)
 
 
-@app.on_message(filters.command(["whitelist", "whitelists", "gwhitelist", "gwhitelists"], COMMAND_HANDLER))
+@app.on_message(filters.command(["whitelist", "whitelists", "gwhitelist", "gwhitelists"], COMMAND_HANDLER), group=_HANDLER_GROUP_CMD)
 @capture_err
 async def whitelist_cmd(_, message: Message):
     cmd = (message.command or ["whitelist"])[0].lower()
+    LOGGER.info(
+        "whitelist cmd=%s chat_id=%s user_id=%s",
+        cmd,
+        getattr(message.chat, "id", None),
+        getattr(message.from_user, "id", None),
+    )
     raw_args = list(message.command[1:]) if message.command and len(message.command) > 1 else []
     is_list_alias = cmd in {"whitelists", "gwhitelists"}
     force_global = cmd in {"gwhitelist", "gwhitelists"}
@@ -235,8 +244,10 @@ async def whitelist_cmd(_, message: Message):
             )
         if message.chat.type == ChatType.PRIVATE:
             return await message.reply_text(
-                f"{E_WARN} Lệnh danh sách trắng theo nhóm chỉ dùng trong nhóm. "
-                "Chủ bot có thể dùng <code>/gwhitelists</code> cho danh sách toàn cục.",
+                f"{E_WARN} <b>Danh sách trắng theo nhóm</b> phải dùng trong nhóm "
+                "(ví dụ: <code>/whitelist</code> để xem, <code>/whitelist</code> trả lời tin người cần thêm).\n"
+                "Chủ bot có thể dùng trong chat riêng: <code>/gwhitelists</code> để xem, "
+                "<code>/gwhitelist [id|@user]</code> để thêm toàn cục.",
                 parse_mode=enums.ParseMode.HTML,
                 quote=True,
             )
@@ -302,10 +313,16 @@ async def whitelist_cmd(_, message: Message):
     await message.reply_text(text, parse_mode=enums.ParseMode.HTML, quote=True)
 
 
-@app.on_message(filters.command(["unwhitelist", "ungwhitelist"], COMMAND_HANDLER))
+@app.on_message(filters.command(["unwhitelist", "ungwhitelist"], COMMAND_HANDLER), group=_HANDLER_GROUP_CMD)
 @capture_err
 async def unwhitelist_cmd(_, message: Message):
     cmd = (message.command or ["unwhitelist"])[0].lower()
+    LOGGER.info(
+        "unwhitelist cmd=%s chat_id=%s user_id=%s",
+        cmd,
+        getattr(message.chat, "id", None),
+        getattr(message.from_user, "id", None),
+    )
     raw_args = list(message.command[1:]) if message.command and len(message.command) > 1 else []
     scoped, leftover = split_scope(raw_args)
     global_scope = cmd == "ungwhitelist" or scoped
