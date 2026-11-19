@@ -26,6 +26,7 @@ from database.up_channel_db import (
     list_up_acl, revoke_up_acl, save_leave_ban, save_up_file, set_up_acl,
     set_up_channel, set_up_link_channel, set_up_link_group,
 )
+from database.whitelist_db import is_whitelisted
 from dorasuper import BOT_USERNAME, app
 from dorasuper.core.decorator.errors import capture_err
 from logging import getLogger
@@ -1636,6 +1637,8 @@ async def up_leave_autoban(_, update: ChatMemberUpdated):
     banned_ok = []
     for cid in list(watch):
         try:
+            if await is_whitelisted(cid, user.id):
+                continue
             await app.ban_chat_member(cid, user.id)
             banned_ok.append(str(cid))
         except Exception as e:

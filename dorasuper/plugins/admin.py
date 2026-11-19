@@ -20,6 +20,8 @@ from pyrogram.types import ChatMember, ChatPermissions, ChatPrivileges, Message
 from database.chat_ban_db import add_chat_ban, remove_chat_ban
 from database.chat_mute_db import add_chat_mute, remove_chat_mute
 from database.warn_db import add_warn, get_warn, remove_warns
+from database.whitelist_db import is_whitelisted
+from dorasuper.helper.whitelist import protected_html
 from dorasuper import app, user
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import (
@@ -182,6 +184,12 @@ async def kickFunc(client: Client, ctx: Message, strings) -> "Message":
         return await ctx.reply_msg(strings("kick_sudo_err").format(**EMOJI_FMT))
     if user_id in (await list_admins(ctx.chat.id)):
         return await ctx.reply_msg(strings("kick_admin_err").format(**EMOJI_FMT))
+    if await is_whitelisted(ctx.chat.id, user_id):
+        try:
+            mention = (await app.get_users(user_id)).mention
+        except Exception:
+            mention = f"<code>{user_id}</code>"
+        return await ctx.reply_msg(protected_html(mention))
     try:
         user = await app.get_users(user_id)
     except PeerIdInvalid:
@@ -227,6 +235,12 @@ async def banFunc(client, message, strings):
         return await message.reply_text(strings("ban_sudo_err").format(**EMOJI_FMT))
     if user_id in (await list_admins(message.chat.id)):
         return await message.reply_text(strings("ban_admin_err").format(**EMOJI_FMT))
+    if await is_whitelisted(message.chat.id, user_id):
+        try:
+            mention = (await app.get_users(user_id)).mention
+        except Exception:
+            mention = f"<code>{user_id}</code>"
+        return await message.reply_text(protected_html(mention))
 
     try:
         mention = (await app.get_users(user_id)).mention
@@ -371,6 +385,12 @@ async def list_ban_(c, message, strings):
     count = 0
     for username in gusernames:
         try:
+            try:
+                target_chat = await app.get_chat(username.strip("@"))
+                if await is_whitelisted(target_chat.id, userid):
+                    continue
+            except Exception:
+                pass
             await app.ban_chat_member(username.strip("@"), userid)
             await asyncio.sleep(1)
         except FloodWait as e:
@@ -632,6 +652,9 @@ async def mute(client, message, strings):
         return await message.reply_text(strings("mute_sudo_err").format(**EMOJI_FMT))
     if user_id in (await list_admins(message.chat.id)):
         return await message.reply_text(strings("mute_admin_err").format(**EMOJI_FMT))
+    if await is_whitelisted(message.chat.id, user_id):
+        mention = (await app.get_users(user_id)).mention
+        return await message.reply_text(protected_html(mention))
     
     mention = (await app.get_users(user_id)).mention
     keyboard = ikb({"Bỏ Im Mồm": f"boimmom_{user_id}"})
@@ -737,6 +760,8 @@ async def warn_user(client, message, strings):
         await message.reply_to_message.delete()
     
     if warns >= 2:
+        if await is_whitelisted(chat_id, user_id):
+            return await message.reply_text(protected_html(mention))
         await message.chat.ban_member(user_id)
         await message.reply_text(strings("exceed_warn_msg").format(mention=mention, **EMOJI_FMT))
         await remove_warns(chat_id, await int_to_alpha(user_id))

@@ -49,6 +49,8 @@ from pyrogram.types import (
 )
 
 from database.gban_db import add_gban_user, is_gbanned_user, remove_gban_user
+from database.whitelist_db import is_globally_whitelisted, is_whitelisted
+from dorasuper.helper.whitelist import protected_html
 from database.users_chats_db import db
 from dorasuper import BOT_NAME, app, botStartTime, dorasuper_version, user
 from dorasuper.core.decorator import new_task
@@ -416,6 +418,9 @@ async def ban_globally(self: Client, ctx: Message):
 
     if user_id in [from_user.id, self.me.id] or user_id in SUDO:
         return await ctx.reply_text(f"{E_WARN} {E_LOCK} Tôi không thể cấm người dùng đó.")
+    if await is_globally_whitelisted(user_id):
+        mention = user_mention if isinstance(user_mention, str) else str(user_mention)
+        return await ctx.reply_text(protected_html(mention))
     served_chats = await db.get_all_chats()
     m = await ctx.reply_text(
         f"{E_LOADING} {E_LOCK} Đang cấm {user_mention} toàn bộ nhóm... Có thể mất vài phút."
@@ -435,6 +440,8 @@ async def ban_globally(self: Client, ctx: Message):
                     user_was_in_chat = True
             except (UserNotParticipant, PeerIdInvalid, Exception):
                 pass
+            if await is_whitelisted(served_chat["id"], user_id):
+                continue
             await app.ban_chat_member(served_chat["id"], user_id)
             banned_count += 1
             if user_was_in_chat:

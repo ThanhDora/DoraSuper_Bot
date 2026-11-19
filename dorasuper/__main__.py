@@ -38,6 +38,7 @@ async def start_bot():
             except Exception as e:
                 LOGGER.error("Failed to load module %s: %s", module, e, exc_info=True)
         LOGGER.info("HELPABLE modules (%d): %s", len(HELPABLE), sorted(HELPABLE.keys()))
+        LOGGER.info("Whitelist auto-unban is listening for chat_member updates")
 
         # Tạo forum topics trong LOG_CHANNEL (nếu chưa có)
         try:

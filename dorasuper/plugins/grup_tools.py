@@ -25,6 +25,8 @@ from pyrogram.types import ChatMemberUpdated, ChatPermissions, InlineKeyboardBut
 from database.chat_ban_db import get_chat_ban_until
 from database.chat_mute_db import get_chat_mute_until
 from database.gban_db import is_gbanned_user
+from database.whitelist_db import is_whitelisted
+from dorasuper.helper.whitelist import protected_html
 from database.greetings_db import (
     is_welcome, toggle_welcome, set_custom_welcome, get_custom_welcome,
     is_goodbye, toggle_goodbye, set_custom_goodbye, get_custom_goodbye,
@@ -157,6 +159,8 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
                     LOGGER.info("Goodbye message error: %s", e)
             # Xử lý cấm tự động khi rời nhóm
             if await is_ban_on_leave(member.chat.id):
+                if await is_whitelisted(member.chat.id, user_left.id):
+                    return
                 try:
                     await c.ban_chat_member(member.chat.id, user_left.id)
                     await c.send_message(
@@ -175,7 +179,7 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
     if new_status != CMS.MEMBER:
         return
     # Tự động kick/ban nếu user bị gban (cấm toàn cầu) — mời lại vẫn bị đá
-    if await is_gbanned_user(user.id):
+    if await is_gbanned_user(user.id) and not await is_whitelisted(member.chat.id, user.id):
         try:
             await c.ban_chat_member(member.chat.id, user.id)
             await c.send_message(
@@ -188,7 +192,7 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
         return
     # Tự động cấm lại nếu user đang trong thời gian bị cấm (cam vĩnh viễn hoặc tcam) — mời lại vẫn bị ban
     until_ban_ts = await get_chat_ban_until(member.chat.id, user.id)
-    if until_ban_ts is not None:
+    if until_ban_ts is not None and not await is_whitelisted(member.chat.id, user.id):
         try:
             until_date = datetime.fromtimestamp(until_ban_ts) if until_ban_ts > 0 else None
             await c.ban_chat_member(member.chat.id, user.id, until_date=until_date)
@@ -203,7 +207,7 @@ async def member_has_joined_or_left(c: Client, member: ChatMemberUpdated, string
 
     # Tự động tắt mic lại nếu user đang trong thời gian bị mute (immom/timmom) — mời lại vẫn bị restrict
     until_ts = await get_chat_mute_until(member.chat.id, user.id)
-    if until_ts is not None:
+    if until_ts is not None and not await is_whitelisted(member.chat.id, user.id):
         try:
             until_date = datetime.fromtimestamp(until_ts) if until_ts > 0 else None
             await c.restrict_chat_member(
@@ -721,6 +725,9 @@ async def suttoi_callback(_, callback_query):
         if action == "cancel":
             await callback_query.message.edit_text(f"{E_ERROR} Đã huỷ yêu cầu, có lẽ bạn đã suy nghĩ lại.")
         elif action == "kick":
+            if await is_whitelisted(callback_query.message.chat.id, user_id):
+                await callback_query.message.edit_text(protected_html(callback_query.from_user.mention))
+                return
             await callback_query.message.chat.ban_member(user_id)
             await callback_query.message.chat.unban_member(user_id)
             response_text = f"{E_ERROR} Người dùng {callback_query.from_user.mention} đã tự đá mình khỏi nhóm. Có lẽ hắn ta đang thất vọng 😕"
@@ -728,6 +735,9 @@ async def suttoi_callback(_, callback_query):
                 response_text += f"\n<b>Lý do</b>: {reason}"
             await callback_query.message.edit_text(response_text)
         elif action == "ban":
+            if await is_whitelisted(callback_query.message.chat.id, user_id):
+                await callback_query.message.edit_text(protected_html(callback_query.from_user.mention))
+                return
             await callback_query.message.chat.ban_member(user_id)
             response_text = f"{E_ERROR} Người dùng {callback_query.from_user.mention} đã tự cấm mình khỏi nhóm. Có lẽ hắn ta đang tuyệt vọng 😱"
             if reason:

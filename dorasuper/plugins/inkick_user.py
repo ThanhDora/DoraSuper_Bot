@@ -11,11 +11,21 @@ from pyrogram.errors.exceptions.bad_request_400 import (
 )
 from pyrogram.errors.exceptions.forbidden_403 import ChatWriteForbidden
 
+from database.whitelist_db import is_whitelisted
 from dorasuper import app
 from dorasuper.emoji import E_ANDROID, E_CLOCK, E_DORA1, E_DORA2, E_DORA3, E_DORA4, E_GROUP, E_LIMIT, E_MENU, E_BAN, E_LOADING, E_ERROR, E_SUCCESS
 from dorasuper.vars import COMMAND_HANDLER
 
 LOGGER = getLogger("DoraSuper")
+
+
+async def _skip_whitelisted(chat_id, member) -> bool:
+    try:
+        uid = member.user.id
+    except Exception:
+        return False
+    return await is_whitelisted(chat_id, uid)
+
 
 __MODULE__ = "SiêuQuảnTrị"
 __HELP__ = """
@@ -45,6 +55,8 @@ async def inkick(_, message):
                     member.user.status.value in input_str
                     and member.status.value not in ("administrator", "owner")
                 ):
+                    if await _skip_whitelisted(message.chat.id, member):
+                        continue
                     try:
                         await message.chat.ban_member(member.user.id)
                         count += 1
@@ -96,6 +108,8 @@ async def uname(_, message):
                 "administrator",
                 "owner",
             ):
+                if await _skip_whitelisted(message.chat.id, member):
+                    continue
                 try:
                     await message.chat.ban_member(member.user.id)
                     count += 1
@@ -144,6 +158,8 @@ async def rm_delacc(_, message):
                 "administrator",
                 "owner",
             ):
+                if await _skip_whitelisted(message.chat.id, member):
+                    continue
                 try:
                     await message.chat.ban_member(member.user.id)
                     count += 1

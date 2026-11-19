@@ -31,6 +31,8 @@ from dorasuper.helper.localization import use_chat_lang
 from dorasuper.vars import COMMAND_HANDLER, ROOT_DIR, SUDO
 from database.chat_ban_db import add_chat_ban, remove_chat_ban
 from database.chat_mute_db import add_chat_mute, remove_chat_mute
+from database.whitelist_db import is_whitelisted
+from dorasuper.helper.whitelist import protected_html
 
 LOGGER = getLogger(__name__)
 
@@ -332,6 +334,18 @@ async def _try_execute_dora_command(message, text: str) -> bool:
         target_mention = reply.from_user.mention
     except Exception:
         target_mention = f"ID {target_id}"
+
+    # Mute/kick/ban (không gồm bỏ mute/bỏ cấm) bị chặn nếu nằm trong danh sách trắng
+    will_punish = (
+        any(_n(p) in t for p in _DORA_CMD_MUTE)
+        or any(_n(p) in t for p in _DORA_CMD_KICK)
+        or (any(_n(p) in t for p in _DORA_CMD_BAN) and not any(_n(p) in t for p in _DORA_CMD_UNBAN))
+    )
+    # "bỏ mute" chứa "mute" nên loại unmute trước khi chặn
+    if will_punish and not any(_n(p) in t for p in _DORA_CMD_UNMUTE):
+        if await is_whitelisted(chat.id, target_id):
+            await message.reply(protected_html(target_mention), parse_mode=ParseMode.HTML)
+            return True
 
     # Bỏ cấm — kiểm tra trước BAN để "bỏ cấm" không match "cấm"
     if any(_n(p) in t for p in _DORA_CMD_UNBAN):

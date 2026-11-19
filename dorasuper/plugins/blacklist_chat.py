@@ -13,6 +13,8 @@ from database.blacklist_db import (
     get_blacklisted_words,
     save_blacklist_filter,
 )
+from database.whitelist_db import is_whitelisted
+from dorasuper.helper.whitelist import protected_html
 from dorasuper import app
 from dorasuper.core.decorator.errors import capture_err
 from dorasuper.core.decorator.permissions import adminsOnly, list_admins
@@ -88,6 +90,9 @@ async def blacklist_filters_re(self, message):
                 return
             try:
                 await message.delete_msg()
+                if await is_whitelisted(chat_id, user.id):
+                    await reply_safe(message, protected_html(user.mention))
+                    return
                 await message.chat.restrict_member(
                     user.id,
                     ChatPermissions(all_perms=False),
