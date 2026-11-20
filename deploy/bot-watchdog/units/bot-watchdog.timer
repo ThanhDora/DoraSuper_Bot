@@ -4,6 +4,7 @@ Description=Run bot hang watchdog every minute
 [Timer]
 OnBootSec=2min
 OnUnitActiveSec=1min
+OnCalendar=*-*-* *:*:00
 AccuracySec=15s
 Persistent=true
 Unit=bot-watchdog.service

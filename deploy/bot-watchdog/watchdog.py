@@ -213,6 +213,13 @@ def rate_limited(times: list[float], now: float, max_restarts: int = MAX_RESTART
     return len(recent) >= max_restarts, recent
 
 
+def record_restart(times: list[float], now: float, window: int = RESTART_WINDOW) -> list[float]:
+    """Prune expired restart timestamps and append this restart."""
+    _, recent = rate_limited(times, now, window=window)
+    recent.append(now)
+    return recent
+
+
 def decide(
     *,
     active: bool,
@@ -426,13 +433,16 @@ def check_one(name: str, spec: dict, *, dry_run: bool, now: Optional[float] = No
     log(f"{name}: restarting {unit} — {decision['reason']}")
     ok = restart_unit(unit)
     if ok:
-        recent, _ = rate_limited(recent, now)  # prune
-        recent.append(now)
+        recent = record_restart(recent, now)
         save_restart_times(state_path, name, recent)
-        notify_for_service(
-            spec,
-            f"Watchdog đã khởi động lại {unit}. Lý do: {decision['reason']}.",
-        )
+        try:
+            notify_for_service(
+                spec,
+                f"Watchdog đã khởi động lại {unit}. Lý do: {decision['reason']}.",
+            )
+        except Exception as exc:
+            # Do not log the exception text; it might include a request URL with the token.
+            log(f"{name}: notify error: {type(exc).__name__}")
     return decision
 
 

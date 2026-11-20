@@ -7,7 +7,7 @@ Restarts DoraSuper, misyou, and testflight when a process stays up but stops han
 1. **In-process heartbeat** (each bot, no second client):
    - DoraSuper and misyou: an asyncio task every 60s runs an MTProto `Ping` (not cached `get_me()`) with a 30s timeout and, on success, writes `/run/bot-watchdog/<name>.heartbeat`.
    - testflight: the existing 60s watch loop touches the same style of file when a cycle finishes (even if the Apple request failed). If the Node event loop hangs, the file goes stale.
-2. **systemd timer** (`bot-watchdog.timer`) every 1 minute runs `/opt/bot-watchdog/watchdog.py`.
+2. **systemd timer** (`bot-watchdog.timer`, `OnCalendar` plus `OnUnitActiveSec=1min`) every 1 minute runs `/opt/bot-watchdog/watchdog.py`.
 3. The script restarts a unit with `systemctl restart` only if all of these hold:
    - the service is `active`
    - it has been running longer than a **5 minute grace** period after start

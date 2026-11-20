@@ -73,3 +73,13 @@ def test_decide_rate_limit():
 
 def test_parse_id_list():
     assert wd.parse_id_list("5341455835 1", "-10042") == [5341455835, 1, -10042]
+
+
+def test_record_restart_prunes_and_appends():
+    now = 10_000.0
+    recent = wd.record_restart([now - 2000, now - 60], now)
+    assert recent[-1] == now
+    assert now - 2000 not in recent
+    assert now - 60 in recent
+    # return value is a list, never the rate-limit bool (regression for append)
+    assert isinstance(recent, list)
