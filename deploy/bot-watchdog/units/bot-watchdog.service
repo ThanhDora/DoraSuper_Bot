@@ -1,0 +1,8 @@
+[Unit]
+Description=Check DoraSuper/misyou/testflight heartbeats and restart hung bots
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/bot-watchdog/watchdog.py
+Nice=10

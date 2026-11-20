@@ -24,6 +24,7 @@ from dorasuper.plugins import ALL_MODULES
 from dorasuper.vars import SUDO, USER_SESSION
 from utils import auto_clean
 from dorasuper.helper.autodel import install_autodel_hooks, resume_pending_deletes
+from dorasuper.helper.heartbeat import heartbeat_loop
 
 LOGGER = getLogger("DoraSuper")
 # Run Bot
@@ -116,6 +117,11 @@ async def start_bot():
             asyncio.create_task(auto_clean())
         except Exception as e:
             LOGGER.error(f"Failed to start auto_clean task: {str(e)}")
+
+        try:
+            asyncio.create_task(heartbeat_loop(app))
+        except Exception as e:
+            LOGGER.error("Failed to start heartbeat: %s", e)
 
         await idle()
     except Exception as e:
